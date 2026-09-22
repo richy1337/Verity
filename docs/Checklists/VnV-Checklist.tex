@@ -1,0 +1,132 @@
+\documentclass[12pt]{article}
+
+\usepackage{enumitem,amssymb}
+\newlist{todolist}{itemize}{2}
+\setlist[todolist]{label=$\square$}
+\usepackage{pifont}
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+\newcommand{\done}{\rlap{$\square$}{\raisebox{2pt}{\large\hspace{1pt}\cmark}}%
+\hspace{-2.5pt}}
+\newcommand{\wontfix}{\rlap{$\square$}{\large\hspace{1pt}\xmark}}
+
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    filecolor=blue,
+    urlcolor=blue,
+    unicode=false}
+\urlstyle{same}
+
+\begin{document}
+
+\title{System Verification and Validation Plan Checklist}
+\author{Spencer Smith}
+\date{\today}
+
+\maketitle
+
+% Show an item is done by   \item[\done] Frame the problem
+% Show an item will not be fixed by   \item[\wontfix] profit
+
+\begin{itemize}
+
+\item Follows writing checklist (full checklist provided in a separate document)
+  \begin{todolist}
+  \item \LaTeX{} points
+  \item Structure
+  \item Spelling, grammar, attention to detail
+  \item Avoid low information content phrases
+  \item Writing style
+  \end{todolist}
+
+\item Follows the template, all parts present
+  \begin{todolist}
+  \item Table of contents
+  \item Pages are numbered
+  \item Revision history included for major revisions
+  \item Sections from template are all present
+  \item Symbolic constants are used rather than ``magic'' numbers.  Symbolic
+    constants are used to improve maintainability and to increase
+    understandability
+  \item Specific values are provided for all symbolic constants
+  \end{todolist}
+
+\item Grammar, spelling, presentation
+  \begin{todolist}
+  \item No spelling mistakes (use a spell checker!)
+  \item No grammar mistakes (review, ask someone else to review (at least a few
+    sections))
+  \item Paragraphs are structured well (clear topic sentence, cohesive)
+  \item Paragraphs are concise (not wordy)
+  \item No Low Information Content (LIC) phrases
+    (\href{https://www.webpages.uidaho.edu/range357/extra-refs/empty-words.htm}{List
+      of LIC phrases})
+  \item All hyperlinks work
+  \item Every figure has a caption
+  \item Every table has a heading
+  \item Symbolic names are used for quantities, rather than literal values
+  \end{todolist}
+
+\item LaTeX
+  \begin{todolist}
+  \item Template comments do not show in the pdf version, either by
+    removing them, or by turning them off.
+  \item References and labels are used so that maintenance is feasible
+\end{todolist}
+
+\item Overall qualities of documentation
+  \begin{todolist}
+\item Test cases include SPECIFIC input
+\item Test cases include EXPLICIT output
+\item Description over specification, when appropriate
+\item Plans for what to do with description data (performance, usability, etc).
+  This may involve saying what plots will be generated.
+\item Plans to quantify error for scalar values using relative error
+\item Plans to quantify error for vector and matrix values using a norm of an error
+  vector (matrix)
+\item Plans are feasible (can be accomplished with resources available)
+\item Plans are ambitious enough for an A+ effort
+\item Survey questions for usability survey are in an Appendix (if appropriate)
+\item Specific plans for task based inspection, if appropriate (not just saying
+inspection will be done, but details on how)
+\item Provided adequate detail on non-dynamic testing.  Statements liks ``We
+will perform a code walkthrough with our stakeholders'' are accompanied by
+details, such as a checklist of items to go through during a walkthrough.
+\item Very careful use of random testing
+\item Specific programming language is listed
+\item Specific linter tool is listed (if appropriate)
+\item Specific coding standard is given
+\item Specific unit testing framework is given
+\item Investigation of code coverage measuring tools
+\item Specific plans for Continuous Integration (CI), or an explanation that CI
+  is not being done and why not
+\item Specific performance measuring tools listed (like Valgrind), if
+  appropriate
+\item If you are referencing an outside standard like the Web Content
+Accessibility Guidelines
+(\href{https://www.w3.org/WAI/standards-guidelines/wcag/} {WCAG}), refer back to
+it when talking about it. Don't just say ``perform WCAG checks to validate
+accessibility'' -- say what tests you are planning on performing. If they are
+provided by WCAG, reference the specific tests you'd like to use.
+\item Traceability between test cases and requirements is summarized (likely in
+  a table).  The traceability matrix shows a test case for each requirement, or
+  a non-dynamic technique is used for that requirement.
+\item 
+\end{todolist}
+
+\item Avenue rubric
+  \begin{todolist}
+  \item More than 5 peer review issues created for another team
+  \item Should have enough redundancy in testing.  Ideally there should be more
+  than one approach for verification for each requirement.
+  \item Custom documents (CDs) should be clearly identified and should be feasible.  The TA
+  should have enough information to be able to provide feedback.
+  \item A case should be made for why the CDs will improve the project, and
+  thus prove that they are not an afterthought.
+\end{todolist}
+
+\end{itemize}
+
+\end{document}
