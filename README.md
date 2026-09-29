@@ -6,7 +6,7 @@ Verity is a McMaster Software Engineering capstone project focused on helping pe
 - **Group:** 23
 - **Team:** Calvin Salsali, Raymond Tao, Jaden Moore, Richard Han
 - **Project status:** Initial planning and proof-of-concept phase
-- **Repository:** https://github.com/CalvinSalsali04/Verity
+- **Repository:** https://github.com/richy1337/Verity
 
 ## Initial Scope
 
