@@ -2,12 +2,11 @@
 
 \usepackage{tabularx}
 \usepackage{booktabs}
+\usepackage{enumitem}
 
 \title{Problem Statement and Goals\\\progname}
-
 \author{\authname}
-
-\date{}
+\date{September 28, 2026}
 
 \input{../Comments.text}
 \input{../Common.text}
@@ -22,78 +21,102 @@
 \toprule
 \textbf{Date} & \textbf{Developer(s)} & \textbf{Change}\\
 \midrule
-Date1 & Name(s) & Description of changes\\
-Date2 & Name(s) & Description of changes\\
-... & ... & ...\\
+2026-09-28 & Team 23 & Initial problem statement, goals, and scope\\
+2026-09-28 & Team 23 & Revised against course checklist and Avenue rubric\\
 \bottomrule
 \end{tabularx}
 \end{table}
 
 \section{Problem Statement}
 
-\wss{You should check your problem statement with the
-\href{https://smiths.github.io/capTemplate/Checklists/ProbState-Checklist.pdf}
-{problem statement checklist}}. 
-
-\wss{You can change the section headings, as long as you include the required
-information.}
-
 \subsection{Problem}
 
-\wss{What problem are you trying to solve?  Why is it important? Do not talk
-about how you will solve the problem, only what the problem is.  AI is rarely
-part of the problem.  The problem is ``what'' you want to do, not ``how'' you
-want to do it.  The problem statement should be written in a way that is
-understandable to a non-technical audience.}
+People increasingly encounter digital content whose origin, authenticity, and intent are difficult to judge. A convincing image, message, post, or other online artifact may be genuine, manipulated, automatically generated, or part of a fraudulent interaction. The burden of deciding whether that content should be trusted is often placed on the individual user even when the useful signals are subtle, technical, or spread across several sources.
+
+This creates two related risks. A person can trust suspicious content and make a harmful decision, or become overly skeptical and incorrectly dismiss legitimate content. Existing tools often examine only one signal or provide a result without enough context for a user to understand its limitations. The problem Verity addresses is therefore not simply labeling content as real or fake. It is helping a person assess questionable digital content using understandable evidence, an explicit indication of uncertainty, and guidance about what still needs independent verification.
+
+The problem matters because decisions based on untrustworthy digital content can have financial, reputational, social, and personal consequences. A useful system should improve a user's ability to judge risk without presenting uncertain evidence as ground truth.
 
 \subsection{Inputs and Outputs}
 
-\wss{Characterize the problem in terms of ``high level'' inputs and outputs.  
-Use abstraction so that you can avoid details.}
+\noindent\textbf{High level inputs:}
+\begin{itemize}[leftmargin=2em]
+    \item A digital content item supplied by a user, initially text or an image.
+    \item Optional context available at the time of analysis, such as source metadata or surrounding content.
+\end{itemize}
+
+\noindent\textbf{High level outputs:}
+\begin{itemize}[leftmargin=2em]
+    \item A structured assessment of the submitted content's risk or trustworthiness.
+    \item A concise summary of the main signals that contributed to the assessment.
+    \item A clear indication of confidence or uncertainty so the assessment is not mistaken for a proven fact.
+    \item Guidance on what the user should verify independently when the evidence is weak, incomplete, or conflicting.
+\end{itemize}
+
+Verity's output is intended to support human judgment rather than replace it. The system will not claim that it can prove the true origin or intent of every item it analyzes.
 
 \subsection{Stakeholders}
 
+The primary stakeholders are people who encounter questionable digital content and want help deciding whether it deserves further trust or verification. Secondary stakeholders include educators, journalists, moderators, and trust and safety practitioners who may benefit from transparent content risk signals. Course staff and future contributors are also stakeholders in the project's engineering quality, reproducibility, and documentation.
+
 \subsection{Environment}
 
-\wss{Hardware and Software Environment for the users.  The developer environment
-is summarized as part of the developer plan.}
+The intended user environment is a modern web browser on a desktop or mobile device with Internet access. The user should not require specialized hardware, local machine learning infrastructure, or technical expertise. Any server side analysis is an implementation concern and is not a requirement placed on the user.
 
 \section{Goals}
 
-\section{Stretch Goals}
+The goals below describe the product qualities that would make Verity worth using. They are intentionally higher level than detailed software requirements, but each includes a measurable success condition so the team can later determine whether the goal was achieved.
 
-\wss{Goals you hope to get to, but not necessary.  They are also helpful if the
-scope of the original project needs to be expanded.}
+\begin{enumerate}[label=G\arabic*., leftmargin=*]
+    \item \textbf{Evidence centered assessment.} Every supported analysis will return both an overall risk assessment and the main evidence behind it. In verification testing, 100\% of completed supported analyses should include both elements rather than only a binary label.
 
-\section{Custom Documents (CDs)}
+    \item \textbf{Honest uncertainty.} Every supported result will communicate confidence or uncertainty, including the ability to state that the available evidence is insufficient. In verification testing, 100\% of completed supported analyses should expose this uncertainty information to the user.
 
-\wss{For CAS 741: State whether the project is a research project. This
-designation, with the approval (or request) of the instructor, can be modified
-over the course of the term.}
+    \item \textbf{Useful detection quality.} For each supported content type, Verity will be evaluated on a held out labelled benchmark. The initial target is a balanced F1 score of at least 0.80 and a false positive rate no greater than 10\%. F1 summarizes how well the system balances missed suspicious content with incorrect accusations against legitimate content. These initial thresholds may be revised after the proof of concept if the benchmark evidence supports a more defensible scope or target.
 
-\wss{For SE Capstone: List your custom documents (CDs).  Potential CDs include
-usability testing, code walkthroughs, user documentation, formal proof,
-GenderMag personas, Design Thinking, etc.  (The full list is on the course
-outline and in Lecture 02.) Normally the number of CDs will be two (one per
-term).  Approval of the CDs will be part of the discussion with the instructor
-for approving the project. The CDs, with the approval (or request) of the
-instructor, can be modified over the course of the term.}
+    \item \textbf{Understandable explanations.} In a small usability evaluation, at least 80\% of participants should be able to identify the system's reported risk level, uncertainty, and primary supporting evidence without additional explanation from the development team.
+
+    \item \textbf{Interactive response time.} In the team's reference test environment, at least 90\% of supported single item analyses should return a completed result within 10 seconds, excluding externally documented outages or unavailable third party services.
+
+    \item \textbf{Privacy aware handling.} In the standard analysis workflow, raw submitted content will not be retained in persistent application storage after the requested analysis completes. Automated verification will check that 100\% of standard test analyses leave no persistent raw content record unless the user explicitly chooses a feature that requires storage.
+\end{enumerate}
 
 \newpage{}
+\section{Stretch Goals}
 
-\section*{Appendix --- Reflection}
+The following capabilities would add value but are not necessary for the initial project to succeed:
 
-\wss{Not required for CAS 741}
+\begin{itemize}[leftmargin=*]
+    \item Support additional content types and multimodal analysis that combines text, images, metadata, and available provenance signals.
+    \item Provide a browser extension or streamlined share workflow that reduces the effort required to submit suspicious content.
+\end{itemize}
 
-\input{../Reflection.text}
+\section{Custom Documents}
 
-\begin{enumerate}
-    \item What went well while writing this deliverable? 
-    \item What pain points did you experience during this deliverable, and how
-    did you resolve them?
-    \item How did you and your team adjust the scope of your goals to ensure
-    they are suitable for a Capstone project (not overly ambitious but also of
-    appropriate complexity for a senior design project)?
-\end{enumerate}  
+The initial custom documentation plan is:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Fall: Machine Learning Model Report.} The report will document candidate models or detection techniques, datasets, evaluation methods, limitations, calibration where applicable, and observed failure modes.
+    \item \textbf{Winter: Usability Report.} The report will evaluate whether users understand Verity's risk, evidence, and uncertainty presentation and whether the interface supports appropriate decision making without overstating confidence.
+\end{itemize}
+
+These selections may be adjusted with course staff approval as the project scope becomes more concrete.
+
+\newpage{}
+\section*{Appendix: Reflection}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{What went well while writing this deliverable?}
+
+    Using the course template, checklist, and rubric together gave this draft a clear structure and helped separate the user problem from possible implementations. An earlier broad framing centered on AI fraud and content detection made the scope difficult to explain. The revised statement focuses on the user's trust decision and on outputs that communicate evidence and uncertainty. It is more understandable to a nontechnical reader and leads to goals that can later be tested. Addressing false positives and insufficient evidence also makes the proposed product more credible than a simple real or fake detector.
+
+    \item \textbf{What pain points did you experience during this deliverable, and how did you resolve them?}
+
+    The main drafting difficulty was scope. Fraud, misinformation, manipulated media, and AI generated content are each large areas on their own. Covering all of them initially would produce vague goals and an unrealistic implementation plan. This draft defines a common user problem, limits initial supported inputs to text and images, and places additional content types in stretch goals. A second difficulty was making goals measurable without turning them into low level requirements. Each goal is therefore tied to a product value, such as understandable explanations or honest uncertainty, with a success measure that can be refined during requirements and verification work.
+
+    \item \textbf{How did you and your team adjust the scope of your goals to ensure they are suitable for a Capstone project?}
+
+    The goals avoid promising a universal authenticity detector. The initial project focuses on a bounded set of content types, a reproducible evaluation process, transparent evidence, and a user experience that communicates uncertainty. Training a foundation model from scratch, supporting every content type, and building a browser extension are outside the initial scope. The project remains technically substantial: it requires detector evaluation, an analysis and uncertainty pipeline, software integration, and user experience validation. The proof of concept can also justify a narrower scope if a proposed detector is not reliable enough.
+\end{enumerate}
 
 \end{document}
