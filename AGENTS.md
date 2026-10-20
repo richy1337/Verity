@@ -105,10 +105,10 @@ Future documents (`VnVPlan.tex`, `MLReport`, `MG.tex`, `MIS.tex`, `VnVReport.tex
 | `MAX_CONCURRENT_REQS` | `10` | Requests | Minimum concurrent requests maintaining strict `UUIDv4` isolation (`FR10`, `SR7`, `SR9`, `H8`, `H9`) |
 | `MAX_REPRO_DELTA` | `0.005` | Macro-$F_1$ delta | Maximum cross-member benchmark reproduction discrepancy (`NFR7`, `H10`) |
 
-### Correction coordination and risk status
-The proposed cleanup contract in `codex/srs-lifecycle-privacy-fixes` changes `MAX_RETENTION_TIME` to 1.0 seconds for logical release of application-owned references; it does not promise forensic memory zeroing. Apply that companion SRS correction together with this hazard-analysis correction before treating both documents as synchronized. The original PR branches remain independently owned and are not updated by this correction.
+### Correction Coordination and Risk Status
+The ephemeral cleanup contract in `codex/srs-lifecycle-privacy-fixes` establishes `MAX_RETENTION_TIME = 1.0 s` for bounded logical release of application-owned transient references, with zero persistent storage of raw user content at all times. This represents logical cleanup, not forensic memory zeroing.
 
-The risk register distinguishes initial estimates, conditional target estimates, and verified residual risk. All H1-H10 controls are planned and residual risk is unverified; proposed action owners have not been represented as completing new human audits. H1 and H5 still have a High conditional target and need stronger controls or narrower scope before a release claim. No approval or release risk acceptance has been recorded by the document correction.
+The risk register distinguishes initial inherent risk estimates, conditional target estimates, and verified residual risk. All H1–H10 controls are planned engineering controls and residual risk remains unverified until test suites pass in CI. H1 and H5 retain a High conditional target and require rigorous held-out slice evaluation and uncoached comprehension testing before release claims can be made.
 
 ### 3.2 Five-State Request Lifecycle & Evidence Source Tags
 - **Request Status Enum (`\mathcal{S}_{\text{status}}`):** `pending`, `completed`, `inconclusive`, `failed`, `cancelled` (`FR6`, `INV1`, `INV2`, `SR4`).
@@ -328,7 +328,7 @@ Verity/
 │   │   ├── constants.py           # Canonical SRS Table 6 symbolic constants (MIN_TEXT_LENGTH=150, etc.)
 │   │   ├── schemas.py             # Pydantic v2 models enforcing SRS Section S.5 JSON contract & INV1–INV3
 │   │   ├── validation.py          # M4 (C3): UTF-8 length, magic-byte MIME, pixel dims (64..4096), bomb guard
-│   │   ├── lifecycle.py           # M5 (C4): UUIDv4 state machine, 11.0s timeout, cancellation, session isolation
+│   │   ├── lifecycle.py           # M5 (C4): UUIDv4 state machine, 10.0s timeout, cancellation, session isolation
 │   │   ├── ephemeral.py           # M6 (C5): Request-owned task/buffer cleanup within MAX_RETENTION_TIME; never persist raw content (INV4)
 │   │   └── detectors/             # S3 (C6)
 │   │       ├── base.py            # Abstract Detector interface (NFR9 modularity)
