@@ -87,6 +87,7 @@ Future documents (`VnVPlan.tex`, `MLReport`, `MG.tex`, `MIS.tex`, `VnVReport.tex
 | Symbolic Constant | Value | Unit | Meaning & Governing Requirements |
 | :--- | :--- | :--- | :--- |
 | `MIN_F1_SCORE` | `0.80` | Macro-$F_1$ | Minimum unweighted Macro-$F_1$ on held-out benchmark (`NFR1`, `H1`, `H2`) |
+| `MIN_COVERAGE` | `70.0%` (`0.70`) | Proportion | Existing overall coverage floor for selective F1 acceptance; report per-class/subgroup coverage and full-population diagnostics (`NFR1`) |
 | `MAX_FPR` | `10.0%` (`0.10`) | Probability | Maximum False Positive Rate on legitimate/authentic items (`NFR1`, `NFR10`, `H1`) |
 | `MIN_BASELINE_DELTA` | `+0.10` | Macro-$F_1$ delta | Minimum Macro-$F_1$ improvement over naive baseline (`NFR1`, Peer Issue `#13`) |
 | `MIN_UNDERSTANDING_RATE` | `80.0%` | Percentage | Minimum uncoached user comprehension rate in usability study (`NFR2`, `H5`) |
@@ -99,10 +100,15 @@ Future documents (`VnVPlan.tex`, `MLReport`, `MG.tex`, `MIS.tex`, `VnVReport.tex
 | `MIN_IMAGE_DIM` | `64 x 64` | `px` | Minimum image pixel dimensions (`FR2`, `SR6`, `H2`) |
 | `MAX_IMAGE_DIM` | `4096 x 4096` | `px` | Maximum image pixel dimensions to prevent decompression bombs (`FR2`, `SR6`, `H7`) |
 | `MAX_INSTALL_TIME` | `5.0` | `min` | Maximum end-user browser extension installation time (`NFR6`, `NFR.E.2`) |
-| `MAX_RETENTION_TIME` | `0.0` (Immediate) | `s` | Post-terminal buffer purge time (`completed`, `inconclusive`, `failed`, `cancelled`) (`FR9`, `NFR4`, `SR8`, `H4`) |
+| `MAX_RETENTION_TIME` | `1.0` | `s` | Proposed bound for stopping request-owned tasks and releasing application-owned transient raw-content references after a terminal decision; no persistent raw writes at any time (`FR9`, `NFR4`, `SR8`, `H4`) |
 | `MIN_SERVICE_UPTIME` | `99.0%` | Percentage | Target availability during active testing/evaluation windows (`NFR8`) |
 | `MAX_CONCURRENT_REQS` | `10` | Requests | Minimum concurrent requests maintaining strict `UUIDv4` isolation (`FR10`, `SR7`, `SR9`, `H8`, `H9`) |
 | `MAX_REPRO_DELTA` | `0.005` | Macro-$F_1$ delta | Maximum cross-member benchmark reproduction discrepancy (`NFR7`, `H10`) |
+
+### Correction coordination and risk status
+The proposed cleanup contract in `codex/srs-lifecycle-privacy-fixes` changes `MAX_RETENTION_TIME` to 1.0 seconds for logical release of application-owned references; it does not promise forensic memory zeroing. Apply that companion SRS correction together with this hazard-analysis correction before treating both documents as synchronized. The original PR branches remain independently owned and are not updated by this correction.
+
+The risk register distinguishes initial estimates, conditional target estimates, and verified residual risk. All H1-H10 controls are planned and residual risk is unverified; proposed action owners have not been represented as completing new human audits. H1 and H5 still have a High conditional target and need stronger controls or narrower scope before a release claim. No approval or release risk acceptance has been recorded by the document correction.
 
 ### 3.2 Five-State Request Lifecycle & Evidence Source Tags
 - **Request Status Enum (`\mathcal{S}_{\text{status}}`):** `pending`, `completed`, `inconclusive`, `failed`, `cancelled` (`FR6`, `INV1`, `INV2`, `SR4`).
@@ -139,7 +145,7 @@ All downstream documents (`VnVPlan.tex`, `MG.tex`, `MIS.tex`, `VnVReport.tex`, `
   - `INV1` (*Mutual Exclusion of Terminal Statuses*): At any time $t$, a request $r$ has exactly one status in $\mathcal{S}_{\text{status}} = \{\texttt{pending}, \texttt{completed}, \texttt{inconclusive}, \texttt{failed}, \texttt{cancelled}\}$.
   - `INV2` (*Safe Abstention & Non-Reassurance on Degraded Signals*): $\text{status}(r) \in \{\texttt{inconclusive}, \texttt{failed}, \texttt{cancelled}\} \implies \text{verdict\_safe}(r) = \texttt{false} \land \text{uncertainty\_banner}(r) = \texttt{true}$.
   - `INV3` (*Complete Source Tagging of Displayed Evidence*): $\forall e \in E_{\text{disp}}(r),\; \text{tag}(e) \in \mathcal{E}_{\text{src}} \land |\text{locator}(e)| > 0$.
-  - `INV4` (*Zero Post-Terminal Buffer Retention*): $\forall t > t_{\text{term}}(r) + \texttt{MAX\_RETENTION\_TIME},\; \text{Buffers}(r) = \emptyset$.
+  - `INV4` (*Bounded Application-Owned Transient Cleanup; No Persistent Raw Writes*): $\forall t > t_{\text{term}}(r) + \texttt{MAX\_RETENTION\_TIME},\; \text{Buffers}(r) = \emptyset$.
 - **Product Use Cases (`UC1`–`UC4`, SRS Section E.6.2):**
   - `UC1`: Evaluate Suspicious Webpage Text Selection (`S1`, `S2`, `S3`)
   - `UC2`: Inspect Webpage Image for Manipulation and Provenance (`S1`, `S2`, `S3`)
@@ -322,8 +328,8 @@ Verity/
 │   │   ├── constants.py           # Canonical SRS Table 6 symbolic constants (MIN_TEXT_LENGTH=150, etc.)
 │   │   ├── schemas.py             # Pydantic v2 models enforcing SRS Section S.5 JSON contract & INV1–INV3
 │   │   ├── validation.py          # M4 (C3): UTF-8 length, magic-byte MIME, pixel dims (64..4096), bomb guard
-│   │   ├── lifecycle.py           # M5 (C4): UUIDv4 state machine, 10.0s timeout, cancellation, session isolation
-│   │   ├── ephemeral.py           # M6 (C5): Context-managed RAM buffer & finally-block zero-retention purge (INV4)
+│   │   ├── lifecycle.py           # M5 (C4): UUIDv4 state machine, 11.0s timeout, cancellation, session isolation
+│   │   ├── ephemeral.py           # M6 (C5): Request-owned task/buffer cleanup within MAX_RETENTION_TIME; never persist raw content (INV4)
 │   │   └── detectors/             # S3 (C6)
 │   │       ├── base.py            # Abstract Detector interface (NFR9 modularity)
 │   │       ├── text_detector.py   # M7: DeBERTa/RoBERTa classifier + linguistic burstiness/perplexity signals
