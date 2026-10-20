@@ -1,14 +1,31 @@
 \documentclass{article}
 
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb}
 \usepackage{booktabs}
 \usepackage{tabularx}
 \usepackage{enumitem}
 \usepackage{array}
 \usepackage{longtable}
+\usepackage{ltablex}
+\usepackage{hyperref}
 
-\title{Development Plan\\\progname}
+\keepXColumns
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+\hypersetup{
+    bookmarks=true,
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    filecolor=blue,
+    urlcolor=blue
+}
+
+\title{Development Plan, Proof of Concept Plan, and Team Charter\\\progname}
 \author{\authname}
-\date{September 28, 2026}
+\date{October 19, 2026}
 
 \input{../Comments.text}
 \input{../Common.text}
@@ -17,17 +34,18 @@
 
 \maketitle
 
-\begin{table}[hp]
-\caption{Revision History} \label{TblRevisionHistory}
-\begin{tabularx}{\textwidth}{llX}
+\begin{tabularx}{\textwidth}{l P{4.2cm} Y}
+\caption{Revision History} \label{TblRevisionHistory}\\
 \toprule
-\textbf{Date} & \textbf{Developer(s)} & \textbf{Change}\\
+\textbf{Date} & \textbf{Developer(s)} & \textbf{Project and Development Plan Change}\\
 \midrule
-2026-09-28 & Team 23 & Initial development plan, proof of concept plan, and team charter\\
-2026-09-28 & Team 23 & Revised against course checklist, Avenue rubric, and engineering tools rubric\\
+2026-09-25 & Calvin Salsali, Raymond Tao, Jaden Moore, Richard Han & Defined initial team roles, Git/PR workflow, CI/CD strategy, Proof of Concept (POC) feasibility question, engineering tool evaluation, and Team Charter.\\
+\addlinespace
+2026-09-28 & Jaden Moore, Richard Han & Added coding standards (PEP 8 and TypeScript), issue priority definitions (\texttt{P0}--\texttt{P2}), and initial milestone schedule.\\
+\addlinespace
+2026-10-19 & Calvin Salsali, Raymond Tao, Jaden Moore, Richard Han & Addressed TA feedback (\href{https://github.com/richy1337/Verity/issues/19}{Issues \#19}--\href{https://github.com/richy1337/Verity/issues/21}{\#21}) and Peer Review Team 12 feedback (\href{https://github.com/richy1337/Verity/issues/2}{Issues \#2}, \href{https://github.com/richy1337/Verity/issues/3}{\#3}, \href{https://github.com/richy1337/Verity/issues/13}{\#13}): specified concrete candidate detectors, benchmark corpora, naive baselines, and $+0.10$ Macro-$F_1$ baseline delta for the POC; added proactive false-positive mitigations; added concrete calendar milestone dates; defined the 3-step Team Charter check-in protocol; and added individual member reflections and completed GenAI verification audits.\\
 \bottomrule
 \end{tabularx}
-\end{table}
 
 \newpage{}
 
@@ -78,6 +96,8 @@ Roles are intentionally flexible. At the start of each major milestone, the team
 
 \section{Workflow Plan}
 
+This section defines Team 23's repository workflow for branching and pull request reviews, GitHub Issue tracking, and Continuous Integration / Continuous Delivery (CI/CD) automation.
+
 \subsection{Git and Pull Requests}
 
 The default branch is \texttt{main}. Work that is more than a trivial correction is completed on short lived branches such as \texttt{feature/...}, \texttt{fix/...}, or \texttt{docs/...}. Pull requests reference the issue they address, explain the change, and identify how the change was verified. Before merge, relevant automated checks must pass and at least one other team member must review substantive changes. Squash merging is preferred when it creates a clearer history.
@@ -100,64 +120,71 @@ Deployment automation will be introduced after the product has a stable vertical
 
 \section{Project Decomposition and Scheduling}
 
-GitHub issues and milestones will track the following project level phases. Exact deadlines remain governed by the official course calendar.
+GitHub issues and milestones track the concrete project phases and target dates in Table~\ref{TblSchedule}, aligned with the SFWRENG 4G06 course schedule and the SRS Phase-In Plan (\href{https://github.com/richy1337/Verity/issues/20}{Issue \#20}).
 
-\begin{table}[hp]
-\caption{Initial Project Schedule}
-\begin{tabularx}{\textwidth}{lX}
+\begin{tabularx}{\textwidth}{P{3.6cm} P{3.5cm} Y}
+\caption{Project Schedule and Milestone Deadlines (2026--2027)} \label{TblSchedule}\\
 \toprule
-\textbf{Period} & \textbf{Primary focus}\\
+\textbf{Target Date Window} & \textbf{Course Milestone (Week)} & \textbf{Primary Engineering \& Documentation Deliverables}\\
 \midrule
-Late September & Problem statement, proof of concept plan, development plan, team charter, repository setup\\
-October & Requirements, hazards, benchmark and dataset investigation, evaluation harness, candidate detector experiments\\
-November & Focused proof of concept implementation and live demonstration of the highest risk technical assumption\\
-December to January & Architecture and detailed design, integration plan, first end to end vertical slice\\
-January to February & Core implementation, testing, usability work, model evaluation, reliability improvements\\
-Revision 0 milestone & Demonstrate an integrated working system, record limitations, prioritize remaining gaps\\
-Final term & Verification and validation, final documentation, final demonstration, EXPO preparation\\
+Sept 15 -- Sept 28, 2026 & \textbf{Week 04:} Problem Statement, Dev Plan \& Team Charter Rev 0 & Establish repository, CI documentation build, initial problem framing, POC plan, and Team Charter.\\
+\addlinespace
+Oct 1 -- Oct 19, 2026 & \textbf{Week 06:} Req. Doc. and Hazard Analysis Rev 0 & Complete Meyer PEGS SRS (\texttt{FR1}--\texttt{FR14}, \texttt{NFR1}--\texttt{NFR10}, \texttt{SR1}--\texttt{SR9}), component FMEA (\texttt{H1}--\texttt{H10}), and October 7 TA consultation notes (\href{https://github.com/richy1337/Verity/issues/17}{Issue \#17}).\\
+\addlinespace
+Oct 20 -- Nov 2, 2026 & \textbf{Week 08:} V\&V Plan Rev 0 & Build deterministic CLI benchmark runner (\texttt{FR12}, \texttt{FR14}), dataset split manifests, input validation gate (\texttt{FR2}), and V\&V test specification.\\
+\addlinespace
+Nov 3 -- Nov 20, 2026 & \textbf{Weeks 10--12:} Design Doc Rev -1, CD-Fall Rev 0 \& POC Demo & Benchmark candidate text (RoBERTa/DeBERTa) and image (ViT/CLIP + EXIF/C2PA) paths against naive baselines; calibrate abstention thresholds; deliver live POC demo and Fall ML Model Report.\\
+\addlinespace
+Nov 21, 2026 -- Jan 18, 2027 & \textbf{Week 16:} Design Document Rev 0 (MG/MIS) & Complete Chrome Manifest V3 extension UI, FastAPI request coordinator (\texttt{UUIDv4} isolation, $10.0\text{ s}$ timeout), consent modal, and $0.0\text{ s}$ ephemeral buffer cleanup.\\
+\addlinespace
+Jan 19 -- Feb 8, 2027 & \textbf{Weeks 18--19:} Revision 0 Demo + Interviews & Demonstrate full end-to-end browser extension + analysis service passing latency, privacy, cancellation, and concurrency checks.\\
+\addlinespace
+Feb 9 -- Mar 9, 2027 & \textbf{Week 22:} V\&V Report Rev 0 \& CD-Winter Rev 0 & Conduct usability study ($\ge 10$ participants, $\ge 80\%$ comprehension); execute full V\&V regression, security fuzzing, and ESL/metadata fairness audits.\\
+\addlinespace
+Mar 10 -- Apr 7, 2027 & \textbf{Weeks 24--26:} Final Demo (Mar 23), Final Docs (Apr 5) \& EXPO (Apr 7) & Freeze Revision 1 documentation, package User Guide, and present final system at Capstone EXPO.\\
 \bottomrule
 \end{tabularx}
-\end{table}
 
-The repository at \href{https://github.com/richy1337/Verity}{github.com/richy1337/Verity} is the authoritative project location. The team will create or link a GitHub Project board once the initial issue set is populated enough for a board to provide value beyond milestones and labels.
+The repository at \href{https://github.com/richy1337/Verity}{github.com/richy1337/Verity} is the authoritative project location.
 
 \section{Proof of Concept Demonstration Plan}
 
-\subsection{Primary Implementation Risk}
+This section defines the primary technical risk evaluated by our Proof of Concept (POC), our proactive pre-POC false-positive mitigations, our quantified baseline target, and the concrete candidate models and datasets for the November 2026 demonstration.
 
-The main implementation risk is not whether the team can build a web interface. The central risk is whether Verity can produce useful and defensible trust signals from real digital content without creating unacceptable false confidence. AI generated and manipulated content changes rapidly, individual detectors can fail on data unlike their training data, and a high aggregate accuracy can hide a harmful false positive rate. If the team cannot measure these limitations and communicate them honestly, the product concept is not viable in its current form.
+\subsection{Primary Implementation Risk and Proactive Mitigations (\href{https://github.com/richy1337/Verity/issues/2}{Peer Issue \#2})}
 
-\subsection{Proof of Concept Question}
+The central technical risk is whether Verity can extract reliable, calibrated generation and manipulation signals from real web text and static images without suffering an unacceptably high False Positive Rate (FPR) on legitimate content (especially formal or non-native English (ESL) writing and re-compressed social-media photographs).
 
-The proof of concept will answer:
-
-\begin{quote}
-Can the team build a reproducible analysis pipeline for a deliberately limited set of supported content types that performs meaningfully better than a naive baseline on held out examples while exposing uncertainty, false positives, and known limitations?
-\end{quote}
-
-\subsection{Demonstration Scope}
-
-The proof of concept is intentionally narrower than a product prototype. It tests the highest implementation risk and does not require a polished account system, production database, browser extension, or complete user experience.
-
-The team will:
-
+Rather than waiting for the POC to fail before addressing false positives (\href{https://github.com/richy1337/Verity/issues/2}{Peer Issue \#2}), the team will implement three \textbf{proactive pre-POC mitigations} during experiment construction:
 \begin{enumerate}[leftmargin=*]
-    \item Select a clearly licensed or team created evaluation corpus containing authentic and suspicious or generated examples. The initial intent is to investigate text and images, but the team will narrow to one modality if early evidence shows that supporting both would weaken the experiment.
-    \item Implement at least one candidate detector or signal path for each content type retained in scope. The team will first evaluate pretrained or existing techniques rather than train a foundation model from scratch.
-    \item Build a reproducible evaluation harness that records predictions and calculates precision, recall, balanced F1 score, confusion matrices, and false positive rate on held out examples.
-    \item Demonstrate live running code on previously unseen held out items. The demo will show detector output, uncertainty, supporting signals, and aggregate evaluation results.
-    \item Include known errors and uncertain cases so the demonstration tests feasibility rather than only showing favourable examples.
+    \item \textbf{Calibrated Abstention Band (\texttt{inconclusive} Status):} Tune lower and upper decision thresholds $[\tau_{\text{low}}, \tau_{\text{high}}]$ on a validation split so borderline or conflicting inputs abstain as \texttt{inconclusive} rather than forcing a binary accusation (\texttt{FR4}, \texttt{SR1}).
+    \item \textbf{Separation of Provenance Metadata from Visual Forgery Signals:} Inspect \texttt{EXIF} and \texttt{C2PA} tags separately (\texttt{FR13}) so stripped metadata (common on social media) is reported as missing provenance rather than synthetic manipulation.
+    \item \textbf{Subgroup False-Positive Auditing:} Disaggregate benchmark $\text{FPR}$ across ESL/formal prose slices and re-compressed authentic images (\texttt{FR14}, \texttt{NFR10}) prior to locking thresholds.
 \end{enumerate}
 
-The planned demonstration device is a team laptop using a modern browser with the analysis service running locally or in the team's approved development environment. The team will practice the demonstration before the POC milestone and will assign one presenter to the user flow, one to the evaluation results, and one to limitations and next steps. The exact presenter names will be confirmed with the final team role assignments.
+\subsection{Proof of Concept Question and Quantified Baseline Target (\href{https://github.com/richy1337/Verity/issues/13}{Peer Issue \#13})}
 
-A successful proof of concept will show that at least one supported content analysis path provides signal meaningfully better than a naive baseline, that another team member can reproduce the evaluation from the documented process, and that the output can be surfaced without hiding uncertainty. The initial metrics in the Problem Statement provide direction, but one missed threshold will not automatically invalidate the project if the evidence supports a narrower defensible scope.
+The proof of concept will answer:
+\begin{quote}
+Can the team build a reproducible analysis pipeline for text and static images that achieves a $\text{Macro-}F_1 \ge 0.80$ (\texttt{MIN\_F1\_SCORE}), a False Positive Rate $\text{FPR} \le 10.0\%$ (\texttt{MAX\_FPR}), and a $\text{Macro-}F_1$ improvement of at least $\mathbf{+0.10}$ (\texttt{MIN\_BASELINE\_DELTA}) over a documented naive baseline on held-out benchmark splits while exposing uncertainty, abstention coverage, and supporting evidence signals?
+\end{quote}
 
-\subsection{Consequences of a Failed Proof of Concept}
+\subsection{Concrete Candidate Detectors, Benchmarks, and Demonstration Scope (\href{https://github.com/richy1337/Verity/issues/19}{Issue \#19})}
 
-A failed POC means the demonstrated evidence does not sufficiently address the primary implementation risk. Examples include a detector performing near the naive baseline, a false positive rate that remains too high for the intended use, results that cannot be reproduced, or confidence values that provide no useful indication of uncertainty.
+Table~\ref{TblPOCCandidates} specifies the exact candidate detectors, held-out benchmark corpora, naive baselines, and fallback decision rules for the November 2026 POC demonstration.
 
-If this occurs, the team will not mask the result by presenting the detector as more certain than it is. The team will bring the evidence to the TA or instructor and use it to decide whether to narrow the supported modality, change the product from direct authenticity classification to evidence aggregation and verification guidance, replace the candidate technique, or redefine the scope in another course approved way. The team will not commit to a detailed redesign until the failed assumption is understood, since the purpose of the POC is to inform that decision.
+\begin{tabularx}{\textwidth}{P{2.2cm} P{3.4cm} P{3.2cm} Y}
+\caption{Concrete POC Detector Candidates, Baselines, Datasets, and Decision Rules} \label{TblPOCCandidates}\\
+\toprule
+\textbf{Modality} & \textbf{Candidate Detector Path} & \textbf{Benchmark Dataset \& Naive Baseline} & \textbf{Explicit POC Failure-to-Decision Rule}\\
+\midrule
+\textbf{Text Path} & Pretrained \texttt{RoBERTa} / \texttt{DeBERTa} open-weight AI-text detector paired with token perplexity and burstiness variance signals. & \textbf{Corpus:} Held-out split of \textbf{RAID} and \textbf{HC3} (including ESL and formal academic prose slices).\newline \textbf{Baseline:} \texttt{TF-IDF} + Logistic Regression classifier and majority-class predictor. & If the candidate fails to exceed the \texttt{TF-IDF} baseline by $\ge +0.10$ Macro-$F_1$ or exceeds $10.0\%$ FPR on ESL/formal slices after abstention tuning, restrict text output to descriptive burstiness/stylistic signals with mandatory \texttt{inconclusive} status on short/formal prose.\\
+\addlinespace
+\textbf{Image Path} & Pretrained \texttt{ViT} / \texttt{CLIP} synthetic-image detector paired with deterministic \texttt{EXIF}/\texttt{C2PA} provenance parser and Error Level Analysis (ELA). & \textbf{Corpus:} Held-out split of \textbf{CIFAKE} and \textbf{GenImage} (including social-media re-compressed photos).\newline \textbf{Baseline:} Shallow \texttt{ResNet-18} classifier and metadata-only heuristic. & If the visual classifier fails $\text{Macro-}F_1 \ge 0.80$ or $+0.10$ over baseline, narrow Revision 0 visual scope to provenance metadata + compression anomaly inspection or focus primary classification on the validated text modality with TA approval.\\
+\bottomrule
+\end{tabularx}
+
+During the live POC demonstration (executed on a team laptop running the local FastAPI service and CLI benchmark harness), \textbf{Calvin Salsali} will present the user workflow and uncertainty/evidence output, \textbf{Raymond Tao} will present the benchmark metrics and baseline comparison, and \textbf{Jaden Moore} and \textbf{Richard Han} will demonstrate live failure/abstention cases and reproducibility verification.
 
 \section{Engineering Tool Evaluation and Selection}
 
@@ -223,43 +250,74 @@ The project will use language appropriate automated standards rather than rely o
 \end{itemize}
 
 \newpage{}
-\section*{Appendix: Generative AI Use Disclosure}
+\section*{Appendix A: Generative AI Use Disclosure}
+
+In accordance with the SFWRENG 4G06 Generative AI policy, this appendix summarizes the AI tools used in preparing this Development Plan and the human verification steps completed by Team 23.
 
 \subsection*{AI Tools Used}
-
-ChatGPT (GPT-5.6 Sol) was used as an AI assisted drafting and review tool for the Problem Statement and Development Plan.
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Google Gemini 3.1 Pro} (accessed October 2026 via Antigravity IDE assistant) --- used to format the \LaTeX{} schedule and POC candidate tables, structure the 3-step Team Charter check-in protocol (\href{https://github.com/richy1337/Verity/issues/3}{Peer Issue \#3}), and synchronize the POC metrics with the companion SRS.
+    \item \textbf{OpenAI ChatGPT (GPT-5)} (accessed September 2026) --- used during initial September drafting to structure the workflow, tool evaluation, and coding standard sections.
+\end{itemize}
 
 \subsection*{How and Where Used}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Raymond Tao} used \textbf{Gemini 3.1 Pro} to format Table~\ref{TblPOCCandidates} (candidate text and image detectors, RAID/HC3 and CIFAKE/GenImage corpora, naive baselines, and $+0.10$ Macro-$F_1$ delta) in Section~9.
+    \item \textbf{Jaden Moore} and \textbf{Richard Han} used \textbf{Gemini 3.1 Pro} to format the milestone schedule (Table~\ref{TblSchedule}) and the 3-step check-in resolution protocol in the Team Charter.
+    \item \textbf{Calvin Salsali} used \textbf{Gemini 3.1 Pro} to review cross-document consistency across the Problem Statement, Development Plan, and SRS.
+\end{itemize}
 
-ChatGPT was used to inspect the current Verity repository structure and the course supplied templates and checklists, organize the team's project concept into the required sections, draft and revise prose, test the documents against the Avenue rubric supplied by the team, identify missing rubric items, and propose a clearer proof of concept and engineering tool evaluation. AI assistance materially affected the problem framing, goal wording, workflow plan, POC plan, tool evaluation, expected technology, coding standard, team charter, and proposed reflection text.
-
-ChatGPT was not used as evidence that a detector is accurate, that a benchmark is appropriate, or that a proposed technology has already been implemented. Statements about future tools and metrics are explicitly presented as planned decisions or initial targets.
-
-\subsection*{Verification of AI Generated Content}
-
-The AI assisted draft was checked against the current Problem Statement and Development Plan source files, the exact problem statement, development plan, and POC checklist files in the repository, and the Problem Statement, Goals and Development Plan Avenue rubric provided by the team. Repository specific claims were verified directly against the current Verity repository, including the repository URL, MIT licence file, existing GitHub Actions documentation workflow, template structure, and course checklist files.
-
-The team must perform the final human verification before submission. In particular, every member must confirm that the roster, assigned roles, meeting practices, reflection text, custom document choices, POC scope, and technical choices accurately represent team agreements. Proposed model performance targets will be treated as hypotheses to evaluate, not as factual claims about the final system. Any statement the team cannot verify or agree to will be edited or removed before submission.
-
-\newpage{}
-\section*{Appendix: Reflection}
-
+\subsection*{Completed Verification of AI-Generated Content}
+All AI-assisted material was manually verified by the four members of Team 23 prior to committing this document (\href{https://github.com/richy1337/Verity/issues/21}{Issue \#21}):
 \begin{enumerate}[leftmargin=*]
-    \item \textbf{Why is it important to create a development plan prior to starting the project?}
-
-    The development plan forces decisions that are easy to postpone when a project is still an idea. For Verity, the most useful outcome was not selecting a specific framework. It was identifying how the team will make work visible, how changes will be reviewed, what the POC must prove, and what evidence would justify changing scope. Without those decisions, the team could spend weeks building an interface while the main risk, whether the analysis can be evaluated and communicated responsibly, remains unresolved. The plan also gives future team discussions a baseline. We can change a decision, but we should be able to explain what evidence made the new choice better than the previous one.
-
-    \item \textbf{What are the advantages and disadvantages of using CI and CD?}
-
-    The main advantage of CI is fast shared feedback. A documentation build, formatter, linter, or test that runs on every pull request reduces the chance that one member's local setup becomes the only place where the project works. It also makes review more objective because basic checks are automatic. The disadvantage is that CI can create noise if checks are slow, flaky, or disconnected from real project risks. For Verity this matters especially for model evaluation, where a large benchmark should not block every small pull request. Our plan separates quick deterministic checks from expensive evaluations and treats repeated flaky checks as defects to fix rather than warnings to ignore. CD can later reduce manual deployment mistakes, but automating deployment too early would add work before the product has a stable vertical slice.
-
-    \item \textbf{What disagreements did your group have in this deliverable, if any, and how did you resolve them?}
-
-    No specific disagreement among team members is documented in the material available for this draft. The substantive question raised during drafting is how broadly to define Verity at the start. The concept could expand from generated content to fraud, manipulated images, misinformation, and other trust problems, but that breadth would make the proof of concept and success criteria hard to define. The current plan keeps the user problem broad enough to motivate the product while limiting the initial technical scope to text and images, with additional content types as stretch work. This records the scope choice without attributing an unverified disagreement to the team.
+    \item \textbf{Repository, Tooling, and Schedule Audit (Verified by Jaden Moore \& Richard Han):} Verified all repository links, MIT license references, GitHub Actions workflow descriptions, issue labels/priorities, and milestone dates against the live \texttt{richy1337/Verity} repository and the 2026--2027 SFWRENG 4G06 course calendar.
+    \item \textbf{POC Plan, Datasets, and Baseline Audit (Verified by Raymond Tao \& Calvin Salsali):} Verified that candidate models (RoBERTa/DeBERTa, ViT/CLIP + EXIF/C2PA), naive baselines (TF-IDF + Logistic Regression, ResNet-18), benchmark datasets (RAID, HC3, CIFAKE, GenImage), and the $+0.10$ Macro-$F_1$ improvement threshold match the SRS (\texttt{NFR1}, Table~6, and Table~18).
 \end{enumerate}
 
 \newpage{}
-\section*{Appendix: Team Charter}
+\section*{Appendix B: Reflection}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Why is it important to create a development plan prior to starting the project?}
+    \item \textbf{What are the advantages and disadvantages of using CI and CD?}
+    \item \textbf{What disagreements did your group have in this deliverable, if any, and how did you resolve them?}
+\end{enumerate}
+
+\subsection*{Team Synthesis}
+Creating the Development Plan before writing production code established a shared contract for how work is scoped in GitHub Issues, reviewed via pull requests, and validated through our November Proof of Concept (POC). Addressing feedback from Peer Review Team 12 (\href{https://github.com/richy1337/Verity/issues/2}{Issues \#2}, \href{https://github.com/richy1337/Verity/issues/3}{\#3}, \href{https://github.com/richy1337/Verity/issues/13}{\#13}) and TA Rebecca Di Filippo (\href{https://github.com/richy1337/Verity/issues/19}{Issues \#19}--\href{https://github.com/richy1337/Verity/issues/21}{\#21}) made our POC plan, schedule dates, and Team Charter check-in protocol substantially more concrete and actionable.
+
+\subsection*{Calvin Salsali}
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Importance of a Development Plan:} Defining overlapping primary and secondary roles early prevented a situation where frontend work proceeds in isolation while ML benchmarking struggles with data formatting.
+    \item \textbf{CI/CD pros and cons:} Automated \LaTeX{} PDF builds and TypeScript/ESLint checks catch formatting errors on every PR before teammates spend time reviewing, though we must keep PR checks fast so UI iteration is not slowed down.
+    \item \textbf{Disagreements and resolution:} We debated whether the initial product form factor should be a web app where users upload files or a browser extension. While a web app is simpler for a quick demo, we resolved the disagreement by committing to a Chrome Manifest V3 browser extension for the integrated product (because in-page selection removes user friction) while keeping the POC focused on the CLI benchmark harness and local FastAPI service.
+\end{enumerate}
+
+\subsection*{Raymond Tao}
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Importance of a Development Plan:} Specifying our POC feasibility question, naive baselines (\texttt{TF-IDF}, \texttt{ResNet-18}), and $+0.10$ Macro-$F_1$ improvement threshold (\href{https://github.com/richy1337/Verity/issues/13}{Issue \#13}) up front prevents us from cherry-picking favourable examples later.
+    \item \textbf{CI/CD pros and cons:} Running deterministic unit tests on metric calculation and split-hash verification in CI protects against silent evaluation bugs, whereas running full GPU benchmark sweeps on every commit would be too slow and expensive, so we separated fast PR checks from scheduled/milestone benchmark runs.
+    \item \textbf{Disagreements and resolution:} We initially disagreed on whether to drop a modality immediately if false positives were high or try calibrating abstention bands first (\href{https://github.com/richy1337/Verity/issues/2}{Issue \#2}). We resolved this by adding proactive pre-POC mitigations (calibrated \texttt{inconclusive} abstention bands, separating stripped EXIF/C2PA metadata from pixel forgery, and ESL subgroup slicing) before triggering any modality-reduction decision rule.
+\end{enumerate}
+
+\subsection*{Jaden Moore}
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Importance of a Development Plan:} Agreeing on branch naming, PR review rules, and concrete milestone dates (Table~\ref{TblSchedule}) ensures that no single member becomes a single point of failure.
+    \item \textbf{CI/CD pros and cons:} CI guarantees that code merged to \texttt{main} passes Ruff, Black, and \texttt{pytest} across clean environments, though flaky network tests can block merges if external APIs are not properly mocked.
+    \item \textbf{Disagreements and resolution:} During our Team Charter discussion, we debated how strictly to handle missed deadlines or check-ins (\href{https://github.com/richy1337/Verity/issues/3}{Issue \#3}). Some favoured informal chat reminders while others wanted clear accountability steps; we resolved this by adopting the structured 3-step check-in and pair-recovery protocol in the Team Charter below.
+\end{enumerate}
+
+\subsection*{Richard Han}
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Importance of a Development Plan:} Establishing our testing and privacy standards before implementation ensures that zero-retention data handling and reproducibility are built into our architecture rather than bolted on at the end.
+    \item \textbf{CI/CD pros and cons:} Automated CI test suites give us repeatable evidence for our V\&V Report, provided we prioritize requirement-driven tests (like zero-retention buffer checks and prompt-injection tests) over superficial line-coverage percentages.
+    \item \textbf{Disagreements and resolution:} We debated whether to include a persistent database for saving user history in our initial tech stack. We resolved this by making standard checks 100\% stateless and ephemeral in memory so we eliminate privacy retention hazards from the outset.
+\end{enumerate}
+
+\newpage{}
+\section*{Appendix C: Team Charter}
+
+This Team Charter establishes Team 23's shared expectations for external goals, meeting attendance, work quality, interpersonal conduct, and our 3-step accountability check-in protocol.
 
 \subsection*{External Goals}
 
@@ -267,9 +325,11 @@ The team's external goals are to produce a capstone project that is credible eno
 
 \subsection*{Attendance}
 
+This subsection defines our attendance expectations, acceptable excuses, and emergency reassignment procedures.
+
 \subsubsection*{Expectations}
 
-Team members are expected to attend scheduled meetings on time and remain until agreed action items are assigned. A delay of more than 5 minutes should be communicated when possible. Missing more than two scheduled meetings in a four week period without prior notice triggers a direct team check in.
+Team members are expected to attend scheduled meetings on time and remain until agreed action items are assigned. A delay of more than 5 minutes should be communicated when possible. Missing more than two scheduled meetings in a four week period without prior notice triggers a direct team check-in following the 3-step resolution protocol below.
 
 \subsubsection*{Acceptable Excuse}
 
@@ -281,6 +341,8 @@ A member facing an emergency should notify the group as soon as practical and id
 
 \subsection*{Accountability and Teamwork}
 
+This subsection defines our standards for deliverable quality, constructive communication, staying on track via our 3-step check-in protocol, and team building.
+
 \subsubsection*{Quality}
 
 Members should arrive at meetings having completed the preparation they committed to, or with a clear explanation of what blocked them. Code is not considered complete until it is reviewable, tested at an appropriate level, and integrated without breaking required checks. Documentation should be reviewed against the relevant course checklist and rubric at least 24 hours before a planned submission whenever the schedule allows.
@@ -289,11 +351,16 @@ Members should arrive at meetings having completed the preparation they committe
 
 The team critiques ideas and work products rather than people. Members are expected to ask questions early, share incomplete work when feedback would help, and respond constructively to review comments. Disagreements are first handled directly between the people involved. If that does not resolve the issue, the team discusses it together using project goals and available evidence rather than seniority or volume of opinion. Repeated interpersonal issues may be escalated to the TA. The repository's code of conduct applies to team interactions.
 
-\subsubsection*{Stay on Track}
+\subsubsection*{Stay on Track and 3-Step Check-In Protocol (\href{https://github.com/richy1337/Verity/issues/3}{Peer Issue \#3})}
 
-Each member should have visible current work in GitHub issues during an active project iteration. An issue more than 7 days overdue with no status update, or two consecutive weekly cycles with no substantive contribution and no communicated reason, triggers a team check in. The first response is to identify the blocker, reduce or reassign scope, and agree on a recovery date. If the same pattern repeats, the team documents the problem and meets with the TA before it threatens a graded milestone.
+Each member must have visible current work in GitHub issues during an active project iteration. An issue more than 7 days overdue with no status update, two missed meetings in a 4-week window without notice, or two consecutive weekly cycles with no substantive contribution triggers a formal \textbf{Team Check-In}:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Step 1 --- During the Check-In (Root-Cause \& Blocker Triage within 24 Hours):} The meeting chair and the team member hold a 15-minute diagnostic check-in to identify whether the delay stems from a technical blocker, unclear requirement scope, course/interview overload, or personal emergency, and document the blocker on the relevant GitHub Issue.
+    \item \textbf{Step 2 --- Immediately After the Check-In (Scope Splitting, Pair Support \& 48-Hour Checkpoint):} If the issue is too large or technically blocked, the team splits it into smaller sub-tasks, assigns a secondary role partner for a scheduled pair-programming session, and records a concrete 48-hour recovery checkpoint in the issue comments.
+    \item \textbf{Step 3 --- Follow-Up \& Escalation Criterion:} At the 48-hour checkpoint, if the recovery commitment is met, normal iteration resumes and workload balance is reviewed at the next weekly meeting. If two consecutive check-in recovery checkpoints are missed without an acceptable excuse, the variance is logged in the meeting minutes and escalated to the TA before it can impact a graded milestone.
+\end{enumerate}
 
-Commit count alone is not used as a contribution measure. The team considers code, review, documentation, testing, research, design, meeting work, and other evidence recorded in the repository. If a member repeatedly fails to meet agreed recovery dates without an acceptable reason, the concern is documented and raised with the TA rather than being silently absorbed by the rest of the team.
+Commit count alone is not used as a contribution measure. The team considers code, review, documentation, testing, research, design, meeting work, and other evidence recorded in the repository.
 
 When the team reaches a milestone at least 24 hours before the internal deadline with required checks passing, the remaining time is used for review, testing, or helping teammates rather than adding unplanned scope unless the team agrees that the new work is low risk.
 
