@@ -1,0 +1,169 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{ltablex}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{hyperref}
+
+\keepXColumns
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+\input{../Comments.text}
+\input{../Common.text}
+
+\hypersetup{
+    bookmarks=true,
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    filecolor=blue,
+    urlcolor=blue
+}
+
+\title{Team \& TA Meeting Notes: SRS and Hazard Analysis\\\progname}
+\author{\authname}
+\date{October 19, 2026}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\vspace{1em}
+\noindent This document records the structured preparation notes, speaking assignments, technical decisions, Teaching Assistant (TA) consultation feedback, and post-meeting action items for Team 23's October 2026 Software Requirements Specification (SRS) and Hazard Analysis deliverables (tracked in GitHub Issue \href{https://github.com/richy1337/Verity/issues/17}{\#17}).
+
+% ======================================================================
+% SECTION 1: OCTOBER 7, 2026 TA CONSULTATION MEETING
+% ======================================================================
+\section{TA Consultation Meeting --- October 7, 2026 (SRS \& Hazard Analysis)}
+
+This section documents the attendance, 20-minute speaking allocation, and technical decisions from Team 23's October 7, 2026 consultation with Teaching Assistant Rebecca Di Filippo regarding Week 06 (Requirements Document and Hazard Analysis Revision 0).
+
+\subsection{Meeting Metadata and Attendance}
+
+\begin{tabularx}{\textwidth}{P{4.2cm} Y}
+\caption{October 7, 2026 TA Meeting Metadata and Attendance} \label{TblOct7Meta}\\
+\toprule
+\textbf{Field} & \textbf{Details}\\
+\midrule
+\textbf{Date \& Time} & Wednesday, October 7, 2026 (20-minute consultation slot)\\
+\textbf{Teaching Assistant} & Rebecca Di Filippo\\
+\textbf{GitHub Meeting Issue} & \href{https://github.com/richy1337/Verity/issues/17}{Issue \#17 --- TA Meeting - October 7 - SRS and Hazard Analysis}\\
+\textbf{Milestone} & Week 06: Req. Doc. and Hazard Analysis Rev 0\\
+\textbf{Team Attendance} &
+\begin{itemize}[nosep, leftmargin=*]
+    \item[\textbf{[x]}] \textbf{Calvin Salsali} (\texttt{@CalvinSalsali04}) --- Present (Product Scope, UI \& Meeting Facilitator)
+    \item[\textbf{[x]}] \textbf{Raymond Tao} (\texttt{@Raymondtaoo}) --- Present (SRS Structure, Evaluation Metrics \& Benchmarks)
+    \item[\textbf{[x]}] \textbf{Jaden Moore} (\texttt{@JadenAntM}) --- Present (Backend State Machine, Concurrency \& Schedule)
+    \item[\textbf{[x]}] \textbf{Richard Han} (\texttt{@richy1337}) --- Present (Hazard Analysis FMEA, Privacy \& Security)
+\end{itemize}\\
+\bottomrule
+\end{tabularx}
+
+\subsection{Pre-Meeting Agenda and 20-Minute Speaking Allocation}
+
+To make full use of the 20-minute TA consultation, Team 23 divided the agenda into five structured segments so every member presented their subsystem and questions directly:
+
+\begin{tabularx}{\textwidth}{P{2.2cm} P{3.4cm} Y}
+\caption{October 7 TA Meeting Agenda and Member Speaking Roles} \label{TblOct7Agenda}\\
+\toprule
+\textbf{Time Slot} & \textbf{Lead Speaker} & \textbf{Agenda Topic and Materials Presented}\\
+\midrule
+\textbf{0:00--3:00}\newline (3 min) & \textbf{Calvin Salsali} & \textbf{Project Scope \& Product Form Factor:} Presented Verity as a user-triggered desktop Chromium browser extension (Manifest V3) that assesses user-selected text and static images for AI-generation and digital manipulation signals, returning evidence, uncertainty, and next verification steps rather than a ``universal truth'' verdict.\\
+\addlinespace
+\textbf{3:00--8:00}\newline (5 min) & \textbf{Raymond Tao} & \textbf{SRS Structure, Requirements \& Evaluation Metrics:} Walked through Functional Requirements (\texttt{FR1}--\texttt{FR14}), Non-Functional Requirements (\texttt{NFR1}--\texttt{NFR10}), symbolic constants ($\texttt{MIN\_F1\_SCORE} = 0.80$, $\texttt{MAX\_FPR} = 10.0\%$, $\texttt{MIN\_BASELINE\_DELTA} = +0.10$), and the formalization of Macro-$F_1$, False Positive Rate (FPR), and abstention coverage.\\
+\addlinespace
+\textbf{8:00--12:00}\newline (4 min) & \textbf{Richard Han} & \textbf{Hazard Analysis Boundary \& FMEA (\texttt{H1}--\texttt{H10}):} Presented the seven internal components (\texttt{C1}--\texttt{C7}), critical assumptions (\texttt{A1}--\texttt{A5}), and Failure Mode and Effects Analysis (FMEA) rows covering false positives, false negatives, prompt injection/hallucination, privacy retention leaks, and evaluation leakage.\\
+\addlinespace
+\textbf{12:00--15:00}\newline (3 min) & \textbf{Jaden Moore} & \textbf{Safety Requirements (\texttt{SR1}--\texttt{SR9}), Concurrency \& Roadmap:} Presented the five-state request lifecycle (\texttt{pending}, \texttt{completed}, \texttt{inconclusive}, \texttt{failed}, \texttt{cancelled}), UUIDv4 request-to-result binding, zero-retention ephemeral cleanup, and milestone phase-in plan.\\
+\addlinespace
+\textbf{15:00--20:00}\newline (5 min) & \textbf{All Members \& TA Rebecca Di Filippo} & \textbf{Targeted TA Questions \& Rubric Alignment Review:} Resolved open questions on SRS template choice, scope exclusions (opinion/satire), high-level goal phrasing vs.\ requirement metrics, revision history conventions, and GenAI disclosure verification.\\
+\bottomrule
+\end{tabularx}
+
+\subsection{Key Technical Questions Discussed and TA Decisions Recorded}
+
+Table~\ref{TblOct7Decisions} records the specific engineering and documentation questions raised during the October 7 consultation with TA Rebecca Di Filippo, the feedback received, and the resulting decisions implemented in the repository.
+
+\begin{tabularx}{\textwidth}{P{3.6cm} P{4.5cm} Y}
+\caption{Summary of TA Feedback and Decisions from the October 7, 2026 Consultation} \label{TblOct7Decisions}\\
+\toprule
+\textbf{Topic / Question Raised} & \textbf{TA Feedback (Rebecca Di Filippo)} & \textbf{Final Team Decision \& Implementation}\\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Topic / Question Raised} & \textbf{TA Feedback (Rebecca Di Filippo)} & \textbf{Final Team Decision \& Implementation}\\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\textbf{1. SRS Template Selection \& Unused Folders} & Select one primary SRS template, document any structural adaptations clearly in a table, and delete unused template folders (\texttt{SRS-Volere}, \texttt{SRS-Meyer}) so the repository is clean. & Adopted \textbf{Bertrand Meyer's PEGS SRS structure} (\textit{Goals, Environment, System, Project}) adapted into \LaTeX{} in \texttt{docs/SRS/SRS.tex}, added Table~2 documenting all template additions, and removed unused template directories.\\
+\addlinespace
+\textbf{2. Narrowing Detection Scope \& Handling Opinion / Satire} (\href{https://github.com/richy1337/Verity/issues/15}{Peer Issue \#15}) & Do not claim to detect general ``misinformation'' or ``truth'' across arbitrary writing. Explicitly bound the task to AI-generation and manipulation signals, and state how opinion/satire are handled. & Bounded scope to AI-generated and manipulated text and static images; explicitly excluded pure opinion, satire, and open-ended fact-checking in SRS Section~G.6, requiring an \texttt{inconclusive} abstention (\texttt{FR4}) when task signals do not apply.\\
+\addlinespace
+\textbf{3. High-Level Product Goals vs.\ Quantitative Percentages} & High-level Goals (\texttt{G1}--\texttt{G6}) should read as non-expert product selling points (Problem $\to$ What it causes $\to$ What Verity addresses) rather than low-level ``100\% of analyses...'' test targets. Keep numerical targets in the SRS requirements/NFRs. & Rewrote \texttt{G1}--\texttt{G6} in SRS Section~G.3 as clear value propositions; placed all numerical thresholds in Symbolic Constants Table~6 (\texttt{MIN\_F1\_SCORE}, \texttt{MAX\_FPR}, \texttt{MIN\_BASELINE\_DELTA}, \texttt{MAX\_RESPONSE\_TIME}) and \texttt{NFR1}--\texttt{NFR10}.\\
+\addlinespace
+\textbf{4. Synchronizing Hazard Analysis FMEA and SRS Safety Requirements} & Every FMEA hazard must lead to concrete elimination or mitigation actions, and any derived Safety Requirements (\texttt{SR}) must appear in both the Hazard Analysis and the SRS with matching IDs. & Synchronized \texttt{SR1}--\texttt{SR9} word-for-word between Hazard Analysis Section~6 and SRS Section~S.4 (Table~16), and added bidirectional trace links to \texttt{H1}--\texttt{H10} across all requirement tables.\\
+\addlinespace
+\textbf{5. Concrete Symbolic Constants and POC Plan Details} (\href{https://github.com/richy1337/Verity/issues/2}{Issues \#2}, \href{https://github.com/richy1337/Verity/issues/13}{\#13}, \href{https://github.com/richy1337/Verity/issues/14}{\#14}) & Avoid leaving ``Not set'' or ``TBD'' placeholders for input limits or baseline comparisons. Name specific candidate detectors, datasets, and baseline delta targets now, and note them in Likely Changes if they may be tuned after POC. & Populated all 17 symbolic constants in SRS Table~6 ($150$--$10{,}000\text{ chars}$, $10.0\text{ MB}$, $64\text{ px}$--$4096\text{ px}$, $10.0\text{ s}$ timeout, $+0.10$ baseline Macro-$F_1$ delta) and documented concrete POC models/corpora (RoBERTa/DeBERTa on RAID/HC3; ViT/CLIP + EXIF/C2PA on CIFAKE/GenImage) in SRS Table~18.\\
+\addlinespace
+\textbf{6. Revision History, Reflections, and GenAI Disclosure Standards} & Revision History must list specific individual author names (never ``All'' or ``Team 23'') and describe project/scope changes (not ``revised against rubric''). Reflections must include personal individual voices, and GenAI disclosures must state completed verification steps. & Updated Revision History tables in both documents with individual developer names and substantive scope descriptions; wrote individual member reflections for Calvin, Raymond, Jaden, and Richard; documented completed verification audits for \textbf{Gemini 3.1 Pro}.\\
+\end{tabularx}
+
+% ======================================================================
+% SECTION 2: PRE-MEETING TEAM PREPARATION NOTES (OCTOBER 5, 2026)
+% ======================================================================
+\section{Team Working Session --- October 5, 2026 (SRS \& Hazard Brainstorming)}
+
+This section records the outcomes of Team 23's pre-consultation working session held on October 5, 2026 to prepare our initial requirements and component FMEA prior to meeting with the TA.
+
+\subsection{Attendance and Session Summary}
+\begin{itemize}[nosep, leftmargin=*]
+    \item \textbf{Date:} Monday, October 5, 2026
+    \item \textbf{Attendees:} Calvin Salsali, Raymond Tao, Jaden Moore, Richard Han (4/4 present)
+    \item \textbf{Objective:} Draft initial functional/non-functional requirements and conduct component-level FMEA brainstorming ahead of the October 7 TA consultation.
+\end{itemize}
+
+\subsection{Technical Architecture and Hazard Brainstorming Outcomes}
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Five-State Request Lifecycle (\texttt{FR6}, \texttt{SR4}):} Jaden and Calvin identified that a binary ``success vs.\ error'' state is unsafe when wrapping ML detectors. The team agreed on five mutually exclusive states: \texttt{pending}, \texttt{completed}, \texttt{inconclusive} (pipeline succeeded, but signals are weak/conflicting or text is subjective opinion/satire), \texttt{failed} (timeout $>10.0\text{ s}$ or dependency error), and \texttt{cancelled} (user aborted or declined external consent).
+    \item \textbf{Newly Surfaced Software Hazards (\texttt{H3}, \texttt{H4}, \texttt{H7}, \texttt{H8}, \texttt{H9}):} While walking through component boundaries \texttt{C1}--\texttt{C7}, Richard and Raymond identified indirect prompt injection from webpage text (\texttt{H3}), residual temp files on crashed/cancelled checks (\texttt{H4}), and SVG script execution / image decompression bombs (\texttt{H7}), while Calvin and Jaden identified out-of-order async responses overwriting newer checks (\texttt{H8}) and cross-session state contamination (\texttt{H9}).
+    \item \textbf{Cultural and Linguistic Fairness (\texttt{LO\_Impact}, \texttt{FR14}, \texttt{NFR10}):} Reviewing literature on AI-text detectors \cite{Liang2023ESL} highlighted high false-positive rates on English as a Second Language (ESL) writing. The team added subgroup false-positive slice reporting (\texttt{FR14}, \texttt{NFR10}) and non-accusatory phrasing (\texttt{SR2}).
+\end{enumerate}
+
+% ======================================================================
+% SECTION 3: POST-MEETING ACTION ITEMS AND ISSUE TRACEABILITY
+% ======================================================================
+\section{Post-Meeting Action Items and GitHub Issue Assignments}
+
+Table~\ref{TblActionItems} tracks the concrete action items assigned after the October 7 TA meeting, each scoped to a single owner with verifiable completion criteria.
+
+\begin{tabularx}{\textwidth}{P{1.6cm} P{3.2cm} Y P{2.2cm}}
+\caption{Post-Meeting Action Items and Single-Owner Assignments} \label{TblActionItems}\\
+\toprule
+\textbf{Issue / Task} & \textbf{Assigned Owner} & \textbf{Actionable Deliverable and Completion Criteria} & \textbf{Status}\\
+\midrule
+\href{https://github.com/richy1337/Verity/issues/17}{\textbf{Issue \#17}} & Calvin Salsali (\texttt{@CalvinSalsali04}) & Finalize SRS Section~(G) Goals (high-level selling points \texttt{G1}--\texttt{G6}), Stakeholder Table~7, User Personas (Maya, Marcus, Priya), and Behaviour Overview Activity Diagram; record October 7 TA meeting notes. & Completed (Oct 19, 2026)\\
+\addlinespace
+\textbf{SRS Formalization \& POC Plan} & Raymond Tao (\texttt{@Raymondtaoo}) & Finalize Symbolic Constants Table~6, Section~S.9 mathematical formalization ($\text{Macro-}F_1$, FPR, Coverage), POC detector/benchmark Table~18, and subgroup fairness requirements (\texttt{FR14}, \texttt{NFR10}); resolve Peer Issues \href{https://github.com/richy1337/Verity/issues/2}{\#2}, \href{https://github.com/richy1337/Verity/issues/13}{\#13}, \href{https://github.com/richy1337/Verity/issues/14}{\#14}. & Completed (Oct 19, 2026)\\
+\addlinespace
+\textbf{SRS Lifecycle \& Phase-In Plan} & Jaden Moore (\texttt{@JadenAntM}) & Finalize request lifecycle requirements (\texttt{FR6}, \texttt{FR10}, \texttt{FR11}), Subsystem Boundary Table~13, Milestone Phase-In Plan Table~19, and Hazard Analysis Section~7 Roadmap; triage Peer Issue \href{https://github.com/richy1337/Verity/issues/3}{\#3}. & Completed (Oct 19, 2026)\\
+\addlinespace
+\textbf{Hazard Analysis FMEA \& SRs} & Richard Han (\texttt{@richy1337}) & Finalize Hazard Analysis component diagram (\texttt{C1}--\texttt{C7}), landscape FMEA Table~4 (\texttt{H1}--\texttt{H10}), synchronized Safety Requirements (\texttt{SR1}--\texttt{SR9}), and bidirectional traceability matrix. & Completed (Oct 19, 2026)\\
+\bottomrule
+\end{tabularx}
+
+\begin{thebibliography}{9}
+\bibitem{Liang2023ESL}
+W.~Liang, M.~Yuksekgonul, Y.~Mao, E.~Wu, and J.~Zou, ``GPT detectors are biased against non-native English writers,'' \emph{Patterns}, vol.~4, no.~7, p.~100779, 2023.
+\end{thebibliography}
+
+\end{document}

@@ -1,9 +1,9 @@
 ---
 name: Team Meeting
-about: Create an agenda for team meetings and track details.
-title: 'Team Meeting - Date'
+about: Create an agenda for Team 23 meetings and track attendance and action items.
+title: 'Team Meeting - YYYY-MM-DD'
 labels: 'meeting'
-assignees: ''
+assignees: 'CalvinSalsali04, Raymondtaoo, JadenAntM, richy1337'
 
 ---
 
@@ -11,12 +11,15 @@ assignees: ''
 
 **Attendance**
 
-- [ ] team member1
-- [ ] team member2
-- [ ] team member3
-- [ ] team member4
-- [ ] team member5
+- [ ] Calvin Salsali (`@CalvinSalsali04`)
+- [ ] Raymond Tao (`@Raymondtaoo`)
+- [ ] Jaden Moore (`@JadenAntM`)
+- [ ] Richard Han (`@richy1337`)
 
 **Agenda**
+
+- 
+
+**Decisions & Assigned Action Items**
 
 - 
