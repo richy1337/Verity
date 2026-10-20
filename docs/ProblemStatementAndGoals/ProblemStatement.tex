@@ -140,12 +140,14 @@ In accordance with the SFWRENG 4G06 Generative AI policy, this appendix summariz
 \subsection*{AI Tools Used}
 \begin{itemize}[leftmargin=*]
     \item \textbf{Google Gemini 3.1 Pro} (accessed October 2026 via Antigravity IDE assistant) --- used to format the \LaTeX{} tables and assist in editing the Problem Statement narrative flow and stakeholder table to address TA and Peer Review Team 12 feedback.
+    \item \textbf{OpenAI Codex} (accessed October 2026) --- used to assist in refining formal mathematical and privacy phrasing across the companion deliverables.
     \item \textbf{OpenAI ChatGPT (GPT-5)} (accessed September 2026) --- used during initial September brainstorming to critique early draft wording against the course Problem Statement checklist.
 \end{itemize}
 
 \subsection*{How and Where Used}
 \begin{itemize}[leftmargin=*]
     \item \textbf{Calvin Salsali} and \textbf{Raymond Tao} used \textbf{Gemini 3.1 Pro} to restructure Section~1.1 (\emph{Problem $\to$ What It Causes $\to$ What Verity Addresses}), format Stakeholder Table~\ref{TblStakeholders}, and align Goals \texttt{G1}--\texttt{G6} with the companion SRS.
+    \item \textbf{Jaden Moore} used \textbf{OpenAI Codex} to refine the ephemeral privacy phrasing in Goal \texttt{G6} ($1.0\text{ s}$ bounded transient logical cleanup with zero persistent storage) to align with the companion SRS and Hazard Analysis.
     \item \textbf{Jaden Moore} and \textbf{Richard Han} used \textbf{Gemini 3.1 Pro} to verify \LaTeX{} cross-references and synchronize the Revision History and reflection structure.
 \end{itemize}
 
@@ -154,12 +156,10 @@ All AI-assisted edits were manually verified by the four members of Team 23 prio
 \begin{enumerate}[leftmargin=*]
     \item \textbf{Scope and Goal Alignment Audit (Verified by Calvin Salsali \& Raymond Tao):} Manually checked that Goals \texttt{G1}--\texttt{G6} contain high-level product selling points while all quantitative fit criteria are traced to \texttt{docs/SRS/SRS.tex}, and confirmed that opinion and satire are explicitly excluded (\href{https://github.com/richy1337/Verity/issues/15}{Peer Issue \#15}).
     \item \textbf{Stakeholder, Fairness, and Citation Audit (Verified by Jaden Moore \& Richard Han):} Verified all stakeholder groups, user personas, ESL false-positive bias claims, and PDF build output across \texttt{pdfs/ProblemStatementAndGoals/ProblemStatement.pdf}.
+    \item \textbf{Privacy Wording and Specification Consistency Audit (Verified by Jaden Moore \& Raymond Tao):} Verified that Goal \texttt{G6} accurately specifies bounded transient cleanup ($\texttt{MAX\_RETENTION\_TIME} = 1.0\text{ s}$) with zero persistent raw storage, and confirmed that PDF formatting has no margin overruns or layout defects across \texttt{pdfs/\allowbreak{}ProblemStatementAndGoals/\allowbreak{}ProblemStatement.pdf}.
 \end{enumerate}
 
 \newpage
-\subsection*{October 19 Correction Assistance}
-At Jaden Moore's request, OpenAI Codex (model build identifier unavailable in this session) aligned the privacy wording with the companion SRS correction. Earlier named human audits are not independently attested here. This correction was checked by compilation and PDF inspection; production privacy behavior has not been measured.
-
 \section*{Appendix B: Reflection}
 
 \begin{enumerate}[leftmargin=*]

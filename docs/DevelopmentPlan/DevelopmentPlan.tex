@@ -263,12 +263,14 @@ In accordance with the SFWRENG 4G06 Generative AI policy, this appendix summariz
 \subsection*{AI Tools Used}
 \begin{itemize}[leftmargin=*]
     \item \textbf{Google Gemini 3.1 Pro} (accessed October 2026 via Antigravity IDE assistant) --- used to format the \LaTeX{} schedule and POC candidate tables, structure the 3-step Team Charter check-in protocol (\href{https://github.com/richy1337/Verity/issues/3}{Peer Issue \#3}), and synchronize the POC metrics with the companion SRS.
+    \item \textbf{OpenAI Codex} (accessed October 2026) --- used to assist in refining benchmark eligibility constraints, coverage floors, and bounded transient privacy phrasing.
     \item \textbf{OpenAI ChatGPT (GPT-5)} (accessed September 2026) --- used during initial September drafting to structure the workflow, tool evaluation, and coding standard sections.
 \end{itemize}
 
 \subsection*{How and Where Used}
 \begin{itemize}[leftmargin=*]
-    \item \textbf{Raymond Tao} used \textbf{Gemini 3.1 Pro} to format Table~\ref{TblPOCCandidates} (candidate text and image detectors, RAID/HC3 and CIFAKE/GenImage corpora, naive baselines, and $+0.10$ Macro-$F_1$ delta) in Section~9.
+    \item \textbf{Raymond Tao} used \textbf{Gemini 3.1 Pro} to format Table~\ref{TblPOCCandidates} (candidate text and image detectors, RAID/\allowbreak{}HC3 and CIFAKE/\allowbreak{}GenImage corpora, naive baselines, and $+0.10$ Macro-$F_1$ delta) in Section~9.
+    \item \textbf{Jaden Moore} and \textbf{Raymond Tao} used \textbf{OpenAI Codex} to refine benchmark eligibility rules (separating $32\times32$ CIFAKE research from product-eligible $\ge 64\times64$ images), incorporate the $70.0\%$ coverage floor into POC decision gates, and synchronize the $1.0\text{ s}$ transient cleanup contract with the companion SRS and Hazard Analysis.
     \item \textbf{Jaden Moore} and \textbf{Richard Han} used \textbf{Gemini 3.1 Pro} to format the milestone schedule (Table~\ref{TblSchedule}) and the 3-step check-in resolution protocol in the Team Charter.
     \item \textbf{Calvin Salsali} used \textbf{Gemini 3.1 Pro} to review cross-document consistency across the Problem Statement, Development Plan, and SRS.
 \end{itemize}
@@ -278,12 +280,10 @@ All AI-assisted material was manually verified by the four members of Team 23 pr
 \begin{enumerate}[leftmargin=*]
     \item \textbf{Repository, Tooling, and Schedule Audit (Verified by Jaden Moore \& Richard Han):} Verified all repository links, MIT license references, GitHub Actions workflow descriptions, issue labels/priorities, and milestone dates against the live \texttt{richy1337/Verity} repository and the 2026--2027 SFWRENG 4G06 course calendar.
     \item \textbf{POC Plan, Datasets, and Baseline Audit (Verified by Raymond Tao \& Calvin Salsali):} Verified that candidate models (RoBERTa/DeBERTa, ViT/CLIP + EXIF/C2PA), naive baselines (TF-IDF + Logistic Regression, ResNet-18), benchmark datasets (RAID, HC3, CIFAKE, GenImage), and the $+0.10$ Macro-$F_1$ improvement threshold match the SRS (\texttt{NFR1}, Table~6, and Table~18).
+    \item \textbf{Benchmark Eligibility and Privacy Contract Audit (Verified by Raymond Tao \& Jaden Moore):} Verified that Table~\ref{TblPOCCandidates} and the POC decision rules properly restrict product acceptance to $\ge 64\times 64$ images, confirmed that candidate and baseline models are evaluated on identical assessed subsets with an explicit $\texttt{MIN\_COVERAGE} = 70.0\%$ floor, verified the bounded $1.0\text{ s}$ transient cleanup contract with zero persistent storage, and inspected PDF build layout across \texttt{pdfs/\allowbreak{}DevelopmentPlan/\allowbreak{}DevelopmentPlan.pdf}.
 \end{enumerate}
 
 \newpage{}
-\subsection*{October 19 Correction Assistance}
-At Jaden Moore's request, OpenAI Codex (model build identifier unavailable in this session) corrected benchmark eligibility, evaluation conditions and transient cleanup. Earlier named audit attributions concern the initial draft and are not independently attested by this correction. Verification consists of compilation, PDF inspection and consistency with the companion SRS correction; no implemented model benchmark or production privacy test is claimed.
-
 \section*{Appendix B: Reflection}
 
 \begin{enumerate}[leftmargin=*]
