@@ -1225,7 +1225,11 @@ Let $\mathcal{R}$ be the set of all initiated requests, $\text{SessionID}$ the s
     Conversely, if $\text{status}(r) \in \{\texttt{failed},\allowbreak\texttt{cancelled},\allowbreak\texttt{pending}\}$, then $r \notin \text{dom}(\text{completed\_\allowbreak{}assessment})$ (\hyperref[INV2]{INV2}).
     \item \textbf{Request Isolation and Session Binding (\hyperref[FR10]{FR10}, \hyperref[SR7]{SR7}, \hyperref[SR9]{SR9}):} Let $\text{displayed}(s, t)$ denote the result rendered in browser session $s \in \text{SessionID}$ at time $t$ when session $s$ has active request $r_{\text{active}}(s, t) = q \in \mathcal{R}$:
     \[
-        \forall s \in \text{SessionID},\ \forall t,\ \forall q \in \mathcal{R} : r_{\text{active}}(s, t) = q \land \text{displayed}(s, t) \neq \bot \implies \text{displayed}(s, t) = \text{result}(q) \land \text{owner}(q) = s.
+        \begin{aligned}
+        &\forall s \in \text{SessionID},\ \forall t,\ \forall q \in \mathcal{R}:\\
+        &\quad r_{\text{active}}(s, t) = q \land \text{displayed}(s, t) \neq \bot\\
+        &\qquad \implies \text{displayed}(s, t) = \text{result}(q) \land \text{owner}(q) = s.
+        \end{aligned}
     \]
     \item \textbf{No Persistence and Bounded Transient Cleanup Invariant (\hyperref[FR9]{FR9}, \hyperref[NFR4]{NFR4}, \hyperref[SR8]{SR8}):} For standard-workflow requests only, let $\text{PersistentStore}(t)$ and $\text{AppLogs}(t)$ denote application-controlled persistent records and logs, and $\text{raw}(r)$ the submitted raw content including reconstructable excerpts. $\text{TempBuffers}$ counts only application-owned live references, including running worker contexts; an empty set does not assert physical heap erasure:
     \[
