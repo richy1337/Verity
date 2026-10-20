@@ -178,9 +178,9 @@ Table~\ref{TblPOCCandidates} specifies the exact candidate detectors, held-out b
 \toprule
 \textbf{Modality} & \textbf{Candidate Detector Path} & \textbf{Benchmark Dataset \& Naive Baseline} & \textbf{Explicit POC Failure-to-Decision Rule}\\
 \midrule
-\textbf{Text Path} & Pretrained \texttt{RoBERTa} / \texttt{DeBERTa} open-weight AI-text detector paired with token perplexity and burstiness variance signals. & \textbf{Corpus:} Held-out split of \textbf{RAID} and \textbf{HC3} (including ESL and formal academic prose slices).\newline \textbf{Baseline:} \texttt{TF-IDF} + Logistic Regression classifier and majority-class predictor. & If the candidate fails to exceed the \texttt{TF-IDF} baseline by $\ge +0.10$ Macro-$F_1$ or exceeds $10.0\%$ FPR on ESL/formal slices after abstention tuning, restrict text output to descriptive burstiness/stylistic signals with mandatory \texttt{inconclusive} status on short/formal prose.\\
+\textbf{Text Path} & Pretrained \texttt{RoBERTa} / \texttt{DeBERTa} open-weight AI-text detector paired with token perplexity and burstiness variance signals. & \textbf{Corpus:} Held-out split of \textbf{RAID} and \textbf{HC3} (including ESL and formal academic prose slices).\newline \textbf{Baseline:} \texttt{TF-IDF} + Logistic Regression classifier and majority-class predictor. & If the candidate fails to reach $\text{Macro-}F_1 \ge 0.80$, fails to exceed the \texttt{TF-IDF} baseline by $\ge +0.10$ Macro-$F_1$, or exceeds $10.0\%$ FPR overall or on ESL/formal slices after abstention tuning, restrict text output to descriptive burstiness/stylistic signals with mandatory \texttt{inconclusive} status on short/formal prose.\\
 \addlinespace
-\textbf{Image Path} & Pretrained \texttt{ViT} / \texttt{CLIP} synthetic-image detector paired with deterministic \texttt{EXIF}/\texttt{C2PA} provenance parser and Error Level Analysis (ELA). & \textbf{Corpus:} Held-out split of \textbf{CIFAKE} and \textbf{GenImage} (including social-media re-compressed photos).\newline \textbf{Baseline:} Shallow \texttt{ResNet-18} classifier and metadata-only heuristic. & If the visual classifier fails $\text{Macro-}F_1 \ge 0.80$ or $+0.10$ over baseline, narrow Revision 0 visual scope to provenance metadata + compression anomaly inspection or focus primary classification on the validated text modality with TA approval.\\
+\textbf{Image Path} & Pretrained \texttt{ViT} / \texttt{CLIP} synthetic-image detector paired with deterministic \texttt{EXIF}/\texttt{C2PA} provenance parser and Error Level Analysis (ELA). & \textbf{Corpus:} Held-out split of \textbf{CIFAKE} and \textbf{GenImage} (including social-media re-compressed photos).\newline \textbf{Baseline:} Shallow \texttt{ResNet-18} classifier and metadata-only heuristic. & If the visual classifier fails $\text{Macro-}F_1 \ge 0.80$ or $+0.10$ over baseline, or exceeds $10.0\%$ FPR overall or on re-compressed authentic-photo slices, narrow Revision 0 visual scope to provenance metadata + compression anomaly inspection or focus primary classification on the validated text modality with TA approval.\\
 \bottomrule
 \end{tabularx}
 
@@ -329,7 +329,7 @@ This subsection defines our attendance expectations, acceptable excuses, and eme
 
 \subsubsection*{Expectations}
 
-Team members are expected to attend scheduled meetings on time and remain until agreed action items are assigned. A delay of more than 5 minutes should be communicated when possible. Missing more than two scheduled meetings in a four week period without prior notice triggers a direct team check-in following the 3-step resolution protocol below.
+Team members are expected to attend scheduled meetings on time and remain until agreed action items are assigned. A delay of more than 5 minutes should be communicated when possible. Missing two or more scheduled meetings in a four week period without prior notice triggers a formal Team Check-In following the 3-step resolution protocol below.
 
 \subsubsection*{Acceptable Excuse}
 
