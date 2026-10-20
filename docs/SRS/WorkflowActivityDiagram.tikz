@@ -1,0 +1,42 @@
+\documentclass[tikz,border=6pt]{standalone}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usetikzlibrary{arrows.meta,shapes.geometric,positioning}
+\begin{document}
+\begin{tikzpicture}[font=\sffamily\small,>=Latex,
+ process/.style={draw=blue!70!black,fill=blue!5,rounded corners=2pt,align=center,text width=5.8cm,minimum height=1.05cm},
+ guard/.style={draw=orange!80!black,fill=yellow!12,align=center,text width=5.8cm,minimum height=1.05cm},
+ bad/.style={draw=red!75!black,fill=red!4,rounded corners=2pt,align=center,text width=5.5cm,minimum height=1.05cm},
+ flow/.style={->,thick},exception/.style={->,dashed,red!70!black}]
+\node[process] (start) at (0,0) {User selects an item and triggers a check\\UC1 / FR1};
+\node[guard] (valid) at (0,-1.8) {Supported format, native dimensions\\and size bounds? FR2 / SR6};
+\node[guard] (consent) at (0,-3.8) {External provider needed? Obtain consent\\and check compatible retention terms. FR8 / SR8};
+\node[process] (run) at (0,-5.8) {Admit execution: status = pending\\Await required signals; no score read before ready. FR6};
+\node[guard] (ready) at (0,-7.8) {Required signal work finished\\before the processing deadline? FR6 / SR4};
+\node[guard] (sufficient) at (0,-9.8) {Available, supported, non-conflicting signals\\justify an assessment? FR4 / SR1};
+\node[process,draw=green!50!black,fill=green!5] (completed) at (0,-11.8) {status = completed\\Show supported evidence, uncertainty, limitations\\and independent verification guidance. FR3 / FR5 / FR7};
+\node[process,draw=black,fill=gray!8,text width=9.8cm] (cleanup) at (3,-15) {Every terminal outcome: stop request-owned work and release\\application-owned transient raw-content references within\\MAX\_RETENTION\_TIME = 1.0 s. No persistent raw-content writes at any time.\\Logical cleanup does not guarantee forensic memory zeroing. FR9 / NFR4 / SR8};
+\node[bad] (reject) at (8,-1.8) {Reject before detector invocation\\Show corrective reason. UC3 / FR2 / SR6};
+\node[bad] (cancel) at (8,-3.8) {status = cancelled\\Decline: no external transfer. In-flight cancel:\\stop further work; already delivered bytes cannot be recalled.\\Discard late results. UC4 / FR8 / FR11};
+\node[bad] (failed) at (8,-7.8) {status = failed\\Deadline or unrecoverable error\\Never show low risk. UC3 / FR6 / SR4};
+\node[bad,draw=purple!70!black,fill=purple!4] (inconclusive) at (8,-9.8) {status = inconclusive\\Weak, partial, conflicting or out-of-domain signals\\Show limitations and verification steps. UC2 / FR4};
+\draw[flow] (start)--(valid);
+\draw[flow] (valid)--node[left]{Yes}(consent);
+\draw[exception] (valid)--node[above]{No}(reject);
+\draw[flow] (consent)--node[left]{Local or approved}(run);
+\draw[exception] (consent)--node[above]{Declined}(cancel);
+\draw[flow] (run)--(ready);
+\draw[flow] (ready)--node[left]{Ready in time}(sufficient);
+\draw[exception] (ready)--node[above,font=\scriptsize]{Deadline / error}(failed);
+\draw[flow] (ready.west)--++(-0.7,0)|-node[pos=.2,left,align=right]{Not ready,\\time remains}(run.west);
+\draw[flow] (sufficient)--node[left]{Yes}(completed);
+\draw[exception] (sufficient)--node[above]{No}(inconclusive);
+\draw[flow] (completed)--(cleanup);
+\draw[exception] (run.east)--++(0.7,0) |- (cancel.west);
+\draw[exception] (reject.east)--(11.6,-1.8)--(11.6,-15)--(cleanup.east);
+\draw[exception] (cancel.east)--(11.6,-3.8);
+\draw[exception] (failed.east)--(11.6,-7.8);
+\draw[exception] (inconclusive.east)--(11.6,-9.8);
+\node[draw,align=left,text width=14.2cm,font=\sffamily\footnotesize] at (4,-17.4) {Legend: blue rounded box = normal process; yellow box = guard; red box = rejection/cancellation/failure; purple box = inconclusive; green box = completed; gray box = terminal cleanup. Solid arrows = ordinary/waiting flow; dashed red arrows = exceptional flow and shared cleanup. Cancellation has precedence over simultaneous deadline/error; terminal states cannot be overwritten.};
+\end{tikzpicture}
+\end{document}
