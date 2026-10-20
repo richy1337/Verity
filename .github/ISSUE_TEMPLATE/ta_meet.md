@@ -1,9 +1,9 @@
 ---
 name: TA Meeting
-about: Track team details for TA meetings.
-title: 'TA Meeting - Date'
+about: Track team details for TA meetings with Rebecca Di Filippo.
+title: 'TA Meeting - YYYY-MM-DD'
 labels: 'meeting'
-assignees: ''
+assignees: 'CalvinSalsali04, Raymondtaoo, JadenAntM, richy1337'
 
 ---
 
@@ -13,12 +13,15 @@ assignees: ''
 
 **Attendance**
 
-- [ ] team member1
-- [ ] team member2
-- [ ] team member3
-- [ ] team member4
-- [ ] team member5
+- [ ] Calvin Salsali (`@CalvinSalsali04`)
+- [ ] Raymond Tao (`@Raymondtaoo`)
+- [ ] Jaden Moore (`@JadenAntM`)
+- [ ] Richard Han (`@richy1337`)
 
-**Questions to Ask**
+**Agenda & Questions to Ask**
 
--
+- 
+
+**TA Feedback & Action Items**
+
+- 

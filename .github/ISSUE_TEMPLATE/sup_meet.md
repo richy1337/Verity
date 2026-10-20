@@ -1,26 +1,23 @@
 ---
-name: Supervisor Meeting
-about: Create an agenda for team meetings with supervisors/stakeholders.
-title: 'Supervisor Meeting - Date'
+name: Supervisor / Stakeholder Consultation
+about: Track Team 23 details for supervisor or stakeholder consultations.
+title: 'Consultation - YYYY-MM-DD'
 labels: 'meeting'
-assignees: ''
+assignees: 'CalvinSalsali04, Raymondtaoo, JadenAntM, richy1337'
 
 ---
+
+**Purpose of Meeting**
 
 **Date and Time**
 
 **Attendance**
 
-- [ ] team member1
-- [ ] team member2
-- [ ] team member3
-- [ ] team member4
-- [ ] team member5
+- [ ] Calvin Salsali (`@CalvinSalsali04`)
+- [ ] Raymond Tao (`@Raymondtaoo`)
+- [ ] Jaden Moore (`@JadenAntM`)
+- [ ] Richard Han (`@richy1337`)
 
-**Agenda**
+**Questions & Discussion Notes**
 
 - 
-
-**Questions to Ask**
-
--
