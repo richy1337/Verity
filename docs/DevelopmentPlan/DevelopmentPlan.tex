@@ -44,6 +44,8 @@
 2026-09-28 & Jaden Moore, Richard Han & Added coding standards (PEP 8 and TypeScript), issue priority definitions (\texttt{P0}--\texttt{P2}), and initial milestone schedule.\\
 \addlinespace
 2026-10-19 & Calvin Salsali, Raymond Tao, Jaden Moore, Richard Han & Addressed TA feedback (\href{https://github.com/richy1337/Verity/issues/19}{Issues \#19}--\href{https://github.com/richy1337/Verity/issues/21}{\#21}) and Peer Review Team 12 feedback (\href{https://github.com/richy1337/Verity/issues/2}{Issues \#2}, \href{https://github.com/richy1337/Verity/issues/3}{\#3}, \href{https://github.com/richy1337/Verity/issues/13}{\#13}): specified concrete candidate detectors, benchmark corpora, naive baselines, and $+0.10$ Macro-$F_1$ baseline delta for the POC; added proactive false-positive mitigations; added concrete calendar milestone dates; defined the 3-step Team Charter check-in protocol; and added individual member reflections and completed GenAI verification audits.\\
+\addlinespace
+2026-10-19 & Jaden Moore (Codex-assisted) & Separated CIFAKE research from product-eligible validation, aligned coverage and baseline comparisons with the corrected SRS, and distinguished no persistent raw-content writes from bounded transient cleanup.\\
 \bottomrule
 \end{tabularx}
 
@@ -135,7 +137,7 @@ Oct 20 -- Nov 2, 2026 & \textbf{Week 08:} V\&V Plan Rev 0 & Build deterministic 
 \addlinespace
 Nov 3 -- Nov 20, 2026 & \textbf{Weeks 10--12:} Design Doc Rev -1, CD-Fall Rev 0 \& POC Demo & Benchmark candidate text (RoBERTa/DeBERTa) and image (ViT/CLIP + EXIF/C2PA) paths against naive baselines; calibrate abstention thresholds; deliver live POC demo and Fall ML Model Report.\\
 \addlinespace
-Nov 21, 2026 -- Jan 18, 2027 & \textbf{Week 16:} Design Document Rev 0 (MG/MIS) & Complete Chrome Manifest V3 extension UI, FastAPI request coordinator (\texttt{UUIDv4} isolation, $10.0\text{ s}$ timeout), consent modal, and $0.0\text{ s}$ ephemeral buffer cleanup.\\
+Nov 21, 2026 -- Jan 18, 2027 & \textbf{Week 16:} Design Document Rev 0 (MG/MIS) & Complete Chrome Manifest V3 extension UI, FastAPI request coordinator (\texttt{UUIDv4} isolation, $10.0\text{ s}$ timeout), consent modal, and $1.0\text{ s}$ application-owned transient cleanup with no persistent raw-content writes.\\
 \addlinespace
 Jan 19 -- Feb 8, 2027 & \textbf{Weeks 18--19:} Revision 0 Demo + Interviews & Demonstrate full end-to-end browser extension + analysis service passing latency, privacy, cancellation, and concurrency checks.\\
 \addlinespace
@@ -166,7 +168,7 @@ Rather than waiting for the POC to fail before addressing false positives (\href
 
 The proof of concept will answer:
 \begin{quote}
-Can the team build a reproducible analysis pipeline for text and static images that achieves a $\text{Macro-}F_1 \ge 0.80$ (\texttt{MIN\_F1\_SCORE}), a False Positive Rate $\text{FPR} \le 10.0\%$ (\texttt{MAX\_FPR}), and a $\text{Macro-}F_1$ improvement of at least $\mathbf{+0.10}$ (\texttt{MIN\_BASELINE\_DELTA}) over a documented naive baseline on held-out benchmark splits while exposing uncertainty, abstention coverage, and supporting evidence signals?
+Can the team build a reproducible analysis pipeline for text and static images that achieves a $\text{Macro-}F_1 \ge 0.80$ (\texttt{MIN\_F1\_SCORE}), a False Positive Rate $\text{FPR} \le 10.0\%$ (\texttt{MAX\_FPR}), and a $\text{Macro-}F_1$ improvement of at least $\mathbf{+0.10}$ (\texttt{MIN\_BASELINE\_DELTA}) over a documented naive baseline on held-out benchmark splits at coverage of at least $70.0\%$ (\texttt{MIN\_COVERAGE}, matching the SRS), with both candidate and baseline F1 computed on the same assessed examples, while reporting uncertainty, abstentions, runtime errors, and supporting evidence signals?
 \end{quote}
 
 \subsection{Concrete Candidate Detectors, Benchmarks, and Demonstration Scope (\href{https://github.com/richy1337/Verity/issues/19}{Issue \#19})}
@@ -178,11 +180,15 @@ Table~\ref{TblPOCCandidates} specifies the exact candidate detectors, held-out b
 \toprule
 \textbf{Modality} & \textbf{Candidate Detector Path} & \textbf{Benchmark Dataset \& Naive Baseline} & \textbf{Explicit POC Failure-to-Decision Rule}\\
 \midrule
-\textbf{Text Path} & Pretrained \texttt{RoBERTa} / \texttt{DeBERTa} open-weight AI-text detector paired with token perplexity and burstiness variance signals. & \textbf{Corpus:} Held-out split of \textbf{RAID} and \textbf{HC3} (including ESL and formal academic prose slices).\newline \textbf{Baseline:} \texttt{TF-IDF} + Logistic Regression classifier and majority-class predictor. & If the candidate fails to reach $\text{Macro-}F_1 \ge 0.80$, fails to exceed the \texttt{TF-IDF} baseline by $\ge +0.10$ Macro-$F_1$, or exceeds $10.0\%$ FPR overall or on ESL/formal slices after abstention tuning, restrict text output to descriptive burstiness/stylistic signals with mandatory \texttt{inconclusive} status on short/formal prose.\\
+\textbf{Text Path} & Pretrained \texttt{RoBERTa} / \texttt{DeBERTa} open-weight AI-text detector paired with token perplexity and burstiness variance signals. & \textbf{Corpus:} Product-eligible held-out \textbf{RAID}/\textbf{HC3} examples, plus separately documented and licensed ESL/formal slices.\newline \textbf{Baseline:} \texttt{TF-IDF} + Logistic Regression classifier and majority-class predictor. & If coverage is below the SRS floor, the candidate fails to reach $\text{Macro-}F_1 \ge 0.80$, fails to exceed the \texttt{TF-IDF} baseline by $\ge +0.10$ Macro-$F_1$, or exceeds $10.0\%$ FPR overall or on ESL/formal slices after abstention tuning, restrict text output to descriptive burstiness/stylistic signals with mandatory \texttt{inconclusive} status on short/formal prose.\\
 \addlinespace
-\textbf{Image Path} & Pretrained \texttt{ViT} / \texttt{CLIP} synthetic-image detector paired with deterministic \texttt{EXIF}/\texttt{C2PA} provenance parser and Error Level Analysis (ELA). & \textbf{Corpus:} Held-out split of \textbf{CIFAKE} and \textbf{GenImage} (including social-media re-compressed photos).\newline \textbf{Baseline:} Shallow \texttt{ResNet-18} classifier and metadata-only heuristic. & If the visual classifier fails $\text{Macro-}F_1 \ge 0.80$ or $+0.10$ over baseline, or exceeds $10.0\%$ FPR overall or on re-compressed authentic-photo slices, narrow Revision 0 visual scope to provenance metadata + compression anomaly inspection or focus primary classification on the validated text modality with TA approval.\\
+\textbf{Image Path} & Pretrained \texttt{ViT} / \texttt{CLIP} synthetic-image detector paired with deterministic \texttt{EXIF}/\texttt{C2PA} provenance parser and Error Level Analysis (ELA). & \textbf{Corpus:} Product-eligible \textbf{GenImage} examples and a documented re-compressed authentic slice. \textbf{CIFAKE} has $32\times32$ inputs and is research-only, excluded from product acceptance with its $64\times64$ minimum.\newline \textbf{Baseline:} Shallow \texttt{ResNet-18} classifier and metadata-only heuristic. & If coverage is below the SRS floor, the visual classifier fails $\text{Macro-}F_1 \ge 0.80$ or $+0.10$ over baseline, or exceeds $10.0\%$ FPR overall or on re-compressed authentic-photo slices, narrow Revision 0 visual scope to provenance metadata + compression anomaly inspection or focus primary classification on the validated text modality with TA approval.\\
 \bottomrule
 \end{tabularx}
+
+Acceptance uses the current SRS thresholds, including the $70\%$ coverage floor. Freeze dataset revisions, eligibility rules, source-disjoint splits, subgroup tags, model checkpoints, baseline selection and calibration thresholds before testing. Compute candidate/baseline F1 on the same assessed item subset and disclose conditional scores, full-population diagnostics, abstentions and errors separately. Upscaling an ineligible $32\times32$ image does not make it a product acceptance example. Synthetic-origin benchmarks do not validate every manipulation subtype. A failed gate requires a documented TA-approved scope/requirements decision before a descriptive-only path can replace classification.
+
+Persistent raw-content writes are prohibited at all times in the standard workflow. Application-owned tasks and transient payload references must be stopped/released within $\texttt{MAX\_RETENTION\_TIME}=1.0\text{ s}$ of each terminal decision. This provisional logical-cleanup allowance does not promise forensic memory zeroing or deletion by an external provider; providers with incompatible or undocumented retention terms remain disabled.
 
 During the live POC demonstration (executed on a team laptop running the local FastAPI service and CLI benchmark harness), \textbf{Calvin Salsali} will present the user workflow and uncertainty/evidence output, \textbf{Raymond Tao} will present the benchmark metrics and baseline comparison, and \textbf{Jaden Moore} and \textbf{Richard Han} will demonstrate live failure/abstention cases and reproducibility verification.
 
@@ -275,6 +281,9 @@ All AI-assisted material was manually verified by the four members of Team 23 pr
 \end{enumerate}
 
 \newpage{}
+\subsection*{October 19 Correction Assistance}
+At Jaden Moore's request, OpenAI Codex (model build identifier unavailable in this session) corrected benchmark eligibility, evaluation conditions and transient cleanup. Earlier named audit attributions concern the initial draft and are not independently attested by this correction. Verification consists of compilation, PDF inspection and consistency with the companion SRS correction; no implemented model benchmark or production privacy test is claimed.
+
 \section*{Appendix B: Reflection}
 
 \begin{enumerate}[leftmargin=*]
