@@ -1,12 +1,31 @@
-\documentclass{article}
+\documentclass[11pt]{article}
 
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb}
 \usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{ltablex}
 \usepackage{booktabs}
 \usepackage{enumitem}
+\usepackage{array}
+\usepackage{hyperref}
 
-\title{Problem Statement and Goals\\\progname}
+\keepXColumns
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+\hypersetup{
+    bookmarks=true,
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    filecolor=blue,
+    urlcolor=blue
+}
+
+\title{Problem Statement and Goals for Verity\\\progname}
 \author{\authname}
-\date{September 28, 2026}
+\date{October 19, 2026}
 
 \input{../Comments.text}
 \input{../Common.text}
@@ -15,108 +34,169 @@
 
 \maketitle
 
-\begin{table}[hp]
-\caption{Revision History} \label{TblRevisionHistory}
-\begin{tabularx}{\textwidth}{llX}
+\begin{tabularx}{\textwidth}{l P{4.2cm} Y}
+\caption{Revision History} \label{TblRevisionHistory}\\
 \toprule
-\textbf{Date} & \textbf{Developer(s)} & \textbf{Change}\\
+\textbf{Date} & \textbf{Developer(s)} & \textbf{Project and Scope Change}\\
 \midrule
-2026-09-28 & Team 23 & Initial problem statement, goals, and scope\\
-2026-09-28 & Team 23 & Revised against course checklist and Avenue rubric\\
+2026-09-24 & Calvin Salsali, Raymond Tao, Jaden Moore, Richard Han & Defined initial problem scope around digital content authenticity, inputs/outputs, and preliminary product goals (\texttt{G1}--\texttt{G6}).\\
+\addlinespace
+2026-09-28 & Calvin Salsali, Raymond Tao & Narrowed initial input modalities to text and static images, added custom documentation plan (Fall Machine Learning Model Report and Winter Usability Report), and defined ephemeral privacy goal (\texttt{G6}).\\
+\addlinespace
+2026-10-19 & Calvin Salsali, Raymond Tao, Jaden Moore, Richard Han & Addressed TA feedback (\href{https://github.com/richy1337/Verity/issues/18}{Issue \#18}, \href{https://github.com/richy1337/Verity/issues/20}{\#20}, \href{https://github.com/richy1337/Verity/issues/21}{\#21}) and Peer Review Team 12 feedback (\href{https://github.com/richy1337/Verity/issues/14}{Issues \#14}--\href{https://github.com/richy1337/Verity/issues/16}{\#16}): restructured Problem section into \emph{Problem $\to$ What It Causes $\to$ What Verity Addresses}, reframed \texttt{G1}--\texttt{G6} as high-level product selling points, excluded opinion/satire from truth scoring, expanded stakeholder and persona analysis, and added individual member reflections and verified GenAI disclosure.\\
 \bottomrule
 \end{tabularx}
-\end{table}
 
 \section{Problem Statement}
 
-\subsection{Problem}
+This section defines the problem addressed by Verity, its real-world consequences, the high-level inputs and outputs of the system, its primary and secondary stakeholders, and its operating environment.
 
-People increasingly encounter digital content whose origin, authenticity, and intent are difficult to judge. A convincing image, message, post, or other online artifact may be genuine, manipulated, automatically generated, or part of a fraudulent interaction. The burden of deciding whether that content should be trusted is often placed on the individual user even when the useful signals are subtle, technical, or spread across several sources.
+\subsection{Problem, Consequences, and What Verity Addresses}
 
-This creates two related risks. A person can trust suspicious content and make a harmful decision, or become overly skeptical and incorrectly dismiss legitimate content. Existing tools often examine only one signal or provide a result without enough context for a user to understand its limitations. The problem Verity addresses is therefore not simply labeling content as real or fake. It is helping a person assess questionable digital content using understandable evidence, an explicit indication of uncertainty, and guidance about what still needs independent verification.
+\noindent\textbf{The Problem:} People browsing the web increasingly encounter digital text and static images whose origin and authenticity are difficult to evaluate at a glance. Advances in generative Artificial Intelligence (AI), Large Language Models (LLMs), and digital image synthesis or splicing tools allow convincing reviews, articles, social posts, and photographs to be fabricated or altered at scale, while the technical signals that distinguish synthetic or manipulated media from authentic content remain hidden from everyday users.
 
-The problem matters because decisions based on untrustworthy digital content can have financial, reputational, social, and personal consequences. A useful system should improve a user's ability to judge risk without presenting uncertain evidence as ground truth.
+\vspace{0.4em}
+\noindent\textbf{What It Causes:} This environment creates two symmetrically harmful failure modes for users and society. First, a reader who accepts synthetic or manipulated content at face value can suffer financial deception, professional or academic misjudgment, and contribute to the spread of deceptive media. Second, a reader who relies on opaque, single-score ``real vs.\ fake'' detectors can wrongly distrust authentic human writing or genuine photographs---causing reputational harm and unfair accusations against legitimate authors (particularly non-native English as a Second Language (ESL) writers whose formal prose triggers false positives in commercial detectors, and photographers whose images have had metadata stripped by social platforms).
 
-\subsection{Inputs and Outputs}
+\vspace{0.4em}
+\noindent\textbf{What Verity Addresses:} \textbf{Verity} addresses this problem by providing a user-triggered desktop browser extension and analysis pipeline that helps users evaluate suspicious webpage text and static images through inspectable evidence signals, explicit uncertainty and abstention (\texttt{inconclusive}) communication, and actionable independent verification steps. Rather than claiming to be an infallible arbiter of factual truth, political opinion, satire, or authorial intent (\href{https://github.com/richy1337/Verity/issues/15}{Peer Issue \#15}), Verity surfaces the concrete generation, manipulation, and provenance signals behind its assessment while processing selected items ephemerally with zero default storage.
 
-\noindent\textbf{High level inputs:}
+\subsection{Inputs, Outputs, and Scope Boundaries}
+
+\noindent\textbf{High-Level Inputs:}
 \begin{itemize}[leftmargin=2em]
-    \item A digital content item supplied by a user, initially text or an image.
-    \item Optional context available at the time of analysis, such as source metadata or surrounding content.
+    \item A user-selected webpage text excerpt or static image (PNG, JPEG, WebP) explicitly triggered for analysis by the user within supported size bounds.
+    \item Optional publicly visible element context (such as image container metadata, Exchangeable Image File Format (EXIF) / Coalition for Content Provenance and Authenticity (C2PA) tags, or user-supplied context notes).
 \end{itemize}
 
-\noindent\textbf{High level outputs:}
+\noindent\textbf{High-Level Outputs:}
 \begin{itemize}[leftmargin=2em]
-    \item A structured assessment of the submitted content's risk or trustworthiness.
-    \item A concise summary of the main signals that contributed to the assessment.
-    \item A clear indication of confidence or uncertainty so the assessment is not mistaken for a proven fact.
-    \item Guidance on what the user should verify independently when the evidence is weak, incomplete, or conflicting.
+    \item A structured, non-accusatory signal assessment bound to the selected item, or an explicit \texttt{inconclusive} / \texttt{failed} status when signals are weak, conflicting, out-of-domain, or unavailable.
+    \item A source-grounded summary of the specific signals observed in the input (distinguishing direct input signals, external references, and model inferences).
+    \item An explicit indication of uncertainty and task limitations so the output is never mistaken for a calibrated probability of truth or fraud.
+    \item At least one concrete next verification step (such as checking primary sources, provenance credentials, or reverse-image search) when evidence is incomplete.
 \end{itemize}
 
-Verity's output is intended to support human judgment rather than replace it. The system will not claim that it can prove the true origin or intent of every item it analyzes.
+\noindent\textbf{Explicit Out-of-Scope Exclusions (\href{https://github.com/richy1337/Verity/issues/15}{Peer Issue \#15}):} Verity evaluates bounded AI-generation, manipulation, and provenance signals; it does \emph{not} score the ``trustworthiness'' of pure opinion, political commentary, satire, parody, or creative fiction, and it does \emph{not} perform covert whole-page scraping or audio/video deepfake streaming analysis.
 
-\subsection{Stakeholders}
+\subsection{Stakeholders and User Profiles (\href{https://github.com/richy1337/Verity/issues/16}{Peer Issue \#16})}
 
-The primary stakeholders are people who encounter questionable digital content and want help deciding whether it deserves further trust or verification. Secondary stakeholders include educators, journalists, moderators, and trust and safety practitioners who may benefit from transparent content risk signals. Course staff and future contributors are also stakeholders in the project's engineering quality, reproducibility, and documentation.
+\begin{tabularx}{\textwidth}{P{3.4cm} P{3.2cm} Y}
+\caption{Stakeholder Analysis and Real-World Impact} \label{TblStakeholders}\\
+\toprule
+\textbf{Stakeholder Group} & \textbf{Role} & \textbf{Needs, Concerns, and Impact of Verity}\\
+\midrule
+\textbf{Everyday Web Readers, Consumers \& Older Adults} (e.g., \emph{Persona 1: Maya Lin, 34, Project Coordinator; older adults browsing marketplaces/news}) & Primary Hands-On Users & Encounter questionable reviews, marketplace listings, phishing scams, and viral images while browsing. Need low-friction in-page checks, plain-language explanations without ML jargon, and privacy protection for sensitive selections.\\
+\addlinespace
+\textbf{Students \& Educators} (e.g., \emph{Persona 2: Marcus Vance, 21, Campus Copy-Editor}) & Primary / Secondary Users & Vet online sources and student submissions. Deeply concerned about commercial AI detectors falsely accusing ESL writers or penalizing benign editing, and about leaking unpublished drafts to third-party servers.\\
+\addlinespace
+\textbf{Journalists, Researchers \& Community Moderators} (e.g., \emph{Persona 3: Priya Patel, 28, Forum Moderator}) & Secondary Power Users & Triage multiple flagged posts rapidly. Need clear separation between stripped EXIF/C2PA metadata and pixel-level forgery, explicit timeout/failure states, and strict isolation across concurrent checks.\\
+\addlinespace
+\textbf{Content Creators, ESL Authors \& Depicted Persons} & Indirectly Affected Stakeholders & Risk reputational damage or unfair dismissal if authentic writing or photography is falsely labelled ``fake.'' Protected by Verity's non-accusatory framing, false-positive ceiling, and ESL/compressed-image subgroup fairness audits.\\
+\addlinespace
+\textbf{Society at Large, Course Staff \& Team 23} & Societal \& Academic Stakeholders & Benefit from resilient media literacy, reduced automation bias, reproducible open-source benchmarks, and verifiable software engineering documentation.\\
+\bottomrule
+\end{tabularx}
 
 \subsection{Environment}
 
-The intended user environment is a modern web browser on a desktop or mobile device with Internet access. The user should not require specialized hardware, local machine learning infrastructure, or technical expertise. Any server side analysis is an implementation concern and is not a requirement placed on the user.
+The user runtime environment is a desktop Chromium-compatible web browser (Google Chrome, Microsoft Edge, or Brave supporting Manifest Version 3) on macOS, Windows, or Linux with standard Internet connectivity. End users require no specialized GPU hardware, local Python/CUDA installation, or machine learning expertise.
 
-\section{Goals}
+\section{Goals (High-Level Product Selling Points)}
 
-The goals below describe the product qualities that would make Verity worth using. They are intentionally higher level than detailed software requirements, but each includes a measurable success condition so the team can later determine whether the goal was achieved.
+In accordance with TA feedback (\href{https://github.com/richy1337/Verity/issues/18}{Issue \#18}), Goals \textbf{G1}--\textbf{G6} state the high-level product selling points and user value propositions of Verity in non-expert terms. Specific quantitative verification thresholds (such as $\text{Macro-}F_1 \ge 0.80$, $\text{FPR} \le 10.0\%$, $+0.10$ baseline Macro-$F_1$ delta, $80\%$ user comprehension, $10.0\text{ s}$ response latency, and $0.0\text{ s}$ post-request retention) are specified and justified in the companion Software Requirements Specification (SRS) \cite{VeritySRS2026}.
 
-\begin{enumerate}[label=G\arabic*., leftmargin=*]
-    \item \textbf{Evidence centered assessment.} Every supported analysis will return both an overall risk assessment and the main evidence behind it. In verification testing, 100\% of completed supported analyses should include both elements rather than only a binary label.
-
-    \item \textbf{Honest uncertainty.} Every supported result will communicate confidence or uncertainty, including the ability to state that the available evidence is insufficient. In verification testing, 100\% of completed supported analyses should expose this uncertainty information to the user.
-
-    \item \textbf{Useful detection quality.} For each supported content type, Verity will be evaluated on a held out labelled benchmark. The initial target is a balanced F1 score of at least 0.80 and a false positive rate no greater than 10\%. F1 summarizes how well the system balances missed suspicious content with incorrect accusations against legitimate content. These initial thresholds may be revised after the proof of concept if the benchmark evidence supports a more defensible scope or target.
-
-    \item \textbf{Understandable explanations.} In a small usability evaluation, at least 80\% of participants should be able to identify the system's reported risk level, uncertainty, and primary supporting evidence without additional explanation from the development team.
-
-    \item \textbf{Interactive response time.} In the team's reference test environment, at least 90\% of supported single item analyses should return a completed result within 10 seconds, excluding externally documented outages or unavailable third party services.
-
-    \item \textbf{Privacy aware handling.} In the standard analysis workflow, raw submitted content will not be retained in persistent application storage after the requested analysis completes. Automated verification will check that 100\% of standard test analyses leave no persistent raw content record unless the user explicitly chooses a feature that requires storage.
+\begin{enumerate}[label=\textbf{G\arabic*.}, leftmargin=*]
+    \item \textbf{Evidence-First Assessment Over Opaque Labels:} Verity gives users clear, inspectable reasons behind every content check rather than an unexplained binary ``real'' or ``fake'' score, allowing users to see which concrete text, visual, or metadata signals contributed to the assessment.
+    \item \textbf{Honest Uncertainty and Safe Abstention:} Verity openly communicates when available evidence is weak, conflicting, out-of-scope (such as opinion or satire), or unavailable due to a service failure, returning an explicit \texttt{inconclusive} or \texttt{failed} status with concrete next verification steps rather than false reassurance.
+    \item \textbf{Defensible, Low-False-Accusation Detection Quality (\href{https://github.com/richy1337/Verity/issues/14}{Peer Issue \#14}):} Verity delivers reliable detection on supported AI-generation and manipulation tasks while actively bounding false positives against legitimate human writing (including ESL and formal prose) and authentic photographs, backed by reproducible benchmark evaluation against naive baselines.
+    \item \textbf{Non-Expert Understandability and Non-Accusatory Framing:} Verity translates technical forensic and statistical signals into plain-language summaries that everyday readers can understand without data-science training and without accusing authors of dishonesty or fraud.
+    \item \textbf{Seamless In-Page Browser Responsiveness:} Verity lets users check suspicious text or images directly on the webpage they are viewing and returns results fast enough for interactive browsing without copy-pasting into external websites.
+    \item \textbf{Privacy-First Ephemeral Content Handling:} Verity respects user confidentiality by accessing only user-selected webpage items, requiring explicit prior consent before any external provider transfer, and purging raw content immediately after analysis completes.
 \end{enumerate}
 
-\newpage{}
 \section{Stretch Goals}
 
-The following capabilities would add value but are not necessary for the initial project to succeed:
-
+The following capabilities would add value beyond the core Revision 0 baseline if schedule slack permits:
 \begin{itemize}[leftmargin=*]
-    \item Support additional content types and multimodal analysis that combines text, images, metadata, and available provenance signals.
-    \item Provide a browser extension or streamlined share workflow that reduces the effort required to submit suspicious content.
+    \item Richer multimodal cross-checking that correlates caption claims with image provenance manifests (\texttt{C2PA} Content Credentials visualizer).
+    \item Expanded cross-browser packaging for Mozilla Firefox and Apple Safari Web Extensions in addition to desktop Chromium.
 \end{itemize}
 
 \section{Custom Documents}
 
-The initial custom documentation plan is:
-
 \begin{itemize}[leftmargin=*]
-    \item \textbf{Fall: Machine Learning Model Report.} The report will document candidate models or detection techniques, datasets, evaluation methods, limitations, calibration where applicable, and observed failure modes.
-    \item \textbf{Winter: Usability Report.} The report will evaluate whether users understand Verity's risk, evidence, and uncertainty presentation and whether the interface supports appropriate decision making without overstating confidence.
+    \item \textbf{Fall: Machine Learning Model Report.} Documents the evaluation methodology, benchmark datasets, baseline comparisons, calibration/abstention behaviour, and subgroup false-positive analysis used to validate Verity's detection pipeline.
+    \item \textbf{Winter: Usability Report.} Evaluates whether representative non-expert users accurately interpret Verity's assessment cards, uncertainty indicators, task limitations, and verification guidance across completed, inconclusive, and failed scenarios.
 \end{itemize}
 
-These selections may be adjusted with course staff approval as the project scope becomes more concrete.
+\newpage
+\section*{Appendix A: Generative AI Use Disclosure}
 
-\newpage{}
-\section*{Appendix: Reflection}
+In accordance with the SFWRENG 4G06 Generative AI policy, this appendix summarizes the AI tools used in preparing this Problem Statement and the human verification steps completed by Team 23.
+
+\subsection*{AI Tools Used}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Google Gemini 3.1 Pro} (accessed October 2026 via Antigravity IDE assistant) --- used to format the \LaTeX{} tables and assist in editing the Problem Statement narrative flow and stakeholder table to address TA and Peer Review Team 12 feedback.
+    \item \textbf{OpenAI ChatGPT (GPT-5)} (accessed September 2026) --- used during initial September brainstorming to critique early draft wording against the course Problem Statement checklist.
+\end{itemize}
+
+\subsection*{How and Where Used}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Calvin Salsali} and \textbf{Raymond Tao} used \textbf{Gemini 3.1 Pro} to restructure Section~1.1 (\emph{Problem $\to$ What It Causes $\to$ What Verity Addresses}), format Stakeholder Table~\ref{TblStakeholders}, and align Goals \texttt{G1}--\texttt{G6} with the companion SRS.
+    \item \textbf{Jaden Moore} and \textbf{Richard Han} used \textbf{Gemini 3.1 Pro} to verify \LaTeX{} cross-references and synchronize the Revision History and reflection structure.
+\end{itemize}
+
+\subsection*{Completed Verification of AI-Generated Content}
+All AI-assisted edits were manually verified by the four members of Team 23 prior to repository commit:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Scope and Goal Alignment Audit (Verified by Calvin Salsali \& Raymond Tao):} Manually checked that Goals \texttt{G1}--\texttt{G6} contain high-level product selling points while all quantitative fit criteria are traced to \texttt{docs/SRS/SRS.tex}, and confirmed that opinion and satire are explicitly excluded (\href{https://github.com/richy1337/Verity/issues/15}{Peer Issue \#15}).
+    \item \textbf{Stakeholder, Fairness, and Citation Audit (Verified by Jaden Moore \& Richard Han):} Verified all stakeholder groups, user personas, ESL false-positive bias claims, and PDF build output across \texttt{pdfs/ProblemStatementAndGoals/ProblemStatement.pdf}.
+\end{enumerate}
+
+\newpage
+\section*{Appendix B: Reflection}
 
 \begin{enumerate}[leftmargin=*]
     \item \textbf{What went well while writing this deliverable?}
-
-    Using the course template, checklist, and rubric together gave this draft a clear structure and helped separate the user problem from possible implementations. An earlier broad framing centered on AI fraud and content detection made the scope difficult to explain. The revised statement focuses on the user's trust decision and on outputs that communicate evidence and uncertainty. It is more understandable to a nontechnical reader and leads to goals that can later be tested. Addressing false positives and insufficient evidence also makes the proposed product more credible than a simple real or fake detector.
-
     \item \textbf{What pain points did you experience during this deliverable, and how did you resolve them?}
-
-    The main drafting difficulty was scope. Fraud, misinformation, manipulated media, and AI generated content are each large areas on their own. Covering all of them initially would produce vague goals and an unrealistic implementation plan. This draft defines a common user problem, limits initial supported inputs to text and images, and places additional content types in stretch goals. A second difficulty was making goals measurable without turning them into low level requirements. Each goal is therefore tied to a product value, such as understandable explanations or honest uncertainty, with a success measure that can be refined during requirements and verification work.
-
     \item \textbf{How did you and your team adjust the scope of your goals to ensure they are suitable for a Capstone project?}
-
-    The goals avoid promising a universal authenticity detector. The initial project focuses on a bounded set of content types, a reproducible evaluation process, transparent evidence, and a user experience that communicates uncertainty. Training a foundation model from scratch, supporting every content type, and building a browser extension are outside the initial scope. The project remains technically substantial: it requires detector evaluation, an analysis and uncertainty pipeline, software integration, and user experience validation. The proof of concept can also justify a narrower scope if a proposed detector is not reliable enough.
 \end{enumerate}
+
+\subsection*{Team Synthesis}
+Separating the user's trust decision problem from low-level implementation details helped us converge on a clear product vision: a user-triggered browser extension that provides evidence, uncertainty, and next verification steps rather than a black-box ``truth'' label. Incorporating feedback from Peer Review Team 12 (\href{https://github.com/richy1337/Verity/issues/14}{Issues \#14}--\href{https://github.com/richy1337/Verity/issues/16}{\#16}) and TA Rebecca Di Filippo (\href{https://github.com/richy1337/Verity/issues/18}{Issue \#18}) improved this document substantially by elevating \texttt{G1}--\texttt{G6} into non-expert product selling points and explicitly bounding our scope away from political opinion and satire.
+
+\subsection*{Calvin Salsali}
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{What went well:} Framing the problem around the everyday browser user's experience made it clear why a browser extension is much more valuable than a standalone website requiring copy-paste uploads.
+    \item \textbf{Pain points and resolution:} Initially, our stakeholder section was too brief (\href{https://github.com/richy1337/Verity/issues/16}{Issue \#16}) and our goals read like test cases (\href{https://github.com/richy1337/Verity/issues/18}{Issue \#18}). I resolved this by creating three concrete user personas (Maya, Marcus, and Priya) and rewriting \texttt{G1}--\texttt{G6} as clear value propositions while moving test percentages into the SRS.
+    \item \textbf{Scope adjustment:} We moved the browser extension into our core scope (since in-page selection is central to user value) while excluding audio/video deepfakes and subjective opinion/satire scoring (\href{https://github.com/richy1337/Verity/issues/15}{Issue \#15}).
+\end{enumerate}
+
+\subsection*{Raymond Tao}
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{What went well:} Identifying the dual risk of false negatives (falling for scams/synthetic media) and false positives (unfairly distrusting human or ESL authors) gave our project a strong scientific motivation.
+    \item \textbf{Pain points and resolution:} Team 12 rightly asked why we chose $0.80$ $F_1$ and $10\%$ FPR (\href{https://github.com/richy1337/Verity/issues/14}{Issue \#14}). We resolved this by moving the mathematical formalization and justification of $\text{Macro-}F_1$, FPR, and $+0.10$ baseline improvement into the SRS while keeping \texttt{G3} focused on low-false-accusation quality.
+    \item \textbf{Scope adjustment:} Rather than training foundation models from scratch, we scoped our ML work to calibrating and benchmarking pretrained open-weight detectors (RoBERTa/DeBERTa and ViT/CLIP + EXIF/C2PA) on held-out corpora (RAID, HC3, CIFAKE, GenImage) with an explicit POC fallback rule.
+\end{enumerate}
+
+\subsection*{Jaden Moore}
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{What went well:} Defining high-level inputs and outputs early allowed us to see that ``insufficient evidence'' (\texttt{inconclusive}) and ``service error'' (\texttt{failed}) must be first-class outputs rather than hidden exceptions.
+    \item \textbf{Pain points and resolution:} In our first draft, the Environment section repeated usage methodology instead of focusing on the runtime environment (\href{https://github.com/richy1337/Verity/issues/18}{Issue \#18}). We streamlined Section~1.4 to focus strictly on desktop Chromium browsers and zero client hardware requirements.
+    \item \textbf{Scope adjustment:} We scoped out user accounts and persistent cloud history so the backend service can remain stateless, fast, and manageable within a four-person two-term capstone.
+\end{enumerate}
+
+\subsection*{Richard Han}
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{What went well:} Emphasizing privacy-first ephemeral processing (\texttt{G6}) and non-accusatory framing (\texttt{G4}) from day one aligned our Problem Statement directly with our Hazard Analysis and SRS safety requirements.
+    \item \textbf{Pain points and resolution:} Early drafts did not sufficiently highlight how false positives harm content creators and ESL writers (\href{https://github.com/richy1337/Verity/issues/14}{Issues \#14}, \href{https://github.com/richy1337/Verity/issues/16}{\#16}). We resolved this by adding Content Creators, ESL Authors, and Depicted Persons as a core stakeholder group in Table~\ref{TblStakeholders}.
+    \item \textbf{Scope adjustment:} By bounding our verification claims to observable statistical and provenance signals rather than claiming universal truth arbitration, we ensured every product goal can be verified objectively in our V\&V Plan.
+\end{enumerate}
+
+\begin{thebibliography}{9}
+\bibitem{VeritySRS2026}
+C.~Salsali, R.~Tao, J.~Moore, and R.~Han, ``Software Requirements Specification for Verity,'' Team 23 Capstone Documentation, McMaster University, Oct. 2026.
+\end{thebibliography}
 
 \end{document}
