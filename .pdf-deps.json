@@ -70,6 +70,7 @@
     "docs/Comments.text",
     "docs/Common.text",
     "docs/HazardAnalysis/HazardAnalysis.tex",
+    "docs/HazardAnalysis/HazardComponentDiagram.pdf",
     "docs/Reflection.text"
   ],
   "docs/ProblemStatementAndGoals/ProblemStatement.tex": [
@@ -82,25 +83,15 @@
     "docs/Common.text",
     "docs/ReflectAndTrace/ReflectAndTrace.tex"
   ],
-  "docs/SRS-Volere/SRS.tex": [
-    "docs/Comments.text",
-    "docs/Common.text",
-    "docs/Reflection.text",
-    "docs/SRS-Volere/SRS.tex",
-    "docs/SRS_Reflection.text"
-  ],
-  "docs/SRS/SRS-FAQ.tex": [
-    "docs/SRS/SRS-FAQ.tex"
-  ],
   "docs/SRS/SRS.tex": [
     "docs/Comments.text",
     "docs/Common.text",
     "docs/Reflection.text",
-    "docs/SRS/RelationsBetweenTM_GD_IM_DD_A.pdf",
+    "docs/SRS/RequirementTraceabilityDiagram.pdf",
     "docs/SRS/SRS.tex",
-    "docs/SRS/SystemContextFigure.pdf",
-    "docs/SRS_Reflection.text",
-    "refs/References.bib"
+    "docs/SRS/SystemContextDiagram.pdf",
+    "docs/SRS/WorkflowActivityDiagram.pdf",
+    "docs/SRS_Reflection.text"
   ],
   "docs/UserGuide/UserGuide.tex": [
     "docs/Comments.text",
@@ -125,6 +116,11 @@
     "docs/Comments.text",
     "docs/Common.text",
     "docs/projMngmnt/Final_Productivity_Rep.tex"
+  ],
+  "docs/projMngmnt/MeetingNotes.tex": [
+    "docs/Comments.text",
+    "docs/Common.text",
+    "docs/projMngmnt/MeetingNotes.tex"
   ],
   "docs/projMngmnt/POC_Productivity_Rep.tex": [
     "docs/Comments.text",

@@ -1,9 +1,9 @@
 ---
 name: Lecture
-about: Track team details for lectures.
-title: 'Lecture - Date'
-labels: 'meeting'
-assignees: ''
+about: Track Team 23 attendance and notes for SFWRENG 4G06 lectures.
+title: 'Lecture - YYYY-MM-DD - Topic'
+labels: 'lecture'
+assignees: 'CalvinSalsali04, Raymondtaoo, JadenAntM, richy1337'
 
 ---
 
@@ -13,12 +13,11 @@ assignees: ''
 
 **Attendance**
 
-- [ ] team member1
-- [ ] team member2
-- [ ] team member3
-- [ ] team member4
-- [ ] team member5
+- [ ] Calvin Salsali (`@CalvinSalsali04`)
+- [ ] Raymond Tao (`@Raymondtaoo`)
+- [ ] Jaden Moore (`@JadenAntM`)
+- [ ] Richard Han (`@richy1337`)
 
-**Questions to Ask**
+**Key Takeaways & Questions**
 
--
+- 
