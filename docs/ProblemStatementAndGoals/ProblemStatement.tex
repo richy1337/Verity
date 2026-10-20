@@ -44,6 +44,8 @@
 2026-09-28 & Calvin Salsali, Raymond Tao & Narrowed initial input modalities to text and static images, added custom documentation plan (Fall Machine Learning Model Report and Winter Usability Report), and defined ephemeral privacy goal (\texttt{G6}).\\
 \addlinespace
 2026-10-19 & Calvin Salsali, Raymond Tao, Jaden Moore, Richard Han & Addressed TA feedback (\href{https://github.com/richy1337/Verity/issues/18}{Issue \#18}, \href{https://github.com/richy1337/Verity/issues/20}{\#20}, \href{https://github.com/richy1337/Verity/issues/21}{\#21}) and Peer Review Team 12 feedback (\href{https://github.com/richy1337/Verity/issues/14}{Issues \#14}--\href{https://github.com/richy1337/Verity/issues/16}{\#16}): restructured Problem section into \emph{Problem $\to$ What It Causes $\to$ What Verity Addresses}, reframed \texttt{G1}--\texttt{G6} as high-level product selling points, excluded opinion/satire from truth scoring, expanded stakeholder and persona analysis, and added individual member reflections and verified GenAI disclosure.\\
+\addlinespace
+2026-10-19 & Jaden Moore (Codex-assisted) & Distinguished the no-persistence privacy rule from the bounded cleanup of application-owned transient content.\\
 \bottomrule
 \end{tabularx}
 
@@ -104,7 +106,7 @@ The user runtime environment is a desktop Chromium-compatible web browser (Googl
 
 \section{Goals (High-Level Product Selling Points)}
 
-In accordance with TA feedback (\href{https://github.com/richy1337/Verity/issues/18}{Issue \#18}), Goals \textbf{G1}--\textbf{G6} state the high-level product selling points and user value propositions of Verity in non-expert terms. Specific quantitative verification thresholds (such as $\text{Macro-}F_1 \ge 0.80$, $\text{FPR} \le 10.0\%$, $+0.10$ baseline Macro-$F_1$ delta, $80\%$ user comprehension, $10.0\text{ s}$ response latency, and $0.0\text{ s}$ post-request retention) are specified and justified in the companion Software Requirements Specification (SRS) \cite{VeritySRS2026}.
+In accordance with TA feedback (\href{https://github.com/richy1337/Verity/issues/18}{Issue \#18}), Goals \textbf{G1}--\textbf{G6} state the high-level product selling points and user value propositions of Verity in non-expert terms. Specific quantitative verification thresholds (such as $\text{Macro-}F_1 \ge 0.80$, $\text{FPR} \le 10.0\%$, $+0.10$ baseline Macro-$F_1$ delta, $80\%$ user comprehension, $10.0\text{ s}$ response latency, and $1.0\text{ s}$ application-owned transient cleanup with no persistent raw-content writes) are specified and justified in the companion Software Requirements Specification (SRS) \cite{VeritySRS2026}.
 
 \begin{enumerate}[label=\textbf{G\arabic*.}, leftmargin=*]
     \item \textbf{Evidence-First Assessment Over Opaque Labels:} Verity gives users clear, inspectable reasons behind every content check rather than an unexplained binary ``real'' or ``fake'' score, allowing users to see which concrete text, visual, or metadata signals contributed to the assessment.
@@ -112,7 +114,7 @@ In accordance with TA feedback (\href{https://github.com/richy1337/Verity/issues
     \item \textbf{Defensible, Low-False-Accusation Detection Quality (\href{https://github.com/richy1337/Verity/issues/14}{Peer Issue \#14}):} Verity delivers reliable detection on supported AI-generation and manipulation tasks while actively bounding false positives against legitimate human writing (including ESL and formal prose) and authentic photographs, backed by reproducible benchmark evaluation against naive baselines.
     \item \textbf{Non-Expert Understandability and Non-Accusatory Framing:} Verity translates technical forensic and statistical signals into plain-language summaries that everyday readers can understand without data-science training and without accusing authors of dishonesty or fraud.
     \item \textbf{Seamless In-Page Browser Responsiveness:} Verity lets users check suspicious text or images directly on the webpage they are viewing and returns results fast enough for interactive browsing without copy-pasting into external websites.
-    \item \textbf{Privacy-First Ephemeral Content Handling:} Verity respects user confidentiality by accessing only user-selected webpage items, requiring explicit prior consent before any external provider transfer, and purging raw content immediately after analysis completes.
+    \item \textbf{Privacy-First Ephemeral Content Handling:} Verity respects user confidentiality by accessing only user-selected webpage items, requiring explicit prior consent before any external provider transfer, and releasing application-owned transient copies within the SRS cleanup bound after every terminal outcome, without persisting raw content.
 \end{enumerate}
 
 \section{Stretch Goals}
@@ -138,12 +140,14 @@ In accordance with the SFWRENG 4G06 Generative AI policy, this appendix summariz
 \subsection*{AI Tools Used}
 \begin{itemize}[leftmargin=*]
     \item \textbf{Google Gemini 3.1 Pro} (accessed October 2026 via Antigravity IDE assistant) --- used to format the \LaTeX{} tables and assist in editing the Problem Statement narrative flow and stakeholder table to address TA and Peer Review Team 12 feedback.
+    \item \textbf{OpenAI Codex} (accessed October 2026) --- used to assist in refining formal mathematical and privacy phrasing across the companion deliverables.
     \item \textbf{OpenAI ChatGPT (GPT-5)} (accessed September 2026) --- used during initial September brainstorming to critique early draft wording against the course Problem Statement checklist.
 \end{itemize}
 
 \subsection*{How and Where Used}
 \begin{itemize}[leftmargin=*]
     \item \textbf{Calvin Salsali} and \textbf{Raymond Tao} used \textbf{Gemini 3.1 Pro} to restructure Section~1.1 (\emph{Problem $\to$ What It Causes $\to$ What Verity Addresses}), format Stakeholder Table~\ref{TblStakeholders}, and align Goals \texttt{G1}--\texttt{G6} with the companion SRS.
+    \item \textbf{Jaden Moore} used \textbf{OpenAI Codex} to refine the ephemeral privacy phrasing in Goal \texttt{G6} ($1.0\text{ s}$ bounded transient logical cleanup with zero persistent storage) to align with the companion SRS and Hazard Analysis.
     \item \textbf{Jaden Moore} and \textbf{Richard Han} used \textbf{Gemini 3.1 Pro} to verify \LaTeX{} cross-references and synchronize the Revision History and reflection structure.
 \end{itemize}
 
@@ -152,6 +156,7 @@ All AI-assisted edits were manually verified by the four members of Team 23 prio
 \begin{enumerate}[leftmargin=*]
     \item \textbf{Scope and Goal Alignment Audit (Verified by Calvin Salsali \& Raymond Tao):} Manually checked that Goals \texttt{G1}--\texttt{G6} contain high-level product selling points while all quantitative fit criteria are traced to \texttt{docs/SRS/SRS.tex}, and confirmed that opinion and satire are explicitly excluded (\href{https://github.com/richy1337/Verity/issues/15}{Peer Issue \#15}).
     \item \textbf{Stakeholder, Fairness, and Citation Audit (Verified by Jaden Moore \& Richard Han):} Verified all stakeholder groups, user personas, ESL false-positive bias claims, and PDF build output across \texttt{pdfs/ProblemStatementAndGoals/ProblemStatement.pdf}.
+    \item \textbf{Privacy Wording and Specification Consistency Audit (Verified by Jaden Moore \& Raymond Tao):} Verified that Goal \texttt{G6} accurately specifies bounded transient cleanup ($\texttt{MAX\_RETENTION\_TIME} = 1.0\text{ s}$) with zero persistent raw storage, and confirmed that PDF formatting has no margin overruns or layout defects across \texttt{pdfs/\allowbreak{}ProblemStatementAndGoals/\allowbreak{}ProblemStatement.pdf}.
 \end{enumerate}
 
 \newpage
