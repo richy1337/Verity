@@ -328,7 +328,7 @@ To prevent magic numbers, improve maintainability, and isolate thresholds that m
 \addlinespace
 \phantomsection\label{const:MAX_FPR}\texttt{MAX\_FPR} & $10.0\%$ ($0.10$) & Percentage & Caps false accusations against legitimate human-written text or authentic images (\hyperref[SR2]{SR2}, Hazard \textbf{H1}). Chosen as an upper ceiling for decision support; per-category false positives are reported explicitly.\\
 \addlinespace
-\phantomsection\label{const:MIN_BASELINE_DELTA}\texttt{MIN\_BASELINE\_DELTA} & $+0.10$ & Macro-$F_1$ delta & Addresses \href{https://github.com/richy1337/Verity/issues/13}{Peer Issue \#13}: defines ``meaningfully better than a naive baseline'' as at least a $+0.10$ Macro-$F_1$ improvement (or $\ge 30\%$ relative \FPR{} reduction at matched recall) over the baseline model.\\
+\phantomsection\label{const:MIN_BASELINE_DELTA}\texttt{MIN\_BASELINE\_DELTA} & $+0.10$ & Macro-$F_1$ delta & Addresses \href{https://github.com/richy1337/Verity/issues/13}{Peer Issue \#13}: defines ``meaningfully better than a naive baseline'' as at least a $+0.10$ unweighted \TermMacroFOne{} improvement over the documented naive baseline model on the same held-out benchmark split.\\
 \addlinespace
 \phantomsection\label{const:MIN_UNDERSTANDING_RATE}\texttt{MIN\_UNDERSTANDING\_RATE} & $80.0\%$ ($0.80$) & Percentage & Operationalizes Goal~\hyperref[G4]{G4}: at least $80\%$ of usability participants must correctly identify the reported assessment, uncertainty state, and primary evidence without team coaching.\\
 \addlinespace
@@ -825,9 +825,9 @@ Every functional requirement (\textbf{FR1}--\textbf{FR14}) in Table~\ref{TblFunc
 \hline
 
 \phantomsection\label{FR8}\textbf{FR8} & Prior Informed Consent for External Transfer \newline \textbf{[Priority: M]} &
-\textbf{Statement:} Before transmitting any user-selected content item to an external third-party analysis provider, the system shall display a notice identifying the external recipient and data scope and obtain the user's explicit consent; declining consent shall prevent external transmission and restrict processing to local/in-boundary components or abort the check.\newline
+\textbf{Statement:} Before transmitting any user-selected content item to an external third-party analysis provider, the system shall display a notice identifying the external recipient and data scope and obtain the user's explicit consent; declining consent shall immediately abort the external check, transition the request status to \texttt{cancelled}, prevent any external network transmission, and purge temporary buffers within \MaxRetentionTime{}.\newline
 \textbf{Inputs:} Analysis routing configuration and user consent response (\texttt{Approve} / \texttt{Decline}).\newline
-\textbf{Outputs:} Network transmission (if consented) or zero external network traffic (if declined).\newline
+\textbf{Outputs:} Network transmission (if consented) or \texttt{cancelled} status with zero external network traffic (if declined).\newline
 \textbf{Rationale:} Protects confidential or personal webpage selections from undisclosed third-party exposure (\hyperref[G6]{G6}, \hyperref[SR8]{SR8}). &
 \textbf{Fit Criterion:} Packet capture during declined-consent test runs shows $0\text{ B}$ transmitted to external provider endpoints.\newline
 \textbf{Traces:} \hyperref[G6]{G6}, \hyperref[A1]{A1}, \hyperref[UC1]{UC1}, \hyperref[UC4]{UC4}, \hyperref[SR8]{SR8}, \hyperref[NFR4]{NFR4}, \textbf{H4}.\\
@@ -870,11 +870,11 @@ Every functional requirement (\textbf{FR1}--\textbf{FR14}) in Table~\ref{TblFunc
 \hline
 
 \phantomsection\label{FR13}\textbf{FR13} & Modality \& Provenance Metadata Inspection \newline \textbf{[Priority: S]} &
-\textbf{Statement:} For supported image submissions, the system shall inspect available file container metadata (\EXIF{} camera tags and \CTwoPA{} Content Credentials manifests when present) and report whether provenance metadata is intact, stripped, or inconsistent alongside statistical visual manipulation signals.\newline
+\textbf{Statement:} For supported image submissions, the system shall inspect available file container metadata (\EXIF{} camera tags and \CTwoPA{} Content Credentials manifests when present) and report whether provenance metadata is intact (\texttt{present\_valid}), absent or stripped (\texttt{absent\_or\_stripped}), or contradictory (\texttt{inconsistent}) alongside statistical visual manipulation signals.\newline
 \textbf{Inputs:} Sanitized image byte stream.\newline
-\textbf{Outputs:} Structured metadata status (\texttt{present\_valid}, \texttt{stripped}, or \texttt{inconsistent}) included in evidence signals.\newline
-\textbf{Rationale:} Social platforms frequently strip metadata from authentic photos; explicitly reporting stripped metadata as an inconclusive provenance signal rather than proof of forgery reduces false positives (\hyperref[G1]{G1}, \hyperref[SR1]{SR1}). &
-\textbf{Fit Criterion:} Test suite containing camera-original, social-media re-saved (stripped \EXIF{}), and \CTwoPA{}-signed images classifies metadata state with $100\%$ accuracy.\newline
+\textbf{Outputs:} Structured metadata status (\texttt{present\_valid}, \texttt{absent\_or\_stripped}, or \texttt{inconsistent}) included in evidence signals.\newline
+\textbf{Rationale:} Social platforms frequently strip metadata from authentic photos, making stripped metadata indistinguishable from never-present metadata in a single file; reporting missing metadata as \texttt{absent\_or\_stripped} (an inconclusive provenance signal rather than proof of forgery) reduces false positives (\hyperref[G1]{G1}, \hyperref[SR1]{SR1}). &
+\textbf{Fit Criterion:} Test suite containing camera-original (\texttt{present\_valid}), social-media re-saved / metadata-absent (\texttt{absent\_or\_stripped}), and tampered/\CTwoPA{}-mismatched (\texttt{inconsistent}) images classifies metadata state with $100\%$ accuracy.\newline
 \textbf{Traces:} \hyperref[G1]{G1}, \hyperref[G2]{G2}, \hyperref[FR3]{FR3}, \hyperref[FR7]{FR7}, \hyperref[SR1]{SR1}, \hyperref[SR5]{SR5}, \textbf{H1}, \textbf{H3}.\\
 \hline
 
@@ -909,9 +909,9 @@ Table~\ref{TblNFRs} defines the ten system-wide Non-Functional Requirements (\te
 \endlastfoot
 
 \phantomsection\label{NFR1}\textbf{NFR1} & Accuracy \& False-Positive Control \newline \textbf{[Priority: M]} &
-\textbf{Statement:} For each retained content modality, the system shall achieve a \TermMacroFOne{} score of at least \MinFOneScore{} ($0.80$), a False Positive Rate (\FPR{}) no greater than \MaxFPR{} ($10.0\%$), and a \TermMacroFOne{} improvement of at least \MinBaselineDelta{} ($+0.10$) over the documented naive baseline on a held-out labelled benchmark, with \TermCoverage{}, abstentions, errors, per-class precision/recall, and the confusion matrix reported explicitly.\newline
-\textbf{Rationale:} Balances catching synthetic/manipulated items with protecting legitimate content against false accusations (\href{https://github.com/richy1337/Verity/issues/13}{Issues \#13}, \href{https://github.com/richy1337/Verity/issues/14}{\#14}). &
-\textbf{Fit Criterion:} Verified via the \VnV{} benchmark harness on held-out test splits; abstentions are retained in the coverage denominator.\newline
+\textbf{Statement:} For each retained content modality, the system shall achieve a \TermMacroFOne{} score of at least \MinFOneScore{} ($0.80$), a False Positive Rate (\FPR{}) no greater than \MaxFPR{} ($10.0\%$) both on assessed negatives and under conservative full-dataset negative accounting ($\text{FP} / N_0 \le \MaxFPR{}$), and a \TermMacroFOne{} improvement of at least \MinBaselineDelta{} ($+0.10$) over the documented naive baseline on a held-out labelled benchmark at a minimum \TermCoverage{} of $\ge 70.0\%$ ($\text{AbstentionRate} \le 30.0\%$), with \TermCoverage{}, abstentions, errors, per-class precision/recall, and the confusion matrix reported explicitly.\newline
+\textbf{Rationale:} Balances catching synthetic/manipulated items with protecting legitimate content against false accusations while preventing trivial abstention from gaming the quality gate (\href{https://github.com/richy1337/Verity/issues/13}{Issues \#13}, \href{https://github.com/richy1337/Verity/issues/14}{\#14}). &
+\textbf{Fit Criterion:} Verified via the \VnV{} benchmark harness on held-out test splits; requires $\text{Coverage} \ge 0.70$, $\text{FPR}_{\text{assessed}} \le 0.10$, and $\text{FPR}_{\text{full}} = \text{FP}/N_0 \le 0.10$.\newline
 \textbf{Traces:} \hyperref[G3]{G3}, \hyperref[A2]{A2}, \hyperref[A4]{A4}, \hyperref[FR12]{FR12}, \hyperref[FR14]{FR14}, \hyperref[SR1]{SR1}, \hyperref[SR2]{SR2}, \textbf{H1}, \textbf{H2}, \textbf{H10}.\\
 \hline
 
@@ -1032,7 +1032,7 @@ Requirements \textbf{SR1}--\textbf{SR9} in Table~\ref{TblSafetyReqs} are derived
 \hline
 
 \phantomsection\label{SR6}\textbf{SR6} & Untrusted Webpage Content Sandboxing \newline \textit{(Security)} &
-\textbf{Statement:} The system shall reject unsupported or malformed inputs, shall never execute active content (HTML/JavaScript/SVG scripts) inside selected items, and shall enforce per-request payload size (\MaxTextLength{}, \MaxImageSize{}), dimension (\MaxImageDim{}), and execution time (\MaxResponseTime{}) bounds.\newline
+\textbf{Statement:} The system shall reject unsupported or malformed inputs, shall never execute active content (HTML/JavaScript/SVG scripts) inside selected items, and shall enforce per-request payload size (\MinTextLength{}--\MaxTextLength{}, $\le \MaxImageSize{}$), dimension (\MinImageDim{} to \MaxImageDim{}), and execution time ($\le \MaxResponseTime{}$) bounds.\newline
 \textbf{Rationale:} Eliminates script execution and mitigates resource-exhaustion denial of service (\textbf{H7}). &
 \textbf{Verification:} Security fuzzing with XSS payloads, zip/decompression bombs, and oversized inputs confirms safe rejection within bounds.\newline
 \textbf{Traces:} \hyperref[A1]{A1}, \hyperref[FR2]{FR2}, \hyperref[NFR3]{NFR3}, \hyperref[NFR8]{NFR8}, \textbf{H7}.\\
@@ -1213,9 +1213,9 @@ Let $\mathcal{R}$ be the set of all initiated requests, $\text{SessionID}$ the s
         \end{cases}
     \]
     Conversely, if $\text{status}(r) \in \{\texttt{failed}, \texttt{cancelled}, \texttt{pending}\}$, then $r \notin \text{dom}(\text{completed\_assessment})$ (\hyperref[INV2]{INV2}).
-    \item \textbf{Request Isolation and Session Binding (\hyperref[FR10]{FR10}, \hyperref[SR7]{SR7}, \hyperref[SR9]{SR9}):} Let $\text{displayed}(s, t)$ denote the result rendered in browser session $s \in \text{SessionID}$ at time $t$ for active request $r_{\text{active}}(s, t)$:
+    \item \textbf{Request Isolation and Session Binding (\hyperref[FR10]{FR10}, \hyperref[SR7]{SR7}, \hyperref[SR9]{SR9}):} Let $\text{displayed}(s, t)$ denote the result rendered in browser session $s \in \text{SessionID}$ at time $t$ when session $s$ has active request $r_{\text{active}}(s, t) = q \in \mathcal{R}$:
     \[
-        \forall s \in \text{SessionID},\ \forall r, q \in \mathcal{R} : \big(r \neq q \lor \text{owner}(r) \neq s\big) \implies \text{result}(r) \neq \text{displayed}\big(s, r_{\text{active}}(s, t) = q\big).
+        \forall s \in \text{SessionID},\ \forall t,\ \forall q \in \mathcal{R} : r_{\text{active}}(s, t) = q \land \text{displayed}(s, t) \neq \bot \implies \text{displayed}(s, t) = \text{result}(q) \land \text{owner}(q) = s.
     \]
     \item \textbf{Ephemeral Zero-Retention Invariant (\hyperref[FR9]{FR9}, \hyperref[NFR4]{NFR4}, \hyperref[SR8]{SR8}):} Let $\text{PersistentStore}(t)$ and $\text{AppLogs}(t)$ be the sets of persistent records and log entries at time $t$, and $\text{raw}(r)$ the raw user submission:
     \[
