@@ -108,6 +108,8 @@
 2026-10-19 & Calvin Salsali, Raymond Tao, Jaden Moore, Richard Han & Finalized Revision 0 Hazard Analysis: added component boundary diagram (Figure~\ref{fig:hazard-boundary}), categorized elimination vs.\ mitigation actions, added cultural/linguistic fairness loss analysis (\texttt{LO\_\allowbreak{}Impact}), completed milestone roadmap, and authored individual reflections.\\
 \addlinespace
 2026-10-19 & Jaden Moore (Codex-assisted) & Replaced asserted Low residual risks with initial/conditional-target estimates, added qualitative severity/likelihood criteria, proposed action owners and open verification gates, and synchronized bounded cleanup and benchmark controls with the corrected SRS.\\
+\addlinespace
+2026-10-28 & Raymond Tao, Richard Han & Resolved Team 16 peer review feedback (\href{https://github.com/richy1337/Verity/issues/29}{Issue \#29}): synchronized table label \texttt{TblHARiskEval} with \texttt{TblRiskRegister} on the Risk Estimates and Open Verification Actions register (Table~\ref{TblRiskRegister}).\\
 \bottomrule
 \end{tabularx}
 
@@ -469,7 +471,7 @@ Overlapping source articles between splits; computing $F_1$ only on high-confide
 Table~\ref{TblRiskRegister} records the worst credible loss severity from the worksheet, the foreseeable trigger supporting the initial likelihood, and the evidence required for a lower target likelihood. \textbf{Status for every row: planned controls; implementation verification not performed; residual risk unverified; no release acceptance recorded.} Owners below are proposed implementation/evidence owners aligned with the team roles, not claims that those people completed new audits. In particular H1/H5 retain a High target because detector generalization and human interpretation cannot be assumed rare.
 
 \begin{tabularx}{\textwidth}{P{0.8cm} P{1.9cm} P{2.3cm} P{2.0cm} Y}
-\caption{Risk Estimates and Open Verification Actions}\label{TblRiskRegister}\\
+\caption{Risk Estimates and Open Verification Actions}\label{TblRiskRegister}\label{TblHARiskEval}\\
 \toprule
 \textbf{ID} & \textbf{Initial} & \textbf{Target if verified} & \textbf{Proposed owner} & \textbf{Basis, evidence and release gate}\\
 \midrule
