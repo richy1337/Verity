@@ -54,6 +54,9 @@
 \newcommand{\MinServiceUptime}{\hyperref[const:MIN_SERVICE_UPTIME]{\texttt{MIN\_\allowbreak{}SERVICE\_\allowbreak{}UPTIME}}}
 \newcommand{\MaxConcurrentReqs}{\hyperref[const:MAX_CONCURRENT_REQS]{\texttt{MAX\_\allowbreak{}CONCURRENT\_\allowbreak{}REQS}}}
 \newcommand{\MaxReproDelta}{\hyperref[const:MAX_REPRO_DELTA]{\texttt{MAX\_\allowbreak{}REPRO\_\allowbreak{}DELTA}}}
+\newcommand{\MaxUiRenderLatency}{\hyperref[const:MAX_UI_RENDER_LATENCY]{\texttt{MAX\_\allowbreak{}UI\_\allowbreak{}RENDER\_\allowbreak{}LATENCY}}}
+\newcommand{\MaxCancelUiLatency}{\hyperref[const:MAX_CANCEL_UI_LATENCY]{\texttt{MAX\_\allowbreak{}CANCEL\_\allowbreak{}UI\_\allowbreak{}LATENCY}}}
+\newcommand{\MaxDevSetupTime}{\hyperref[const:MAX_DEV_SETUP_TIME]{\texttt{MAX\_\allowbreak{}DEV\_\allowbreak{}SETUP\_\allowbreak{}TIME}}}
 
 % ===== Acronym & Glossary Hyperlink Macros =====
 \newcommand{\AI}{\hyperlink{acr-ai}{AI}}
@@ -84,8 +87,12 @@
 \newcommand{\PEP}{\hyperlink{acr-pep}{PEP}}
 \newcommand{\TFIDF}{\hyperlink{acr-tfidf}{TF-IDF}}
 \newcommand{\TA}{\hyperlink{acr-ta}{TA}}
+\newcommand{\CUDA}{\hyperlink{acr-cuda}{CUDA}}
+\newcommand{\MIME}{\hyperlink{acr-mime}{MIME}}
+\newcommand{\TLS}{\hyperlink{acr-tls}{TLS}}
 
 \newcommand{\TermAssessment}{\hyperlink{gls-assessment}{Assessment}}
+\newcommand{\TermLowRisk}{\hyperlink{gls-lowrisk}{Low-Risk Summary}}
 \newcommand{\TermInconclusive}{\hyperlink{gls-inconclusive}{Inconclusive}}
 \newcommand{\TermMacroFOne}{\hyperlink{gls-macrof1}{Macro-$F_1$}}
 \newcommand{\TermAbstention}{\hyperlink{gls-abstention}{Abstention}}
@@ -132,6 +139,8 @@
 2026-10-19 & Calvin Salsali, Jaden Moore, Raymond Tao, Richard Han & Finalized Revision 0 \SRS{}: added user personas, installability and fairness non-functional requirements (\hyperref[NFR6]{NFR6}, \hyperref[NFR10]{NFR10}), symbolic constants table, MoSCoW phase-in plan with milestone dates, and bidirectional traceability matrices.\\
 \addlinespace
 2026-10-19 & Jaden Moore (Codex-assisted) & Clarified the existing 70-percent coverage and baseline comparison policy, pending/readiness transitions and request identity; separated research-only CIFAKE evaluation from product acceptance; bounded application-owned cleanup and clarified provider retention.\\
+\addlinespace
+2026-10-28 & Calvin Salsali, Raymond Tao, Jaden Moore, Richard Han & Addressed Team 16 peer review feedback (\href{https://github.com/richy1337/Verity/issues/30}{Issues \#30}--\href{https://github.com/richy1337/Verity/issues/34}{\#34}): clarified pre-admission input validation rejection prior to entering $\mathcal{S}_{\text{status}}$ (\hyperref[INV1]{INV1}, \hyperref[FR2]{FR2}, \hyperref[UC3]{UC3}), formalized ``low-risk'' summary terminology (\hyperref[INV2]{INV2}), promoted \texttt{MAX\_UI\_RENDER\_LATENCY} ($500\text{ ms}$), \texttt{MAX\_CANCEL\_UI\_LATENCY} ($200\text{ ms}$), and \texttt{MAX\_DEV\_SETUP\_TIME} ($15.0\text{ min}$) to Table~\ref{TblSymbolicConstants}, removed project developers from the external Stakeholders table (Table~\ref{TblStakeholders}), and added \CUDA{}, \MIME{}, and \TLS{} to Table~\ref{TblAcronyms}.\\
 \bottomrule
 \end{tabularx}
 
@@ -199,6 +208,7 @@ Table~\ref{TblAcronyms} lists the full expansion of every acronym and abbreviati
 \hypertarget{acr-api}{\textbf{API}} & Application Programming Interface & Section~\ref{subsec:env-components} (\hyperref[subsec:env-components]{E.2 Environment Components})\\
 \hypertarget{acr-cli}{\textbf{CLI}} & Command-Line Interface & Section~\ref{subsec:func-overview} (\hyperref[subsec:func-overview]{G.4 Functionality Overview})\\
 \hypertarget{acr-cnn}{\textbf{CNN}} & Convolutional Neural Network & Section~\ref{subsec:tech-choices} (\hyperref[subsec:tech-choices]{P.2 Imposed Technical Choices})\\
+\hypertarget{acr-cuda}{\textbf{CUDA}} & Compute Unified Device Architecture & Section~\ref{subsec:constraints} (\hyperref[subsec:constraints]{E.3 Mandated Constraints})\\
 \hypertarget{acr-c2pa}{\textbf{C2PA}} & Coalition for Content Provenance and Authenticity & Section~\ref{subsec:standards-legal} (\hyperref[subsec:standards-legal]{Standards and Legal Factors})\\
 \hypertarget{acr-dom}{\textbf{DOM}} & Document Object Model & Section~\ref{subsec:env-components} (\hyperref[subsec:env-components]{E.2 Environment Components})\\
 \hypertarget{acr-esl}{\textbf{ESL}} & English as a Second Language & Section~\ref{subsec:stakeholders} (\hyperref[subsec:stakeholders]{G.7 Stakeholders})\\
@@ -217,6 +227,7 @@ Table~\ref{TblAcronyms} lists the full expansion of every acronym and abbreviati
 \hypertarget{acr-json}{\textbf{JSON}} & JavaScript Object Notation & Section~\ref{subsec:interfaces} (\hyperref[subsec:interfaces]{S.5 External Interfaces})\\
 \hypertarget{acr-lc}{\textbf{LC}} & Likely Change & Section~\ref{subsec:likely-changes} (\hyperref[subsec:likely-changes]{P.3 Likely and Unlikely Changes})\\
 \hypertarget{acr-llm}{\textbf{LLM}} & Large Language Model & Section~\ref{subsec:current-situation} (\hyperref[subsec:current-situation]{G.2 Current Situation})\\
+\hypertarget{acr-mime}{\textbf{MIME}} & Multipurpose Internet Mail Extensions & Section~\ref{subsec:func-reqs} (\hyperref[subsec:func-reqs]{S.2 Functional Requirements})\\
 \hypertarget{acr-ml}{\textbf{ML}} & Machine Learning & Section~\ref{subsec:context-objective} (\hyperref[subsec:context-objective]{G.1 Context and Overall Objective})\\
 \hypertarget{acr-moscow}{\textbf{MoSCoW}} & Must have, Should have, Could have, Won't have & \hyperref[subsec:conventions]{Notations and Document Conventions}\\
 \hypertarget{acr-mv3}{\textbf{MV3}} & Manifest Version 3 (Browser Extension Standard) & Section~\ref{subsec:constraints} (\hyperref[subsec:constraints]{E.3 Mandated Constraints})\\
@@ -230,6 +241,7 @@ Table~\ref{TblAcronyms} lists the full expansion of every acronym and abbreviati
 \hypertarget{acr-srs}{\textbf{SRS}} & Software Requirements Specification & \hyperref[TblRevisionHistory]{Revision History}\\
 \hypertarget{acr-ta}{\textbf{TA}} & Teaching Assistant & \hyperref[TblRevisionHistory]{Revision History}\\
 \hypertarget{acr-tfidf}{\textbf{TF-IDF}} & Term Frequency--Inverse Document Frequency & Section~\ref{subsec:tech-choices} (\hyperref[subsec:tech-choices]{P.2 Imposed Technical Choices})\\
+\hypertarget{acr-tls}{\textbf{TLS}} & Transport Layer Security & Section~\ref{subsec:constraints} (\hyperref[subsec:constraints]{E.3 Mandated Constraints})\\
 \hypertarget{acr-tn}{\textbf{TN}} & True Negative & Section~\ref{subsec:formalization} (\hyperref[subsec:formalization]{S.9 Formalization})\\
 \hypertarget{acr-tp}{\textbf{TP}} & True Positive & Section~\ref{subsec:formalization} (\hyperref[subsec:formalization]{S.9 Formalization})\\
 \hypertarget{acr-uc}{\textbf{UC}} & Use Case & \hyperref[subsec:conventions]{Notations and Document Conventions}\\
@@ -252,6 +264,7 @@ Table~\ref{TblAcronyms} lists the full expansion of every acronym and abbreviati
     \item[\hypertarget{gls-fp}{False Positive (FP) and False Positive Rate (FPR)}] A False Positive occurs when a legitimate negative-class item (e.g., human-authored text or unmanipulated photograph) is classified as positive (suspicious/synthetic). The False Positive Rate is $\text{FPR} = \text{FP} / (\text{FP} + \text{TN})$ (Section~\ref{subsec:formalization}).
     \item[\hypertarget{gls-grounded}{Grounded Explanation}] An explanation statement in which every factual assertion about the submitted item is directly linked to either an observable signal in the input (e.g., token perplexity burstiness, \EXIF{}/\CTwoPA{} metadata anomaly, resampling artifact) or an accessible external reference, or is explicitly labelled as an inference (\hyperref[FR7]{FR7}, \hyperref[SR5]{SR5}).
     \item[\hypertarget{gls-inconclusive}{Inconclusive Status}] A distinct terminal request status indicating that the analysis pipeline executed without system failure, but the extracted signals were too weak, conflicting, or out-of-distribution to support a reliable assessment (\hyperref[FR4]{FR4}, \hyperref[FR6]{FR6}, \hyperref[SR1]{SR1}).
+    \item[\hypertarget{gls-lowrisk}{Low-Risk Signal Summary (``Low-Risk Badge'')}] A directional assessment summary produced only when $\text{status}(r) = \texttt{completed}$ and the calibrated synthetic/manipulation score falls below the lower decision threshold ($\hat{p}(r) \le 0.5 - \tau_{\text{abs}}$, corresponding to predicted class $\hat{o} = 0$ in Section~\ref{subsec:formalization}), indicating that no strong statistical generation or manipulation signals were detected in the supported task domain. Even when a low-risk summary is displayed, it never constitutes a guarantee of authenticity or factual truth (\hyperref[SR3]{SR3}), and it is strictly prohibited when $\text{status}(r) \in \{\texttt{pending}, \texttt{inconclusive}, \texttt{failed}, \texttt{cancelled}\}$ (\hyperref[INV2]{INV2}, \hyperref[SR4]{SR4}; \href{https://github.com/richy1337/Verity/issues/31}{Issue \#31}).
     \item[\hypertarget{gls-macrof1}{Macro-$F_1$}] The unweighted arithmetic mean of per-class $F_1$ scores across all classes in a bounded detection task: $\text{Macro-}F_1 = \frac{1}{|C|}\sum_{c \in C} F_{1,c}$. Used to operationalize the ``balanced $F_1$'' goal from the Problem Statement so majority-class performance cannot mask minority-class failure (Section~\ref{subsec:formalization}).
     \item[\hypertarget{gls-isolation}{Request Isolation}] The property that every analysis request $r$ is assigned a unique identifier and isolated state such that concurrent or subsequent requests cannot read, overwrite, or display $r$'s payload or result (\hyperref[FR10]{FR10}, \hyperref[SR7]{SR7}, \hyperref[SR9]{SR9}).
 \end{description}
@@ -367,6 +380,12 @@ To prevent magic numbers, improve maintainability, and isolate thresholds that m
 \phantomsection\label{const:MAX_CONCURRENT_REQS}\texttt{MAX\_\allowbreak{}CONCURRENT\_\allowbreak{}REQS} & $10$ & Requests & Minimum number of concurrent analysis requests that must maintain strict request-to-result isolation under reverse-order completion (\hyperref[FR10]{FR10}, \hyperref[SR7]{SR7}, \hyperref[SR9]{SR9}).\\
 \addlinespace
 \phantomsection\label{const:MAX_REPRO_DELTA}\texttt{MAX\_\allowbreak{}REPRO\_\allowbreak{}DELTA} & $0.005$ & Macro-$F_1$ delta & Maximum allowable numeric discrepancy when a second team member independently reproduces a recorded benchmark run (\hyperref[NFR7]{NFR7}, Hazard \textbf{H10}).\\
+\addlinespace
+\phantomsection\label{const:MAX_UI_RENDER_LATENCY}\texttt{MAX\_\allowbreak{}UI\_\allowbreak{}RENDER\_\allowbreak{}LATENCY} & $500$ & \texttt{ms} & Maximum latency for synchronous pre-admission validation rejection (\hyperref[FR2]{FR2}) or rendering a terminal status notification in the extension \UI{} (\hyperref[FR6]{FR6}); chosen from human-computer interaction responsiveness bounds so validation feedback feels immediate (\href{https://github.com/richy1337/Verity/issues/32}{Issue \#32}).\\
+\addlinespace
+\phantomsection\label{const:MAX_CANCEL_UI_LATENCY}\texttt{MAX\_\allowbreak{}CANCEL\_\allowbreak{}UI\_\allowbreak{}LATENCY} & $200$ & \texttt{ms} & Maximum \UI{} transition latency after a user clicks \texttt{Cancel} on a \texttt{pending} request (\hyperref[FR11]{FR11}); chosen within the $100$--$200\text{ ms}$ perceptual threshold for instantaneous button acknowledgement (\href{https://github.com/richy1337/Verity/issues/32}{Issue \#32}).\\
+\addlinespace
+\phantomsection\label{const:MAX_DEV_SETUP_TIME}\texttt{MAX\_\allowbreak{}DEV\_\allowbreak{}SETUP\_\allowbreak{}TIME} & $15.0$ & \texttt{min} & Maximum time required for a developer or \VnV{} auditor on a clean machine to bootstrap the local analysis and benchmark environment via a single setup script (\hyperref[NFR6]{NFR6}; \href{https://github.com/richy1337/Verity/issues/32}{Issue \#32}).\\
 \end{tabularx}
 
 \newpage
@@ -430,7 +449,7 @@ Verity's behaviour across normal operation and undesired events is organized aro
 \begin{itemize}[leftmargin=*]
     \item \textbf{\hyperref[UC1]{UC1} --- Analyse a Supported Webpage Item (Normal Operation):} The user selects a valid text passage or image on a webpage, triggers Verity, reviews any applicable consent notice, and receives a \texttt{completed} assessment with grounded evidence signals, uncertainty indicators, and limitations, followed by bounded application-owned transient cleanup (\MaxRetentionTime{}).
     \item \textbf{\hyperref[UC2]{UC2} --- Handle Weak, Conflicting, or Borderline Evidence:} The analysis pipeline executes normally, but the extracted signals fall within the detector's uncertainty margin or conflict across indicators. Verity returns an \texttt{inconclusive} status, explains which signals were weak or conflicting, withholds any authenticity guarantee, and provides concrete manual verification steps.
-    \item \textbf{\hyperref[UC3]{UC3} --- Reject Invalid Input or Handle Service/Timeout Failure:} The user submits an empty, malformed, unsupported, or oversized item (which is rejected prior to inference with a corrective message), or an internal/external dependency times out or fails (which produces a \texttt{failed} status and never a reassuring low-risk result).
+    \item \textbf{\hyperref[UC3]{UC3} --- Reject Invalid Input Pre-Admission or Handle Service/Timeout Failure:} The user submits an empty, malformed, unsupported, or oversized item---which is rejected synchronously at the pre-admission validation gate prior to request admission ($t_{\text{init}}$) with a corrective message without entering $\mathcal{R}$ or $\mathcal{S}_{\text{status}}$ (\hyperref[FR2]{FR2}, \hyperref[INV1]{INV1})---or an admitted request encounters an internal/external dependency timeout or failure, which transitions the request to the \texttt{failed} terminal status and never renders a reassuring \TermLowRisk{} result (\hyperref[INV2]{INV2}).
     \item \textbf{\hyperref[UC4]{UC4} --- Cancel Pending Check or Decline External Transfer:} The user declines an external provider consent prompt or cancels an in-flight check. Verity halts external transmission, discards any late asynchronous response for that request identifier, and releases application-owned temporary copies within \MaxRetentionTime{}.
 \end{itemize}
 
@@ -484,8 +503,6 @@ Addressing \href{https://github.com/richy1337/Verity/issues/16}{Peer Issue \#16}
 \textbf{Society at Large (\texttt{LO\_\allowbreak{}Impact})} & Broader Public Stakeholder & Affected by the health of the digital information ecosystem, psychological anxiety from pervasive misinformation, privacy norms, and cultural fairness. Verity supports societal resilience by encouraging critical human verification (\hyperref[FR5]{FR5}, \hyperref[SR3]{SR3}) rather than passive automation bias.\\
 \addlinespace
 \textbf{Course Instructor \& Teaching Assistant (Rebecca Di Filippo)} & Project Evaluators \& Advisors & Evaluate engineering rigour, requirement verifiability, hazard mitigation traceability, and reproducible \VnV{} evidence.\\
-\addlinespace
-\textbf{Team 23 Developers (Calvin, Raymond, Jaden, Richard)} & System Designers, Builders \& Testers & Require an unambiguous, modular, testable specification with clear subsystem boundaries and realistic milestone phasing.\\
 \end{tabularx}
 
 \noindent\textbf{Requirements Sources:}
@@ -645,8 +662,8 @@ Table~\ref{TblAssumptions} states the explicit assumptions made about the enviro
 
 \noindent\textbf{System Invariants:}
 \begin{itemize}[leftmargin=*]
-    \item \phantomsection\label{INV1}\textbf{INV1 (Status Exclusivity Invariant):} At any instant $t$, every initiated request $r \in \mathcal{R}$ is in exactly one state $\text{status}(r) \in \{\texttt{pending},\allowbreak\texttt{completed},\allowbreak\texttt{inconclusive},\allowbreak\texttt{failed},\allowbreak\texttt{cancelled}\}$ (Section~\ref{subsec:formalization}).
-    \item \phantomsection\label{INV2}\textbf{INV2 (No Silent Reassurance Invariant):} A request $r$ with $\text{status}(r) \in \{\texttt{failed},\allowbreak\texttt{cancelled},\allowbreak\texttt{pending}\}$ never produces or displays a low-risk or authentic assessment record (\hyperref[FR4]{FR4}, \hyperref[FR6]{FR6}, \hyperref[SR4]{SR4}).
+    \item \phantomsection\label{INV1}\textbf{INV1 (Status Exclusivity Invariant):} At any instant $t \ge t_{\text{init}}(r)$, every admitted request $r \in \mathcal{R}$ is in exactly one state $\text{status}(r) \in \{\texttt{pending},\allowbreak\texttt{completed},\allowbreak\texttt{inconclusive},\allowbreak\texttt{failed},\allowbreak\texttt{cancelled}\}$ (Section~\ref{subsec:formalization}). Invalid, empty, or out-of-bounds selections rejected by pre-admission validation (\hyperref[FR2]{FR2}, \hyperref[UC3]{UC3}) are blocked prior to $t_{\text{init}}$ with a synchronous validation notice and never enter $\mathcal{R}$ or $\mathcal{S}_{\text{status}}$ (\href{https://github.com/richy1337/Verity/issues/30}{Issue \#30}).
+    \item \phantomsection\label{INV2}\textbf{INV2 (No Silent Reassurance Invariant):} A request $r$ with $\text{status}(r) \in \{\texttt{failed},\allowbreak\texttt{cancelled},\allowbreak\texttt{pending},\allowbreak\texttt{inconclusive}\}$ never produces or displays a \TermLowRisk{} ($\hat{p}(r) \le 0.5 - \tau_{\text{abs}}$, $\hat{o} = 0$) or authentic assessment record (\hyperref[FR4]{FR4}, \hyperref[FR6]{FR6}, \hyperref[SR4]{SR4}; \href{https://github.com/richy1337/Verity/issues/31}{Issue \#31}).
     \item \phantomsection\label{INV3}\textbf{INV3 (Strict Request-to-Result Binding Invariant):} For any two distinct requests $r \neq q$, $\text{result}(r)$ is never bound to or rendered as the assessment for request $q$ (\hyperref[FR10]{FR10}, \hyperref[SR7]{SR7}, \hyperref[SR9]{SR9}).
     \item \phantomsection\label{INV4}\textbf{INV4 (Bounded Transient Cleanup and No Persistence Invariant):} For every standard-workflow request, application-owned processing stops and transient raw-content references are released within \MaxRetentionTime{} after its terminal decision. Raw content is absent from application-controlled persistent storage and logs at all times; the formal bound appears in Section~\ref{subsec:formalization} (\hyperref[FR9]{FR9}, \hyperref[NFR4]{NFR4}, \hyperref[SR8]{SR8}).
 \end{itemize}
@@ -783,11 +800,11 @@ Every functional requirement (\textbf{FR1}--\textbf{FR14}) in Table~\ref{TblFunc
 
 \phantomsection\label{FR2}\textbf{FR2} & Pre-Analysis Input Validation \& Sanitization \newline \textbf{[Priority: M]} &
 \textbf{Statement:} The system shall validate every submitted item before invoking any detector and shall reject empty inputs, text shorter than \MinTextLength{} or longer than \MaxTextLength{}, images smaller than \MinImageDim{}, larger than \MaxImageDim{}, or exceeding \MaxImageSize{}, and unsupported, corrupted, or active-script formats (Allowlist: UTF-8 plain text; PNG, JPEG, WebP static images), displaying a specific corrective message without executing embedded markup or scripts.\newline
-\textbf{Inputs:} Raw selected item payload and MIME/header metadata.\newline
-\textbf{Outputs:} Validated/sanitized item passed to analysis, or rejection status with corrective reason.\newline
+\textbf{Inputs:} Raw selected item payload and \MIME{}/header metadata.\newline
+\textbf{Outputs:} Validated/sanitized item admitted to \texttt{pending} ($t_{\text{init}}$), or synchronous pre-admission validation rejection with corrective reason (without entering $\mathcal{R}$ or $\mathcal{S}_{\text{status}}$; \hyperref[INV1]{INV1}).\newline
 \textbf{Rationale:} Protects against decompression bombs, XSS/script execution, and unreliable short-snippet classifications (\hyperref[SR6]{SR6}). &
-\textbf{Fit Criterion:} $100\%$ of test cases with empty, $< \MinTextLength{}$, $> \MaxTextLength{}$, $> \MaxImageSize{}$, malformed header, or SVG/HTML script payloads are rejected within $500\text{ ms}$ with a reason.\newline
-\textbf{Traces:} \hyperref[A1]{A1}, \hyperref[UC3]{UC3}, \hyperref[SR2]{SR2}, \hyperref[SR6]{SR6}, \textbf{H2}, \textbf{H7}.\\
+\textbf{Fit Criterion:} $100\%$ of test cases with empty, $< \MinTextLength{}$, $> \MaxTextLength{}$, $> \MaxImageSize{}$, malformed header, or SVG/HTML script payloads are rejected pre-admission within \MaxUiRenderLatency{} ($500\text{ ms}$) with a reason.\newline
+\textbf{Traces:} \hyperref[A1]{A1}, \hyperref[INV1]{INV1}, \hyperref[UC3]{UC3}, \hyperref[SR2]{SR2}, \hyperref[SR6]{SR6}, \textbf{H2}, \textbf{H7}.\\
 \hline
 
 \phantomsection\label{FR3}\textbf{FR3} & Evidence-Backed Assessment Output \newline \textbf{[Priority: M]} &
@@ -822,7 +839,7 @@ Every functional requirement (\textbf{FR1}--\textbf{FR14}) in Table~\ref{TblFunc
 \textbf{Inputs:} Request execution timer and detector/provider health responses.\newline
 \textbf{Outputs:} Distinct state enum value and corresponding UI status banner.\newline
 \textbf{Rationale:} Prevents timeouts or crashes from hanging indefinitely or masquerading as normal results (\hyperref[INV1]{INV1}, \hyperref[INV2]{INV2}). &
-\textbf{Fit Criterion:} Fault injection shows the service records \texttt{failed} when the processing deadline is reached or an unrecoverable dependency error occurs. The UI renders the terminal notification within $500\text{ ms}$ of receiving it; this display delay does not extend the processing deadline.\newline
+\textbf{Fit Criterion:} Fault injection shows the service records \texttt{failed} when the processing deadline is reached or an unrecoverable dependency error occurs. The UI renders the terminal notification within \MaxUiRenderLatency{} ($500\text{ ms}$) of receiving it; this display delay does not extend the processing deadline.\newline
 \textbf{Traces:} \hyperref[G2]{G2}, \hyperref[G5]{G5}, \hyperref[A2]{A2}, \hyperref[INV1]{INV1}, \hyperref[UC3]{UC3}, \hyperref[SR4]{SR4}, \hyperref[NFR3]{NFR3}, \hyperref[NFR8]{NFR8}, \textbf{H6}.\\
 \hline
 
@@ -863,11 +880,11 @@ Every functional requirement (\textbf{FR1}--\textbf{FR14}) in Table~\ref{TblFunc
 \hline
 
 \phantomsection\label{FR11}\textbf{FR11} & In-Flight Request Cancellation \newline \textbf{[Priority: S]} &
-\textbf{Statement:} The system shall allow the user to cancel any \texttt{pending} analysis request at any time, transitioning the UI to \texttt{cancelled} within $200\text{ ms}$, stopping request-owned processing and releasing application-owned transient copies within \MaxRetentionTime{}, and discarding any late asynchronous response that arrives after cancellation.\newline
+\textbf{Statement:} The system shall allow the user to cancel any \texttt{pending} analysis request at any time, transitioning the UI to \texttt{cancelled} within \MaxCancelUiLatency{} ($200\text{ ms}$), stopping request-owned processing and releasing application-owned transient copies within \MaxRetentionTime{}, and discarding any late asynchronous response that arrives after cancellation.\newline
 \textbf{Inputs:} User \texttt{Cancel} action on an active \texttt{req\_\allowbreak{}id}.\newline
 \textbf{Outputs:} Immediate UI transition to \texttt{cancelled} and suppression of late results.\newline
 \textbf{Rationale:} Gives users full control over accidental triggers or slow network checks (\hyperref[UC4]{UC4}). &
-\textbf{Fit Criterion:} Triggering cancellation mid-flight transitions UI state within $200\text{ ms}$; instrumented backend tests stop request-owned tasks and release payload references within \MaxRetentionTime{} of the cancellation decision and ignore all late results. Backend cleanup completion is acknowledged separately from the UI state.\newline
+\textbf{Fit Criterion:} Triggering cancellation mid-flight transitions UI state within \MaxCancelUiLatency{} ($200\text{ ms}$); instrumented backend tests stop request-owned tasks and release payload references within \MaxRetentionTime{} of the cancellation decision and ignore all late results. Backend cleanup completion is acknowledged separately from the UI state.\newline
 \textbf{Traces:} \hyperref[G5]{G5}, \hyperref[G6]{G6}, \hyperref[UC4]{UC4}, \hyperref[SR7]{SR7}, \hyperref[SR8]{SR8}, \hyperref[NFR4]{NFR4}, \textbf{H4}, \textbf{H8}.\\
 \hline
 
@@ -956,9 +973,9 @@ Both model and baseline F1 shall use the identical assessed item subset; full-po
 \hline
 
 \phantomsection\label{NFR6}\textbf{NFR6} & Installability \newline \textbf{[Priority: M]} &
-\textbf{Statement:} A target end user meeting the persona characteristics in Section~\ref{subsec:user-profiles} shall be able to install the Verity browser extension and execute a first webpage check within \MaxInstallTime{} ($5.0\text{ min}$) using only the packaged extension bundle and User Guide, and a developer shall be able to set up the full local analysis and evaluation environment within $15.0\text{ min}$ via a single documented script.\newline
+\textbf{Statement:} A target end user meeting the persona characteristics in Section~\ref{subsec:user-profiles} shall be able to install the Verity browser extension and execute a first webpage check within \MaxInstallTime{} ($5.0\text{ min}$) using only the packaged extension bundle and User Guide, and a developer shall be able to set up the full local analysis and evaluation environment within \MaxDevSetupTime{} ($15.0\text{ min}$) via a single documented script.\newline
 \textbf{Rationale:} Explicitly satisfies the \SRS{} rubric installability requirement and constraint \hyperref[C2]{C2}. &
-\textbf{Fit Criterion:} Timed installation trial with usability participants ($\le \MaxInstallTime{}$) and clean-machine CI/developer setup check ($\le 15.0\text{ min}$).\newline
+\textbf{Fit Criterion:} Timed installation trial with usability participants ($\le \MaxInstallTime{}$) and clean-machine CI/developer setup check ($\le \MaxDevSetupTime{}$).\newline
 \textbf{Traces:} \hyperref[G5]{G5}, \hyperref[C2]{C2}, \hyperref[NFR.E.2]{NFR.E.2}.\\
 \hline
 
