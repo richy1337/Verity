@@ -17,7 +17,7 @@ The generator writes into ignored `test/fixtures/generated/`, including two 10 M
 | Available construction | Plan cases | Precise input |
 |---|---|---|
 | ASCII bounds | FT-2, UT-C3 | 0, 149, 150, 1,000, 10,000 and 10,001 code points; nonempty rejected strings contain a canary without changing the length |
-| Unicode bounds | FT-2, UT-C3 | 149 and 150 code points containing `é`/`ü`; UTF-8 byte counts differ |
+| Unicode bounds | FT-2, UT-C3 | 149 and 150 code points containing `é`/`ü`; emoji variants at 149, 150, 10,000 and 10,001 code points distinguish code points from JavaScript UTF-16 length. Nonempty rejected variants retain the canary |
 | Image bounds | FT-3, UT-C3 | 63x64 PNG, 64x63 JPEG, 64x64 PNG, 4096x4096 WebP, 4097x4096 PNG, 1024x1024 PNG padded to exactly 10,000,000 and 10,000,001 bytes |
 | Bomb input | FT-3, UT-C3 | Exactly 200,000 bytes; valid IHDR with CRC declaring 30,000x30,000; truncated IDAT |
 | Format/execution inputs | FT-4 | SVG script renamed PNG, animated GIF, MP4 signature, half-truncated JPEG, ELF renamed JPEG, and 500-character HTML/XSS text |
@@ -32,7 +32,7 @@ The plan's remaining data must be frozen before execution. Their owners and date
 - **Evidence/abstention/grounding:** commit ten synthetic content items with declared stub features, ten borderline cases, twenty clearly identified opinion/satire/poetry texts, and ten contradicted explanation drafts with their feature registry. These are controlled functional inputs; real-detector behavior is evaluated separately on frozen, held-out data. Provenance-conflict cases reuse the approved signed photos.
 - **Image prompt injection:** write the injected instruction to EXIF `ImageDescription`, `UserComment`, or `XPComment` in ten copies of approved photos; retain clean twins, exact tag values and hashes. Freeze noninstruction computed features for the controlled FT-8 run.
 - **Hostile-page harness:** implement FT-16's five attacks and log both the attempted action and its observed effect. Verify the authoritative extension-owned controls, not an inaccessible page imitation.
-- **Usability:** freeze the separate onboarding page, three unseen comprehension pages, expected primary evidence/tag, explanation/limitation text, fixed facilitator script and scorer answer sheet. Force timeout through a controlled provider/proxy delay; keep production test-mode flags off. Do not coach the scored tasks.
+- **Usability:** freeze the separate onboarding page, three unseen comprehension pages, expected primary evidence/tag, explanation/limitation text, fixed facilitator script and scorer answer sheet. Participant prompts use only neutral item numbers; expected statuses and answers stay in the facilitator/scorer materials. Item 2 is a satirical ESL-style passage; ESL authorship alone is not an abstention reason. Force timeout through a controlled provider/proxy delay; keep production test-mode flags off. Do not coach the scored tasks.
 - **Performance:** commit the exact 100 text and 100 image IDs and native sizes described in the plan; record acquisition and rendered-result timestamps per request.
 - **ML benchmark:** freeze licensed source revisions, label/source-group IDs, deduplication results, splits, subgroup annotations and checkpoint/config hashes under the plan's sampling protocol. Synthetic generated fixtures are excluded.
 

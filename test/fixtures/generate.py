@@ -82,6 +82,13 @@ def build(output, seed):
             text_at_length(length, CANARY if length == 149 else "", True),
             case="FT-2", admitted=length == 150,
             code=None if length == 150 else "TEXT_TOO_SHORT")
+    for length in (MIN_TEXT - 1, MIN_TEXT, MAX_TEXT, MAX_TEXT + 1):
+        admitted = MIN_TEXT <= length <= MAX_TEXT
+        prefix = "" if admitted else CANARY
+        put(f"text/bounds/emoji-{length}.txt",
+            prefix + "\U0001f600" * (length - len(prefix)),
+            case="FT-2", admitted=admitted,
+            code=None if admitted else "TEXT_TOO_SHORT" if length < MIN_TEXT else "TEXT_TOO_LONG")
     xss = '<img src=x onerror="window.__xss_triggered=true">'
     put("text/xss.txt", text_at_length(500, xss), case="FT-4", admitted=True,
         rendered_as="inert_text")
