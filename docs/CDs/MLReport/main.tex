@@ -1,199 +1,126 @@
-% This template was provided by Dr. Charles Welch
-% He uses it in his course
-%
-
 \documentclass[11pt]{article}
-
-% Change "review" to "final" to generate the final (sometimes called camera-ready) version.
-% Change to "preprint" to generate a non-anonymous version with page numbers.
-\usepackage[]{acl}
-\usepackage{times}
-\usepackage{latexsym}
-
-% For proper rendering and hyphenation of words containing Latin characters (including in bib files)
+\usepackage[preprint]{acl}
+\usepackage{times,booktabs}
 \usepackage[T1]{fontenc}
-% For Vietnamese characters
-% \usepackage[T5]{fontenc}
-% See https://www.latex-project.org/help/documentation/encguide.pdf for other character sets
-
-% This assumes your files are encoded as UTF8
-\usepackage[utf8]{inputenc}
 \usepackage{microtype}
-\usepackage{inconsolata}
-\usepackage{graphicx}
 
-% If the title and author information does not fit in the area allocated, uncomment the following
-%
-%\setlength\titlebox{<dim>}
-%
-% and set <dim> to something 5cm or larger.
-
-\title{ML Report:\\My Group's Project Name}
-
-
-\author{First Author, Second Author, Third Author \\
-  \texttt{\{macid1,macid2,macid3\}@mcmaster.ca} }
-
-%\author{
-%  \textbf{First Author\textsuperscript{1}},
-%  \textbf{Second Author\textsuperscript{1,2}},
-%  \textbf{Third T. Author\textsuperscript{1}},
-%  \textbf{Fourth Author\textsuperscript{1}},
-%\\
-%  \textbf{Fifth Author\textsuperscript{1,2}},
-%  \textbf{Sixth Author\textsuperscript{1}},
-%  \textbf{Seventh Author\textsuperscript{1}},
-%  \textbf{Eighth Author \textsuperscript{1,2,3,4}},
-%\\
-%  \textbf{Ninth Author\textsuperscript{1}},
-%  \textbf{Tenth Author\textsuperscript{1}},
-%  \textbf{Eleventh E. Author\textsuperscript{1,2,3,4,5}},
-%  \textbf{Twelfth Author\textsuperscript{1}},
-%\\
-%  \textbf{Thirteenth Author\textsuperscript{3}},
-%  \textbf{Fourteenth F. Author\textsuperscript{2,4}},
-%  \textbf{Fifteenth Author\textsuperscript{1}},
-%  \textbf{Sixteenth Author\textsuperscript{1}},
-%\\
-%  \textbf{Seventeenth S. Author\textsuperscript{4,5}},
-%  \textbf{Eighteenth Author\textsuperscript{3,4}},
-%  \textbf{Nineteenth N. Author\textsuperscript{2,5}},
-%  \textbf{Twentieth Author\textsuperscript{1}}
-%\\
-%\\
-%  \textsuperscript{1}Affiliation 1,
-%  \textsuperscript{2}Affiliation 2,
-%  \textsuperscript{3}Affiliation 3,
-%  \textsuperscript{4}Affiliation 4,
-%  \textsuperscript{5}Affiliation 5
-%\\
-%  \small{
-%    \textbf{Correspondence:} \href{mailto:email@domain}{email@domain}
-%  }
-%}
+\title{How Far Can Verity Trust a Detector?\\
+       Fall Custom Document, Revision 0}
+\author{Calvin Salsali, Raymond Tao, Jaden Moore, Richard Han \\
+        Team 23, Verity --- McMaster University}
+\newcommand{\repo}{https://github.com/richy1337/Verity}
+\newcommand{\papers}{\repo/blob/main/pdfs}
 
 \begin{document}
 \maketitle
-% \begin{abstract}
-% \end{abstract}
 
-\section{Introduction}
+\begin{abstract}
+Verity needs to decide when the evidence about a selected item is too weak to show a direction. We trained two CPU-friendly text classifiers on the English Human ChatGPT Comparison Corpus (HC3) and tested a validation-tuned abstention rule on withheld questions and an unseen source domain. The character model reached 0.991 macro-$F_1$ on the 81\% of same-domain test answers it assessed, but improved on the word baseline by only 0.007 and falsely flagged 5 of the 27 Wikipedia-source human answers it assessed. A small image pilot missed every acceptance gate. The results support keeping the inconclusive outcome and treating these models as offline references.
+\end{abstract}
 
-Here, write a brief introduction to the problem you are solving. This can be adapted from your problem description and motivation from the original proposal. This should be around 0.25-0.5 pages.
+\section{Task}
 
-\section{Related Work}
+Verity is a browser extension for checking a selected passage or static image. Its result is a set of evidence signals and a suggestion for checking the source. This pilot asks a smaller question: can a light classifier distinguish a human answer from a ChatGPT answer under a stated error budget? The labels describe the source of a benchmark answer. They say nothing about whether it is accurate or whether a particular person wrote it.
 
-Here, talk about the related work you encountered for your approach. Cite at least 5 references. Refer to item 2. No one has done exactly your task? Write about the most similar thing you can find. This should be around 0.25-0.5 pages.
+The \href{\papers/SRS/SRS.pdf}{Software Requirements Specification (SRS)} calls for at least 0.80 macro-$F_1$, 70\% coverage, a false-positive rate (FPR) no greater than 10\%, and at least a 0.10 macro-$F_1$ gain over a declared baseline on the same assessed examples. These are engineering decision gates. Passing a gate on one corpus does not demonstrate safe use across the web. The \href{\papers/Design/SoftArchitecture/MG.pdf}{Module Guide} assigns extraction to M7/M8, assessment to M9 and offline evaluation to M10.
 
-\section{Dataset}
+\section{Related work}
 
-You should write about your dataset here, following the guidelines regarding item 1. This section may be 0.5-1 pages. Depending on your specific dataset, you may want to include subsections for the preprocessing, annotation, etc.
+\citet{guo2023hc3} collected paired human and ChatGPT answers and compared text detectors. Pairing on the prompt makes HC3 useful for an initial comparison. It still offers a narrow view of writing and one generation setting. \citet{dugan2024raid} show that detectors can degrade across new domains, generators, decoding choices and edits. Their RAID benchmark motivates a held-source check here and a later cross-generator test. DetectGPT uses probability curvature from a language model \citep{mitchell2023detectgpt}. A sparse classifier offers a CPU baseline that requires neither model access nor repeated generations. \citet{liang2023bias} show that false positives can concentrate on non-native English writing. We track false-positive counts and coverage by source. Source categories cannot establish a writer's first language.
 
-\section{Features}
+For images, GenImage distinguishes in-generator and cross-generator evaluation \citep{zhu2023genimage}. CIFAKE is a useful small-image research comparison \citep{bird2024cifake}. Its native $32\times32$ images fall below Verity's $64\times64$ minimum. Neither synthetic-origin task covers the full range of digital edits that a browser user might ask about.
 
-Describe any features you used for your model, or how your data was input to your model. Are you doing feature engineering or feature selection? Are you learning embeddings? Is it all part of one neural network? Refer to item 3. This may range from 0.25 pages to 0.5 pages.
+\section{Dataset and split}
 
-\section{Implementation}
+HC3 English provides supervised labels from two answer fields. For each selected normalized question, we keep one human and one ChatGPT answer. We apply Unicode NFKC normalization and collapse whitespace. We keep answers with 150--10,000 characters after normalization. The model sees answer text only. Question text, label and source are excluded from its inputs.
 
-Describe your model and implementation here. Refer to item 4. This may take around a page.
+We pick up to 1,400 eligible questions per source using a stable hash with seed 23. Finance, open question answering, Reddit Explain Like I'm Five and Wikipedia computer science/artificial intelligence contribute to internal splits. Medicine stays held out from fitting, calibration and threshold selection. A normalized question belongs to one partition. Questions listed across source domains are excluded. Stable hash buckets yield an approximate 70/10/10/10 training, calibration, validation and test split in the internal sources.
 
-\section{Results and Evaluation}
+We remove exact normalized answer matches globally. We also compare word-trigram sets across partitions at Jaccard similarity of at least 0.85 and remove both members of a match. When one answer in a pair is removed, we drop the other as well. The verifier checks membership through hashed question and answer IDs. This audit catches literal and very close overlaps. Paraphrases with different trigrams and common prompts across unrelated datasets remain possible.
 
-How are you evaluating your model? What results do you have so far? What are your baselines? Refer to item 5. This may take around 0.5 pages.
+\begin{table}[h]
+\centering
+\begin{tabular}{lr}
+\toprule
+Partition & Answers \\
+\midrule
+Train & 5,664 \\
+Calibration & 832 \\
+Validation & 840 \\
+Same-source test & 834 \\
+Held-source test (medicine) & 2,378 \\
+\bottomrule
+\end{tabular}
+\caption{Each partition contains equally many human and ChatGPT answers. Source snapshot and split IDs are in the experiment artifacts.}
+\label{tab:splits}
+\end{table}
 
-\section{Feedback and Plans}
+\section{Models and procedure}
 
-Write about your plans for the remainder of the project. This should include a discussion of the feedback you received from your TA, and how you plan to improve your approach. Reflect on your implementation and areas for improvement. Refer to item 6. This may be around 0.5 pages.
+The baseline is word unigram/bigram term frequency--inverse document frequency (TF--IDF) with logistic regression. The candidate uses character 3--5 grams with the same classifier. Character grams can retain punctuation and word fragments that word tokenization discards. Both use sublinear term frequency, a minimum document frequency of 3, and at most 60,000 features. We fit the vectorizers only on training answers. The classifiers use $L_2$ regularization ($C=1$), a maximum of 1,000 iterations and the LIBLINEAR solver in scikit-learn. Logistic regression minimizes regularized binary log loss. We fixed the feature ranges and penalty for this pilot. There was no neural training or test-set tuning.
 
-\section{Template Notes}
+A second logistic regression fits a sigmoid to the character model's scores on the calibration fold. On the separate validation fold we sweep margins from 0 to 0.49 in steps of 0.01. We maximize assessed macro-$F_1$ among settings meeting the coverage and assessed FPR limits, with coverage as the tie-breaker. We freeze the chosen margin of 0.43 before reading test outcomes. A score at or below 0.07 gives the lower direction, and a score at or above 0.93 gives the higher direction. Scores in between abstain. This score reflects a balanced source-labelled corpus. It should not be read as the probability that a passage on the web is synthetic.
 
-You can remove this section or comment it out, as it only contains instructions for how to use this template. You may use subsections in your document as you find appropriate.
+The run used Python 3.12.15 and scikit-learn 1.8.0 on an ARM64 Mac with CPU execution. The two classifier fits together took about six seconds. The experiment records batch timing for reproducibility. Browser and network latency are separate product tests.
 
-\subsection{Tables and figures}
+\section{Results}
 
-See Table~\ref{citation-guide} for an example of a table and its caption.
-See Figure~\ref{fig:experiments} for an example of a figure and its caption.
+Table~\ref{tab:results} compares models on identical assessed items. Coverage divides the number of assessed items by the eligible test count. Assessed FPR divides false flags by the number of assessed human items. FPR over all eligible human items is reported separately in the artifacts. When an answer abstains, the full-population diagnostic counts it as a miss for the true class. Forced classification is an additional diagnostic that applies a 0.5 threshold to every answer.
 
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Metric & Same source & Medicine \\
+\midrule
+Assessed / eligible & 675/834 & 1,985/2,378 \\
+Coverage & 80.9\% & 83.5\% \\
+Assessed candidate $F_1$ & .991 & .999 \\
+Word baseline $F_1$ & .984 & .996 \\
+Gain over word baseline & .007 & .004 \\
+Assessed false flags (FPR) & 5/322 & 0/801 \\
+Forced candidate $F_1$ & .953 & .969 \\
+Full-population $F_1$ & .886 & .901 \\
+\bottomrule
+\end{tabular}
+\caption{Held-out text results. False flag counts are conditional on an assessed human answer.}
+\label{tab:results}
+\end{table}
 
-\begin{figure}[t]
-  \includegraphics[width=\columnwidth]{example-image-golden}
-  \caption{A figure with a caption that runs for more than one line.
-    Example image is usually available through the \texttt{mwe} package
-    without even mentioning it in the preamble.}
-  \label{fig:experiments}
-\end{figure}
+The character model clears the aggregate $F_1$, coverage and FPR floors on both tests and misses the baseline-improvement gate on both. The prior-only baseline gives 0.333 macro-$F_1$ on balanced classes. Comparing only to it would hide how much an ordinary word model already explains. With abstentions disabled, the word model slightly leads the character model on medicine ($0.972$ versus $0.969$). The gain on the selected examples is small enough that this result gives no reason to commit the product to the character model.
 
-\begin{figure*}[t]
-  \includegraphics[width=0.48\linewidth]{example-image-a} \hfill
-  \includegraphics[width=0.48\linewidth]{example-image-b}
-  \caption {A minimal working example to demonstrate how to place
-    two images side-by-side.}
-\end{figure*}
+\paragraph{Where it fails.}
+All five same-source false flags occur in the Wikipedia-derived source, where 27 human answers received a direction and five of them were flagged (18.5\%). That source covered only 59.6\% of its 146 items. Across medicine, the system assessed 67.4\% of human answers and 99.6\% of ChatGPT answers. Zero assessed false flags there should be read alongside that imbalance. Among medicine answers near the eligibility floor (150--299 characters), only one of 253 was ChatGPT-labelled and the model missed it. That slice is too imbalanced to support conclusions about short generated answers.
 
+\paragraph{What calibration changed.}
+On the same-source test, the Brier score fell from 0.060 to 0.036 after sigmoid calibration. It fell from 0.046 to 0.023 in medicine. Training forced macro-$F_1$ was 0.983, compared with 0.953 on the internal test, a 0.030 gap. These differences are consistent with some training fit and corpus-specific style effects. They cannot distinguish stable authorship signals from recurring formatting or boilerplate cues. Both test partitions still come from the same dataset and generation setup.
 
-\subsection{Citations}
+\section{Image pilot}
 
-\begin{table*}
-  \centering
-  \begin{tabular}{lll}
-    \hline
-    \textbf{Output}           & \textbf{natbib command} & \textbf{ACL only command} \\
-    \hline
-    \citep{Gusfield:97}       & \verb|\citep|           &                           \\
-    \citealp{Gusfield:97}     & \verb|\citealp|         &                           \\
-    \citet{Gusfield:97}       & \verb|\citet|           &                           \\
-    \citeyearpar{Gusfield:97} & \verb|\citeyearpar|     &                           \\
-    \citeposs{Gusfield:97}    &                         & \verb|\citeposs|          \\
-    \hline
-  \end{tabular}
-  \caption{\label{citation-guide}
-    Citation commands supported by the style file.
-  }
-\end{table*}
+We sampled 192 labelled examples from Tiny-GenImage: 96 training, 32 validation, and 64 held-out test images, balanced between original photographs and generated images. We selected fixed windows in the published train and validation splits before fitting. The files served by the dataset viewer all met the product size and static-format bounds. A byte-hash check and a 64-bit difference-hash screen found no pair within the chosen cutoff. The mirror does not expose original photograph or prompt group IDs, so this is a smoke test. It cannot establish source separation or cross-generator robustness.
 
-Table~\ref{citation-guide} shows the syntax supported by the style files.
-We encourage you to use the natbib styles.
-You can use the command \verb|\citet| (cite in text) to get ``author (year)'' citations, like this citation to a paper by \citet{Gusfield:97}.
-You can use the command \verb|\citep| (cite in parentheses) to get ``(author, year)'' citations \citep{Gusfield:97}.
-You can use the command \verb|\citealp| (alternative cite without parentheses) to get ``author, year'' citations, which is useful for using citations within parentheses (e.g. \citealp{Gusfield:97}).
+We converted each image to red, green and blue channels and resized to $64\times64$ for feature extraction. The baseline uses per-channel means and standard deviations. The candidate adds grayscale gradient statistics and frequency-band energy. Both use training-set standardization and $L_2$ logistic regression ($C=1$) in scikit-learn. We used model scores directly because the validation set was too small to set aside another calibration fold. No margin met both validation limits. The fallback margin of 0.09 minimized assessed FPR among margins that kept 70\% coverage on validation. It is for comparison only.
 
-\subsection{References}
+On the 64 held-out examples the candidate assessed 43 (67.2\%), attained 0.581 macro-$F_1$, and flagged 11 of 23 assessed authentic images. The colour baseline scored 0.650 on the same items. Re-encoding those same inputs as JPEG at quality 60 kept the selective confusion counts unchanged. Forced macro-$F_1$ dropped from 0.547 to 0.531. These are paired observations, so the JPEG copies do not increase the number of independent test items. The validation failure and test false flags rule out this feature model for directional product assessments.
 
-\nocite{Ando2005,andrew2007scalable,rasooli-tetrault-2015}
+This pilot uses synthetic-origin labels. It did not measure editing or authenticity. Camera metadata and Content Credentials should remain separate observations, because ordinary re-encoding can remove them. The next image comparison needs auditable source groups, a held-out generator and more authentic compressed images.
 
-Many websites where you can find academic papers also allow you to export a bib file for citation or bib formatted entry. Copy this into the \texttt{custom.bib} and you will be able to cite the paper in the \LaTeX{}. You can remove the example entries.
+\section{What changes in Verity}
 
-\subsection{Equations}
+We would keep the sparse models as offline references and leave directional classification gated behind stronger evidence. For the next comparison, the word model stays frozen as a reference while pretrained text and image candidates are tested on wholly separate sources. NFR1 needs the same eligibility rules and baseline subset for every model. NFR10 needs actual language-background and recompression slices, with their sample counts and abstentions. HC3 source names do not substitute for those labels.
 
-An example equation is shown below:
-\begin{equation}
-  \label{eq:example}
-  A = \pi r^2
-\end{equation}
+The TA's feedback on acceptance criteria asks for an explanation of the targets and a clear decision when they are missed. The 0.10 gain is a provisional requirement for adopting extra model complexity. This experiment falls short. A detector that clears aggregate gates but misses a source or subgroup FPR limit needs investigation and an explicit scope decision before use. For the interface, M9 owns the decision about applicability and abstention. M3 displays the reason and suggests a source check. An authentic item can still be flagged. The model result belongs alongside the evidence and its limitations.
 
-Labels for equation numbers, sections, subsections, figures and tables
-are all defined with the \verb|\label{label}| command and cross references
-to them are made with the \verb|\ref{label}| command.
-This an example cross-reference to Equation~\ref{eq:example}. You can also write equations inline, like this: $A=\pi r^2$.
+\section{Data and reproducibility}
 
+The experiment uses public benchmark data from the source maintainers. HC3's source-specific terms apply where stricter than its general CC BY-SA 4.0 terms. Tiny-GenImage is marked CC BY-NC-SA 4.0 by its mirror. We use that sample for academic evaluation. No dataset text, image payload or live user content is committed. Each prediction retains an item hash, label, score, split and outcome. Baseline comparisons and error counts can be reconstructed from those records. The \href{\repo/tree/main/docs/CDs/MLReport/experiment}{experiment directory} records the commands, checksums, outcome records and environment. A same-environment replay tests repeatability. Cross-member reproduction on another machine and the larger SRS acceptance evaluation remain open.
 
-% \section*{Limitations}
+\section*{Contribution and AI disclosure}
 
-\section*{Team Contributions}
+Calvin Salsali directed preparation of this revision and confirmed the approved Fall ML topic. The earlier Verity development plan records Raymond Tao's evaluation ownership and team input to the SRS and verification plan. This report does not attribute new runs or review to a person who has not performed them.
 
-Write in this section a few sentences describing the contributions of each team member. What did each member work on? Refer to item 7.
+OpenAI Codex (GPT-6, November 2026) helped write the pilot scripts, run the benchmarks, compare predictions and draft this report. Codex checked the corpus checksum and split assertions, recomputed held-out counts from prediction records, and built the PDF. These checks concern the reported pilot and its artifacts. They do not establish independent human verification or product behaviour.
 
-% Bibliography entries for the entire Anthology, followed by custom entries
-%\bibliography{custom,anthology-overleaf-1,anthology-overleaf-2}
-
-% Custom bibliography entries only
 \bibliography{custom}
-
-% \appendix
-
-% \section{Example Appendix}
-% \label{sec:appendix}
-
-% This is an appendix.
-
 \end{document}

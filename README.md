@@ -30,6 +30,12 @@ The repository includes the McMaster capstone documentation structure. The initi
 
 The Development Plan contains both the Proof of Concept Demonstration Plan and the Team Charter appendix.
 
+### November design milestone
+
+- **Design Rev −1:** [Module Guide](pdfs/Design/SoftArchitecture/MG.pdf) and [Module Interface Specification](pdfs/Design/SoftDetailedDes/MIS.pdf).
+- **CD-Fall Rev 0:** [Machine Learning Model Report](pdfs/CDs/MLReport/main.pdf) and [experiment evidence](docs/CDs/MLReport/experiment/).
+- [Design source and review issues](docs/Design/).
+
 Generated documentation is intended to be published through GitHub Pages using the repository's existing GitHub Actions workflow.
 
 ## License
