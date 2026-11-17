@@ -80,7 +80,7 @@
 \newcommand{\MaxUnitSuiteTime}{\hyperref[const:MAX_UNIT_SUITE_TIME]{\texttt{MAX\_\allowbreak{}UNIT\_\allowbreak{}SUITE\_\allowbreak{}TIME}}}
 \newcommand{\MinInstallPassRate}{\hyperref[const:MIN_INSTALL_PASS_RATE]{\texttt{MIN\_\allowbreak{}INSTALL\_\allowbreak{}PASS\_\allowbreak{}RATE}}}
 \newcommand{\MinLikertMean}{\hyperref[const:MIN_LIKERT_MEAN]{\texttt{MIN\_\allowbreak{}LIKERT\_\allowbreak{}MEAN}}}
-\newcommand{\HealthProbeInterval}{\hyperref[const:HEALTH_PROBE_INTERVAL]{\texttt{HEALTH\_\allowbreak{}PROBE\_\allowbreak{}INTERVAL}}}
+\newcommand{\AvailabilityProbeInterval}{\hyperref[const:AVAILABILITY_PROBE_INTERVAL]{\texttt{AVAILABILITY\_\allowbreak{}PROBE\_\allowbreak{}INTERVAL}}}
 \newcommand{\AvailabilityWindow}{\hyperref[const:AVAILABILITY_WINDOW]{\texttt{AVAILABILITY\_\allowbreak{}WINDOW}}}
 \newcommand{\MarginEpsilon}{\hyperref[const:MARGIN_EPSILON]{\texttt{MARGIN\_\allowbreak{}EPSILON}}}
 \newcommand{\BenchmarkTrainSize}{\hyperref[const:BENCHMARK_TRAIN_SIZE]{\texttt{BENCHMARK\_\allowbreak{}TRAIN\_\allowbreak{}SIZE}}}
@@ -134,14 +134,13 @@
 
 \title{System Verification and Validation Plan for Verity:\\Explainable, Uncertainty-Aware Digital Content Assessment\\\progname{}}
 \author{\authname}
-\date{November 2, 2026}
+\date{November 16, 2026}
 
 \begin{document}
 \emergencystretch=3em
 
 \hypersetup{pageanchor=false}
 \maketitle
-\thispagestyle{empty}
 
 \newpage
 \hypersetup{pageanchor=true}
@@ -169,12 +168,13 @@
 \addlinespace
 2026-10-28 & Calvin Salsali, Raymond Tao, Jaden Moore, Richard Han & Completed functional system tests (\texttt{FT-1}--\texttt{FT-15}) across all nine \SRS{} input equivalence classes, non-functional tests (\texttt{NFT-1}--\texttt{NFT-10}), the component unit testing strategy (\texttt{C1}--\texttt{C7}), symbolic constants, and individual reflections.\\
 \addlinespace
-2026-11-02 & Richard Han, Jaden Moore, Raymond Tao, Calvin Salsali & Cross-document consistency revision against the \SRS{} and \HA{}: corrected \SRS{} table and invariant references and NFT identifiers; separated \SRS{} constraint IDs from \HA{} component IDs; added host-page tampering test \texttt{FT-16}, claim-support, race, multi-tab, cross-origin image, rejection-path privacy, user-note, and eligibility-filter cases; pinned the baseline, reference environment, availability window, and comprehension scoring rule; added the activity assignment matrix, non-dynamic verification schedule, test harness conventions, fixture inventory, V\&V-specific parameter table, and milestone figure.\\
+2026-11-02 & Richard Han, Jaden Moore, Raymond Tao, Calvin Salsali & Aligned SRS references, lifecycle and coverage criteria. Added tampering, race and isolation cases, test environments, the fixture inventory and the milestone gates.\\
 \addlinespace
-2026-11-02 & Jaden Moore (Codex-assisted) & Specified bounded corpus sampling and evidence collection; supplied a synthetic fixture generator; separated existing checks from planned CI; defined packaged local-service installation, keyboard and branded-browser procedures, independent cleanup observations, controlled injection checks, and metric export rules.\\
+2026-11-02 & Jaden Moore (Codex-assisted) & Added reproducible fixtures, bounded sampling, installation and browser procedures, and cleanup, injection and metric evidence.\\
 \addlinespace
-2026-11-02 & Calvin Salsali (Codex-assisted) & Aligned prompt-injection gates and traceability; removed comprehension answer hints; added Unicode code-point boundary cases; clarified dataset license checks and the satire fixture; corrected the announced PoC window.\\
-\bottomrule
+2026-11-02 & Calvin Salsali (Codex-assisted) & Aligned injection gates, neutral study prompts, Unicode bounds, dataset license checks and the PoC window.\\
+\addlinespace
+2026-11-16 & OpenAI Codex-assisted follow-up requested by Jaden Moore & Updated availability, overload, abstention, false-flag comprehension and subgroup evidence criteria using the peer and TA feedback.\\
 \end{tabularx}
 \endgroup
 
@@ -318,7 +318,7 @@ This section summarizes the system under test, states the objective of the plan 
 
 \subsection{Objectives and Scope Priorities}\label{subsec:objectives}
 
-\textbf{Objective.} The objective of this plan is to produce evidence, before the Final Demo, that Verity never gives a user false reassurance, never exposes or retains a user's selection without consent, never accuses an author, and produces output that non-expert users interpret correctly. Verification effort is allocated by hazard severity in \HA{} Table~5. The plan prioritizes five mission-critical qualities, in order:
+\textbf{Objective.} Verify that Verity handles uncertainty, failed checks and private selections safely, and validate that non-experts understand its results and limitations. The tests prioritize the following qualities based on the harms described in \HA{} Table~4:
 \begin{enumerate}[leftmargin=*]
     \item \textbf{Safe failure and honest uncertainty.} Timeouts, crashes, partial results, and weak signals map to \texttt{failed} or \texttt{inconclusive} and never to a low-risk summary (\hyperref[req:SR1]{SR1}, \hyperref[req:SR3]{SR3}, \hyperref[req:SR4]{SR4}, \texttt{INV2}; hazards \hyperref[haz:H2]{H2}, \hyperref[haz:H5]{H5}, \hyperref[haz:H6]{H6}).
     \item \textbf{Privacy and least-privilege access.} Only the selected item and user note are read; no transfer without consent; no persistent raw content; bounded cleanup; no cross-session access (\hyperref[req:SR8]{SR8}, \hyperref[req:SR9]{SR9}, \texttt{INV4}; \hyperref[haz:H4]{H4}, \hyperref[haz:H9]{H9}).
@@ -434,7 +434,7 @@ Each member owns one verification area (Table~\ref{TblVnVTeam}). To prevent auth
 \addlinespace
 \textbf{Rebecca Di Filippo} & \TA{} evaluator & Reviews deliverables against course rubrics, audits traceability, evaluates demonstrations, and approves scope changes triggered by failed acceptance gates (\SRS{} Table~18).\\
 \addlinespace
-\textbf{Teams 12, 16, and 06} & Peer reviewers & Black-box inspection via GitHub Issues. Team 12 reviewed the Problem Statement and Development Plan; Team 16 reviewed the \SRS{} and \HA{} (Issues \href{https://github.com/richy1337/Verity/issues/29}{\#29}--\href{https://github.com/richy1337/Verity/issues/34}{\#34}); Team 06 reviews this plan and the design documents.\\
+\textbf{Teams 12 and 16} & Peer reviewers & Reviewed the \VnV{} Plan through \href{https://github.com/richy1337/Verity/issues/42}{Issue \#42} through \href{https://github.com/richy1337/Verity/issues/52}{\#52}. Team 16 also reviewed the \SRS{} and \HA{} in Issues \href{https://github.com/richy1337/Verity/issues/29}{\#29}--\href{https://github.com/richy1337/Verity/issues/34}{\#34}.\\
 \end{tabularx}
 
 \begin{tabularx}{\textwidth}{P{5.6cm} P{3.4cm} Y}
@@ -464,14 +464,14 @@ Code: capture and manifest audit (\texttt{C1}) & Calvin Salsali & Richard Han\\
 Privacy and security test suites & Richard Han & Jaden Moore\\
 Benchmark run and reproduction (\hyperref[test:NFT-1]{NFT-1}, \hyperref[test:NFT-7]{NFT-7}) & Raymond Tao & Richard Han\\
 Usability facilitation and scoring (\hyperref[test:NFT-2]{NFT-2}) & Calvin Salsali (facilitator, scorer 1) & Raymond Tao (scorer 2); Jaden Moore resolves disagreements\\
-This plan and the \VnV{} Report & Richard Han & All other members, Team 06, \TA{}\\
+This plan and the \VnV{} Report & Richard Han & Other team members and the \TA{}; Teams 12 and 16 reviewed this plan\\
 \end{tabularx}
 
 \subsection{SRS Verification}\label{subsec:srs-verif}
 
 The \SRS{} \cite{VeritySRS2026} is verified in four stages before each revision (Rev 0 done; Rev 1 due with the Final documentation, Weeks 24--26).
 \begin{enumerate}[leftmargin=*]
-    \item \textbf{Executable specification checks.} From the repository root, \texttt{python3 test/\allowbreak{}documentation/\allowbreak{}verify\_\allowbreak{}specification.py -{}-with-hazard} runs eight existing checks: lifecycle guard completeness/disjointness over all $2^5=32$ assignments, pending/readiness behaviour, simultaneous-event precedence, full-population metric examples, the coverage floor, and identical \texttt{SR1}--\texttt{SR9} statements in the \SRS{} and \HA{}. All eight passed during this revision's automated review. The script does not read this plan, compare all constants, or audit references/traceability. The current GitHub Actions workflow builds documents; it does not invoke this script. Jaden Moore will add the specification job by Week 09 (Nov 9) and retain its log. Until then the release reviewer runs it manually. Exit criterion: all eight checks pass, plus the separate inspection below.
+    \item \textbf{Executable specification checks.} From the repository root, \texttt{python3 test/\allowbreak{}documentation/\allowbreak{}verify\_\allowbreak{}specification.py -{}-with-hazard} runs eight existing checks: lifecycle guard completeness/disjointness over all $2^5=32$ assignments, pending/readiness behaviour, simultaneous-event precedence, full-population metric examples, the coverage floor, and identical \texttt{SR1}--\texttt{SR9} statements in the \SRS{} and \HA{}. All eight passed during this revision's automated review. The script does not read this plan, compare all constants, or audit references/traceability. The current GitHub Actions workflow builds documents; it does not invoke this script. The release reviewer runs it manually and saves the log with the reviewed commit until the specification job is added. Exit criterion: all eight checks pass, plus the separate inspection below.
     \item \textbf{Manual consistency audit.} The independent verifiers compare every constant in Table~\ref{TblVnVSymbolicConstants} with \SRS{} Table~6, check the requirement/hazard rows in Tables~\ref{TblTraceFunc}--\ref{TblClassCoverage}, and inspect the compiled PDF for unresolved references and instructor comments. They retain a signed checklist and the reviewed commit. Automating these additional checks is planned; a successful run of the existing script does not establish them.
     \item \textbf{Checklist inspection meeting.} All four members meet for 60 minutes before each revision and inspect the \SRS{} against \texttt{SRS-Checklist.pdf} and \texttt{Writing-Checklist.pdf} \cite{SmithCapTemplate}. Section authors present; the verifiers in Table~\ref{TblActivityMatrix} ask four questions of every requirement: (a) can an independent tester write a deterministic pass/fail test from the fit criterion; (b) does it state observable behaviour only; (c) does it preserve \texttt{INV1}--\texttt{INV4} under timeout, cancellation, and malformed input; (d) are its thresholds symbolic and consistent with the \HA{}. Each defect becomes a GitHub Issue. Exit criterion: no open major defect, or a deferral approved by the \TA{}.
     \item \textbf{Peer review.} Team 12 (Issues \href{https://github.com/richy1337/Verity/issues/13}{\#13}--\href{https://github.com/richy1337/Verity/issues/16}{\#16}) drove \MinBaselineDelta{}, opinion and satire abstention, and expanded personas. Team 16 (Issues \href{https://github.com/richy1337/Verity/issues/29}{\#29}--\href{https://github.com/richy1337/Verity/issues/34}{\#34}) drove the pre-admission boundary (\texttt{INV1}), the low-risk summary definition (\texttt{INV2}), and the UI and setup timing constants.
@@ -484,10 +484,31 @@ The \SRS{} \cite{VeritySRS2026} is verified in four stages before each revision 
 \begin{enumerate}[leftmargin=*, label=(\roman*)]
     \item \textbf{Pre-admission consent (Jaden Moore):} keep an unadmitted consent interaction separate from admitted execution. Invalid input has no execution status; declining a valid check displays \texttt{cancelled} without detector execution, as S.9.1 states. \hyperref[test:FT-11]{FT-11} must distinguish the display event from an admitted request transition.
     \item \textbf{Non-guarantee notice (Calvin Salsali):} document the coded \texttt{LIMIT\_\allowbreak{}NO\_\allowbreak{}GUARANTEE} entry in \texttt{limitations[]} in the \MIS{} and check its rendered wording with \hyperref[test:FT-7]{FT-7}; S.5 already permits limitations.
-    \item \textbf{Genre/scope abstention (Raymond Tao):} the \MG{} must identify the mechanism supporting \hyperref[req:FR4]{FR4}'s opinion/satire criterion and its data. Stub tests verify routing only. If real held-out cases fail, apply the \SRS{} Table~18 decision rule with the \TA{}; do not claim that fixture tagging solves genre recognition.
+    \item \textbf{Genre and task scope (Raymond Tao):} record which origin tasks the released profile supports, how it decides whether a text is in scope, and which evidence marks eligibility as uncertain. Verify with the two parts of \hyperref[test:FT-6]{FT-6}. Escalate a missing or failed real-detector gate through \SRS{} Table~18.
     \item \textbf{Document dates (Richard Han):} keep cover and revision-history dates interpretable when publishing the next \SRS{}/\HA{} revisions.
 \end{enumerate}
-Each accepted change beyond this plan is filed as an actionable issue with one owner, a due milestone, the affected requirement, exact closure evidence, and the independent verifier; a rejected suggestion retains its reason in the review record. For the separate activities rubric, Richard Han will index at least six substantive V\&V critiques on the assigned team's plan and the V\&V/\POC{} presentation's attendance, prepared questions, feedback, and follow-up issues. Earlier SRS peer reviews or the October 7 SRS/HA meeting are not counted as this deliverable's activity evidence.
+Team 23 filed six substantive outgoing reviews on DAIIM (\href{https://github.com/robertLam04/daiim/issues/190}{\#190}--\href{https://github.com/robertLam04/daiim/issues/195}{\#195}). The following register links the most relevant incoming feedback to proposed owners and evidence. Owners record the correcting revision or approved deferral and its evidence on the original issue. An independent reviewer confirms the closure condition.
+
+\begin{tabularx}{\textwidth}{P{2.9cm} P{2.7cm} Y}
+\caption{Feedback and Closure Evidence} \label{TblFeedbackEvidence}\\
+\toprule Issue & Proposed owner & Evidence required for closure\\ \midrule
+\endfirsthead
+\toprule Issue & Proposed owner & Evidence required for closure\\ \midrule
+\endhead
+\bottomrule
+\endfoot
+\href{https://github.com/richy1337/Verity/issues/42}{\#42}, \href{https://github.com/richy1337/Verity/issues/59}{\#59}, \href{https://github.com/richy1337/Verity/issues/64}{\#64} & Jaden Moore & Aligned NFR8, H7 and NFT-8; saved availability denominator, overload trace and recovery results when executed.\\
+\addlinespace
+\href{https://github.com/richy1337/Verity/issues/58}{\#58} & Raymond Tao & Frozen supported-domain rule and independently labelled FT-6 inputs with separate routing and real-detector results.\\
+\addlinespace
+\href{https://github.com/richy1337/Verity/issues/43}{\#43}, \href{https://github.com/richy1337/Verity/issues/60}{\#60} & Raymond Tao & Benchmark target rationale, baseline and common evaluation subset, subgroup rule and any scope decision.\\
+\addlinespace
+\href{https://github.com/richy1337/Verity/issues/65}{\#65} & Calvin Salsali & Screenshot of the false-flag warning and scored uncoached answers from NFT-2 when collected.\\
+\addlinespace
+\href{https://github.com/richy1337/Verity/issues/66}{\#66} & Richard Han & Commands, reviewed files, commit and actual verifiers for the disclosure checks.\\
+\addlinespace
+\href{https://github.com/richy1337/Verity/issues/45}{\#45}, \href{https://github.com/richy1337/Verity/issues/67}{\#67} & Each reflection author & Each member confirms their own account with a concrete decision, what they learned and what they will try next.\\
+\end{tabularx}
 
 \subsection{Design Verification}\label{subsec:design-verif}
 
@@ -495,7 +516,7 @@ The \MG{} \cite{VerityMG2026} and \MIS{} \cite{VerityMIS2026} (Rev $-1$ Week 10,
 \begin{enumerate}[leftmargin=*]
     \item \textbf{Checklist inspection.} Before each revision, Jaden Moore and Richard Han lead a review against \texttt{MG-Checklist.pdf} and \texttt{MIS-Checklist.pdf} \cite{SmithCapTemplate}. Pass criteria: every module hides one secret tied to a likely change (\texttt{LC1}--\texttt{LC6}); the Uses relation is acyclic; every access routine states typed inputs, outputs, state changes, and exceptions (for example \texttt{PayloadBoundsError}, \texttt{ConsentDeclinedError}, \texttt{DetectorTimeoutError}) without exposing internal data structures.
     \item \textbf{Traceability audit.} Raymond Tao and Calvin Salsali confirm that every \texttt{FR}, \texttt{NFR}, \texttt{SR}, and component \texttt{C1}--\texttt{C7} is allocated to at least one \MG{} module and that no module is orphaned.
-    \item \textbf{Design decisions required by this plan.} The \MG{} must record three decisions that tests depend on: (a) the extension-owned popup or side panel that holds authoritative results and consent controls; any in-page overlay is a non-authoritative mirror and cannot record consent (\hyperref[test:FT-16]{FT-16}, \SRS{} S.5); (b) how cross-origin image bytes are obtained without persistent \texttt{<all\_urls>} access (\hyperref[test:FT-1]{FT-1} Case D); (c) which signal implements opinion and satire abstention (Section~\ref{subsec:srs-verif}, action iii).
+    \item \textbf{Design decisions required by this plan.} The \MG{} must record three decisions that tests depend on: (a) the extension-owned popup or side panel that holds authoritative results and consent controls; any in-page overlay is a non-authoritative mirror and cannot record consent (\hyperref[test:FT-16]{FT-16}, \SRS{} S.5); (b) how cross-origin image bytes are obtained without persistent \texttt{<all\_urls>} access (\hyperref[test:FT-1]{FT-1} Case D); (c) which signal establishes supported or uncertain task scope (Section~\ref{subsec:srs-verif}, action iii). The MIS walkthrough must also show how an admission acknowledgement and terminal update reach the same browser view and how cancel and timeout affect late replies.
     \item \textbf{Walkthroughs and peer review.} The team walks UC1--UC4 through the \MIS{} interfaces and confirms that (a) the \UUID{}v4 binding survives async worker boundaries, (b) cleanup hooks run on all terminal states within \MaxRetentionTime{}, and (c) swapping detector weights changes no \UI{} or coordinator module (\hyperref[req:NFR9]{NFR9}). Team 06 inspects the \MG{} and \MIS{} in Week 16; issues are resolved before Rev 0.
 \end{enumerate}
 
@@ -505,7 +526,7 @@ This plan is verified with four mechanisms.
 \begin{enumerate}[leftmargin=*]
     \item \textbf{Checklist audit.} All members inspect the plan against \texttt{VnV-Checklist.pdf} and \texttt{Writing-Checklist.pdf} \cite{SmithCapTemplate}. Pass criteria: every system test states its control, initial state, input, expected output, derivation, procedure, and requirements; every acceptance threshold is a constant from Table~\ref{TblVnVSymbolicConstants} or Table~\ref{TblVnVTestParams}; every test and requirement identifier in Tables~\ref{TblTraceFunc}--\ref{TblClassCoverage} is a hyperlink.
     \item \textbf{Coverage audit.} Richard Han confirms that every \texttt{FR}, \texttt{NFR}, \texttt{NFR.E}, \texttt{SR}, hazard, and \SRS{} Table~17 class has at least one test (Tables~\ref{TblTraceFunc}, \ref{TblTraceNFR}, \ref{TblClassCoverage}) and that every \HA{} Table~4 verification method has a test or a non-dynamic activity.
-    \item \textbf{\TA{} walkthrough and peer review.} The team presents the plan to the \TA{}; Team 06 files issues on it.
+    \item \textbf{\TA{} walkthrough and peer review.} Retain the walkthrough feedback and peer issues. Use Table~\ref{TblFeedbackEvidence} to track the evidence needed to resolve findings.
     \item \textbf{Fault seeding.} During harness implementation (Weeks 09--18), the team seeds faults and confirms that tests fail: removing the buffer release (\hyperref[test:FT-12]{FT-12} must fail), removing a source tag (\hyperref[test:FT-8]{FT-8}), adding a $+0.15$ \FPR{} offset to the \ESL{} slice (\hyperref[test:NFT-10]{NFT-10}), mapping a timeout to a low-risk summary (\hyperref[test:FT-10]{FT-10}), and echoing input in a 422 body (\hyperref[test:FT-2]{FT-2}).
 \end{enumerate}
 
@@ -537,7 +558,7 @@ The source code (\texttt{src/\allowbreak{}extension/}, \texttt{src/\allowbreak{}
 \endhead
 \bottomrule
 \endfoot
-Executable specification checks & \SRS{}, \HA{} & Jaden Moore; CI planned Week 09 & Each docs revision; each docs PR after wiring & All eight checks pass; manual constant/trace audit retained\\
+Executable specification checks & \SRS{}, \HA{} & Jaden Moore; manual until CI is wired & Each document revision and then each document PR & All eight checks pass; manual constant/trace audit retained\\
 \addlinespace
 \SRS{}/\HA{} checklist inspection & \SRS{}, \HA{} & All members & Before each revision & No open major defect\\
 \addlinespace
@@ -557,7 +578,7 @@ Code walkthrough & Request path & All members & Weeks 10, 18 & Findings filed an
 \addlinespace
 Lexical \UI{} audit (\HA{} H1, H5) & \UI{} strings, templates & Calvin Salsali, Richard Han & Weeks 10, 18 & Zero accusatory or guarantee terms (\texttt{FX-LEX})\\
 \addlinespace
-Plan checklist audit & This plan & All members, Team 06 & Week 08 & Section~\ref{subsec:vnv-verif} criteria met\\
+Plan checklist audit & This plan & All members; peer review from Teams 12 and 16 & Each revision & Section~\ref{subsec:vnv-verif} criteria met\\
 \end{tabularx}
 
 \subsection{Automated Testing and Verification Tools}\label{subsec:tools}
@@ -611,7 +632,7 @@ Verification checks that Verity meets its specification. Validation checks that 
     \item \textbf{Winter Usability and Comprehension Evaluation (\hyperref[test:NFT-2]{NFT-2}, \hyperref[test:NFT-6]{NFT-6}, CD-Winter).} In Weeks 19--21, after Rev 0, the team runs a task-based study with $\ge$ \MinUsabilityParticipants{} unpaid volunteers from the McMaster community, at least three per \SRS{} persona (everyday reader, \ESL{}-aware student editor, community moderator), under the course usability testing guidelines. Each participant signs a consent form; only an anonymous participant ID, task times, and answers are recorded. Each session takes about 30 minutes on a reset team-owned laptop and uses \texttt{FX-USE} (Appendix~\ref{subsec:fixtures}). Task 0 starts with no installed Verity service, Python/CUDA runtime, models, or extension; the release bundle contains the local-service launcher, bundled runtime/model files, unpacked extension, and User Guide. After Task 0, Tasks 1--3 use that installed release build. A separate onboarding item prevents prior exposure to the scored scenarios. Status labels in this plan are facilitator-only; participant prompts use neutral item numbers. ESL authorship alone is not a reason to abstain.
     \begin{itemize}[leftmargin=*]
         \item \emph{Task 0 (installation):} extract the complete release bundle, launch its graphical local-service application, load the extension in developer mode, and run a first check using only the two-page User Guide (\hyperref[req:NFR6]{NFR6}). Developer mode is used because a Chrome Web Store listing requires a registration fee, which \texttt{SRS-C4} excludes.
-        \item \emph{Task 1 (\texttt{completed}):} inspect a strong-signal item and identify the status, the primary evidence, and its source tag.
+        \item \emph{Task 1 (flagged result):} inspect the strong-signal fixture and identify the status, primary evidence, source tag and meaning of the false-flag warning.
         \item \emph{Task 2 (\texttt{inconclusive}):} inspect the satirical \ESL{}-style passage in \texttt{FX-USE} and explain whether Verity accuses the author or abstains, and why.
         \item \emph{Task 3 (\texttt{failed}):} inspect a timeout induced by a controlled provider/proxy delay and state whether the item can be trusted; production test-mode flags remain off.
     \end{itemize}
@@ -659,7 +680,7 @@ Functional and safety tests are grouped into four areas that follow the \SRS{} s
 
 These tests verify that the extension reads only the selected item after an explicit gesture (\hyperref[req:FR1]{FR1}, \hyperref[req:SR8]{SR8}) and that \texttt{C3} rejects invalid input before admission (\hyperref[req:FR2]{FR2}, \hyperref[req:SR6]{SR6}).
 
-\vnvcase{test:FT-1}{FT-1}{User-Triggered Scoped Selection and Restricted-Page Boundary}
+\vnvcase{test:FT-1}{FT-1}{Scoped Selection}
 \begin{itemize}[leftmargin=*]
     \item \textbf{Control:} Dynamic, automatic (Playwright with request logging on the extension and backend).
     \item \textbf{Initial State:} Release build loaded; \texttt{FX-PAGE-SCOPE} served from origin A, containing a 500-character paragraph \texttt{\#target}, surrounding paragraphs containing \texttt{CANARY\_\allowbreak{}SECRET\_\allowbreak{}PII}, a same-origin $512 \times 512$ PNG, and a $512 \times 512$ PNG from origin B; a second tab on \texttt{chrome://\allowbreak{}extensions}.
@@ -670,7 +691,7 @@ These tests verify that the extension reads only the selected item after an expl
     \item \textbf{Relevant Requirements:} \hyperref[req:FR1]{FR1}, \hyperref[req:SR8]{SR8}, \hyperref[req:NFR.E.3]{NFR.E.3}, \hyperref[haz:H4]{H4}.
 \end{itemize}
 
-\vnvcase{test:FT-2}{FT-2}{Text Length Boundaries and Rejection-Path Privacy}
+\vnvcase{test:FT-2}{FT-2}{Text Validation and Privacy}
 \begin{itemize}[leftmargin=*]
     \item \textbf{Control:} Dynamic, automatic (pytest with FastAPI TestClient; Playwright for the \UI{} message).
     \item \textbf{Initial State:} \texttt{C3} and the extension active; detector entry point wrapped by a call counter set to 0; log and response sinks monitored.
@@ -681,7 +702,7 @@ These tests verify that the extension reads only the selected item after an expl
     \item \textbf{Relevant Requirements:} \hyperref[req:FR2]{FR2}, \hyperref[req:SR6]{SR6}, \hyperref[req:SR8]{SR8}, \hyperref[haz:H2]{H2}, \hyperref[haz:H4]{H4}, \hyperref[haz:H7]{H7}.
 \end{itemize}
 
-\vnvcase{test:FT-3}{FT-3}{Image Dimension, Byte Size, and Decompression-Bomb Rejection}
+\vnvcase{test:FT-3}{FT-3}{Image Limits and Bomb Rejection}
 \begin{itemize}[leftmargin=*]
     \item \textbf{Control:} Dynamic, automatic (pytest, Pillow fixtures, psutil).
     \item \textbf{Initial State:} \texttt{C3} active with \MinImageDim{} $= 64 \times 64$, \MaxImageDim{} $= 4096 \times 4096$, \MaxImageSize{} $= 10.0\text{ MB} = 10{,}000{,}000$ bytes.
@@ -692,7 +713,7 @@ These tests verify that the extension reads only the selected item after an expl
     \item \textbf{Relevant Requirements:} \hyperref[req:FR2]{FR2}, \hyperref[req:SR6]{SR6}, \hyperref[haz:H2]{H2}, \hyperref[haz:H7]{H7}.
 \end{itemize}
 
-\vnvcase{test:FT-4}{FT-4}{Unsupported Formats, Magic-Byte Mismatch, and Inert Rendering}
+\vnvcase{test:FT-4}{FT-4}{Unsupported Formats and Inert Rendering}
 \begin{itemize}[leftmargin=*]
     \item \textbf{Control:} Dynamic, automatic (pytest with Hypothesis; Playwright on the test build).
     \item \textbf{Initial State:} \texttt{C3} and \texttt{C2} active; \texttt{window.\_\allowbreak{}\_xss\_\allowbreak{}triggered = false} on the host page and in every extension page.
@@ -707,29 +728,24 @@ These tests verify that the extension reads only the selected item after an expl
 
 These tests verify grounded, source-tagged, non-accusatory output (\hyperref[req:FR3]{FR3}, \hyperref[req:FR7]{FR7}, \hyperref[req:FR13]{FR13}), safe abstention (\hyperref[req:FR4]{FR4}, \hyperref[req:FR5]{FR5}), and resistance to injected instructions (\hyperref[req:SR5]{SR5}).
 
-\vnvcase{test:FT-5}{FT-5}{Evidence-Backed Output and Non-Accusatory Wording}
+\vnvcase{test:FT-5}{FT-5}{Evidence and False-Flag Warning}
 \begin{itemize}[leftmargin=*]
-    \item \textbf{Control:} Dynamic, automatic (pytest schema and lexical check; Playwright \UI{} check).
-    \item \textbf{Initial State:} Full pipeline (\texttt{C1}--\texttt{C6}) with stub scores outside the abstention band.
-    \item \textbf{Input:} \texttt{FX-EVID}: 10 items (5 synthetic or manipulated, 5 authentic; text and images; Classes 1 and 2).
-    \item \textbf{Output:} Every response has \texttt{status = completed}, validates against the S.5 response schema, and contains (a) a non-accusatory summary, (b) $\ge 1$ entry in \texttt{signals[]}, each with a source tag in $\mathcal{E}_{\text{src}}$ and a non-empty locator, (c) a non-null \texttt{uncertainty} and non-empty \texttt{limitations[]}. Rendered text and response strings contain zero terms from \texttt{FX-LEX/accusatory.txt}.
-    \item \textbf{Test Case Derivation:} \hyperref[req:FR3]{FR3}, \hyperref[req:SR1]{SR1}, \hyperref[req:SR2]{SR2}, and the well-formed result invariant (\SRS{} S.9.1 item 4) (\hyperref[haz:H1]{H1}, \hyperref[haz:H5]{H5}).
-    \item \textbf{How Test Will Be Performed:} pytest validates each response with the Pydantic schema and matches the lexicon; Playwright repeats the lexicon match on rendered text.
-    \item \textbf{Relevant Requirements:} \hyperref[req:FR3]{FR3}, \hyperref[req:SR1]{SR1}, \hyperref[req:SR2]{SR2}, \hyperref[haz:H1]{H1}, \hyperref[haz:H5]{H5}.
+    \item \textbf{Setup.} Drive the analysis service and extension with stub scores and known grounded observations. Use pytest for the response contract and Playwright for the actual card.
+    \item \textbf{Input.} Run the ten \texttt{FX-EVID} cases and the additional \texttt{abstention/false-flag.txt} fixture. In the last case, the scenario treats the item as authentic and the stub deliberately produces a supported higher-signal result using a fixed observed locator in the selected text.
+    \item \textbf{Pass.} Every result is \texttt{completed}, conforms to the SRS S.5 response contract, and displays uncertainty, limitations and at least one source-tagged, locatable observation. The response and UI contain no accusatory terms. Every higher-signal card visibly communicates that authentic content can be flagged in the same view as the result. The deliberate false-flag fixture fails this test if the warning is absent, hidden, or replaced by a generic non-guarantee.
+    \item \textbf{Evidence.} Save the response and card capture keyed by fixture. Inspect the wording with the lexical check and an independent reviewer. \hyperref[test:NFT-2]{NFT-2} separately tests comprehension.
+    \item \textbf{Trace.} \hyperref[req:FR3]{FR3}, \hyperref[req:SR1]{SR1}, \hyperref[req:SR2]{SR2}, \hyperref[haz:H1]{H1}, \hyperref[haz:H5]{H5}.
 \end{itemize}
 
-\vnvcase{test:FT-6}{FT-6}{Abstention on Borderline, Conflicting, and Out-of-Domain Inputs}
+\vnvcase{test:FT-6}{FT-6}{Safe Abstention}
 \begin{itemize}[leftmargin=*]
-    \item \textbf{Control:} Dynamic, automatic (pytest; stub detectors in CI, real detectors at the milestone gate).
-    \item \textbf{Initial State:} \texttt{C6} with the frozen $\tau_{\text{abs}}$ from CD-Fall.
-    \item \textbf{Input:} \texttt{FX-ABST} (Classes 3 and 4): (1) 10 borderline items with $\hat{p} \in (\tau_{\text{low}}, \tau_{\text{high}})$ (stub mode) or drawn from validation-split items in that band (milestone mode); (2) 5 \CTwoPA{}-valid camera photos with a scripted detector score $\hat{p} = 0.88$; (3) 20 team-written items with $200 \le L_T \le 1{,}500$: 7 opinion editorials, 7 satirical news excerpts, 6 poems.
-    \item \textbf{Output:} All 35 items return \texttt{inconclusive} with a banner naming the reason (borderline margin, provenance conflicting with the statistical signal, or out-of-domain genre). No directional claim and no low-risk summary element is rendered (\texttt{INV2}).
-    \item \textbf{Test Case Derivation:} \hyperref[req:FR4]{FR4}, \hyperref[req:SR1]{SR1}, \SRS{} Table~17 Classes 3 and 4, Peer Issue~\href{https://github.com/richy1337/Verity/issues/15}{\#15} (\hyperref[haz:H1]{H1}, \hyperref[haz:H2]{H2}, \hyperref[haz:H5]{H5}). \emph{Feasibility dependency:} input set 3 requires the genre or scope signal named in the \MG{} (Section~\ref{subsec:srs-verif}, action iii).
-    \item \textbf{How Test Will Be Performed:} pytest runs all three sets through the pipeline and asserts status, reason code, and absence of the low-risk summary.
-    \item \textbf{Relevant Requirements:} \hyperref[req:FR4]{FR4}, \hyperref[req:SR1]{SR1}, \hyperref[req:SR2]{SR2}, \hyperref[haz:H1]{H1}, \hyperref[haz:H2]{H2}, \hyperref[haz:H5]{H5}.
+    \item \textbf{A. Routing with stubs (PR gate).} Inject frozen feature records for both score directions just inside and outside the abstention band, a grounded provenance conflict, unsupported opinion and satire, and uncertain task eligibility. Use the generated opinion, satire and ambiguous texts in \texttt{FX-ABST}. Every inside-band, conflicting, unsupported or uncertain case must reach \texttt{inconclusive} with the correct reason, visible uncertainty and no directional or low-risk summary. Use the frozen lower and upper thresholds $\tau_{\text{low}}$ and $\tau_{\text{high}}$ with score offsets $10^{-4}$ on either side; the supported, agreeing outside-band controls must reach \texttt{completed}.
+    \item \textbf{B. Real detectors (milestone gate).} Before running the frozen profile, commit an independent manifest with at least five eligible examples per category: unsupported ordinary opinion, unsupported satire, uncertain task eligibility and supported controls. Two reviewers apply the written eligibility rule to the input alone, resolve disagreements and freeze expected outcomes. Separate these source groups from all training and calibration data. Do not supply the expected labels or preset scores to the product.
+    \item \textbf{Pass B.} The first three categories return \texttt{inconclusive} with a scope/eligibility reason and a next step. Supported controls must reach the detector. Their genuine evidence and calibrated margins determine the final status. Across the separately frozen held-out \hyperref[test:NFT-1]{NFT-1} input manifest, record calibrated scores before abstention in the offline run trace. Require at least one in-band score per retained modality and check that every in-band result abstains. Log inputs reaching validation or detector errors separately; an error does not count as abstention. Missing a profile, a required category or an in-band example blocks this gate; wrong status, reason or directional output fails it. Use the \SRS{} Table~18 scope decision for a failed or blocked milestone gate.
+    \item \textbf{Evidence and trace.} Retain both runs, showing case IDs, profile hash, eligibility decisions and rendered states. \hyperref[req:FR4]{FR4}, \hyperref[req:SR1]{SR1}, \hyperref[haz:H1]{H1}, \hyperref[haz:H2]{H2}, \hyperref[haz:H5]{H5}.
 \end{itemize}
 
-\vnvcase{test:FT-7}{FT-7}{Independent Verification Guidance and Non-Guarantee Notice}
+\vnvcase{test:FT-7}{FT-7}{Independent Verification Guidance}
 \begin{itemize}[leftmargin=*]
     \item \textbf{Control:} Dynamic, automatic (pytest; Playwright).
     \item \textbf{Initial State:} \texttt{C2} and \texttt{C6} active with stub scores.
@@ -740,7 +756,7 @@ These tests verify grounded, source-tagged, non-accusatory output (\hyperref[req
     \item \textbf{Relevant Requirements:} \hyperref[req:FR5]{FR5}, \hyperref[req:SR3]{SR3}, \hyperref[haz:H2]{H2}, \hyperref[haz:H5]{H5}.
 \end{itemize}
 
-\vnvcase{test:FT-8}{FT-8}{Source Tagging, Claim Support, and Prompt-Injection Resistance}
+\vnvcase{test:FT-8}{FT-8}{Evidence Grounding and Injection}
 \begin{itemize}[leftmargin=*]
     \item \textbf{Control:} Dynamic, automatic (pytest adversarial suite).
     \item \textbf{Initial State:} \texttt{C6} active; controlled run uses identical frozen detector/provenance feature outputs for each clean/injected pair; a separate milestone run uses real detectors. The reference registry \texttt{test/\allowbreak{}fixtures/\allowbreak{}references.json} lists the only external sources the system may cite.
@@ -766,7 +782,7 @@ These tests verify grounded, source-tagged, non-accusatory output (\hyperref[req
 
 These tests verify the \SRS{} S.9.1 condition table and \texttt{INV1}--\texttt{INV4}: timeout and error handling (\hyperref[req:FR6]{FR6}, \hyperref[req:SR4]{SR4}), consent (\hyperref[req:FR8]{FR8}), cleanup (\hyperref[req:FR9]{FR9}, \hyperref[req:SR8]{SR8}), isolation (\hyperref[req:FR10]{FR10}, \hyperref[req:SR7]{SR7}, \hyperref[req:SR9]{SR9}), cancellation (\hyperref[req:FR11]{FR11}), and integrity of controls on hostile pages (\SRS{} S.5).
 
-\vnvcase{test:FT-10}{FT-10}{Lifecycle Exclusivity, Timeout, and Partial-Failure Handling}
+\vnvcase{test:FT-10}{FT-10}{Request States and Failures}
 \begin{itemize}[leftmargin=*]
     \item \textbf{Control:} Dynamic, automatic (pytest-asyncio fault injection; Playwright).
     \item \textbf{Initial State:} \texttt{C4} and \texttt{C2} active; \MaxResponseTime{} $= 10.0$\,s.
@@ -777,7 +793,7 @@ These tests verify the \SRS{} S.9.1 condition table and \texttt{INV1}--\texttt{I
     \item \textbf{Relevant Requirements:} \hyperref[req:FR6]{FR6}, \hyperref[req:FR4]{FR4}, \hyperref[req:SR4]{SR4}, \hyperref[req:NFR3]{NFR3}, \hyperref[req:NFR8]{NFR8}, \hyperref[haz:H6]{H6}.
 \end{itemize}
 
-\vnvcase{test:FT-11}{FT-11}{Informed Consent Gate and External Transfer Control}
+\vnvcase{test:FT-11}{FT-11}{Consent and External Transfer}
 \begin{itemize}[leftmargin=*]
     \item \textbf{Control:} Dynamic, automatic (Playwright; pytest-socket in CI; tcpdump at the milestone gate).
     \item \textbf{Initial State:} An optional external provider is configured; the backend allows outbound sockets only to the provider host; tcpdump captures traffic to that host.
@@ -788,7 +804,7 @@ These tests verify the \SRS{} S.9.1 condition table and \texttt{INV1}--\texttt{I
     \item \textbf{Relevant Requirements:} \hyperref[req:FR8]{FR8}, \hyperref[req:FR9]{FR9}, \hyperref[req:SR8]{SR8}, \hyperref[req:NFR4]{NFR4}, \hyperref[haz:H4]{H4}.
 \end{itemize}
 
-\vnvcase{test:FT-12}{FT-12}{No Persistent Storage and Bounded Cleanup on Every Path}
+\vnvcase{test:FT-12}{FT-12}{Transient Cleanup and Storage}
 \begin{itemize}[leftmargin=*]
     \item \textbf{Control:} Dynamic, automatic (pytest with buffer-registry inspection and sink monitoring).
     \item \textbf{Initial State:} \texttt{C5} exposes its registry and task set. Test-owned weak references observe application-owned raw-buffer wrappers, worker handoffs and closures independently of registry membership; the harness releases its own strong references before the deadline. All sinks in Section~\ref{subsec:harness} are monitored. A negative control retains a raw wrapper in an unregistered worker closure and must fail even when the registry is empty.
@@ -799,7 +815,7 @@ These tests verify the \SRS{} S.9.1 condition table and \texttt{INV1}--\texttt{I
     \item \textbf{Relevant Requirements:} \hyperref[req:FR9]{FR9}, \hyperref[req:NFR4]{NFR4}, \hyperref[req:SR8]{SR8}, \hyperref[haz:H4]{H4}.
 \end{itemize}
 
-\vnvcase{test:FT-13}{FT-13}{Request Binding, Out-of-Order Responses, Multi-Tab, and Cross-Session Isolation}
+\vnvcase{test:FT-13}{FT-13}{Request and Session Isolation}
 \begin{itemize}[leftmargin=*]
     \item \textbf{Control:} Dynamic, automatic (pytest-asyncio with \texttt{httpx.AsyncClient}; Playwright multi-tab and multi-context).
     \item \textbf{Initial State:} \texttt{C4} and \texttt{C2} active.
@@ -810,7 +826,7 @@ These tests verify the \SRS{} S.9.1 condition table and \texttt{INV1}--\texttt{I
     \item \textbf{Relevant Requirements:} \hyperref[req:FR10]{FR10}, \hyperref[req:SR7]{SR7}, \hyperref[req:SR9]{SR9}, \hyperref[haz:H8]{H8}, \hyperref[haz:H9]{H9}.
 \end{itemize}
 
-\vnvcase{test:FT-14}{FT-14}{In-Flight Cancellation, Cancellation-at-Completion Race, and Late-Response Suppression}
+\vnvcase{test:FT-14}{FT-14}{Cancellation and Late Replies}
 \begin{itemize}[leftmargin=*]
     \item \textbf{Control:} Dynamic, automatic (Playwright; FastAPI TestClient; completion barrier in test mode).
     \item \textbf{Initial State:} A valid request $r$ is \texttt{pending} with a 4.0\,s detector delay.
@@ -821,7 +837,7 @@ These tests verify the \SRS{} S.9.1 condition table and \texttt{INV1}--\texttt{I
     \item \textbf{Relevant Requirements:} \hyperref[req:FR11]{FR11}, \hyperref[req:FR9]{FR9}, \hyperref[req:SR7]{SR7}, \hyperref[req:SR8]{SR8}, \hyperref[req:NFR4]{NFR4}, \hyperref[haz:H4]{H4}, \hyperref[haz:H8]{H8}.
 \end{itemize}
 
-\vnvcase{test:FT-16}{FT-16}{Host-Page Tampering with Consent and Result Controls}
+\vnvcase{test:FT-16}{FT-16}{Host-Page Tampering}
 \begin{itemize}[leftmargin=*]
     \item \textbf{Control:} Dynamic, automatic (Playwright on the release build).
     \item \textbf{Initial State:} \texttt{FX-PAGE-HOSTILE} runs main-world attacks after the extension-owned consent prompt/result surface is available. A compliant external provider is configured; provider traffic and the authoritative consent/status record are observed independently.
@@ -834,7 +850,7 @@ These tests verify the \SRS{} S.9.1 condition table and \texttt{INV1}--\texttt{I
 
 \subsubsection{Area 4: Offline Benchmark Logging and Subgroup Reporting (\texttt{S4})}\label{subsubsec:area4}
 
-\vnvcase{test:FT-15}{FT-15}{Benchmark Artifact Logging, Split Disjointness, Eligibility, and Slice Reporting}
+\vnvcase{test:FT-15}{FT-15}{Benchmark Artifacts and Splits}
 \begin{itemize}[leftmargin=*]
     \item \textbf{Control:} Dynamic, automatic (pytest driving the \CLI{}).
     \item \textbf{Initial State:} \texttt{C7} with manifests \texttt{FX-BENCH}: a clean manifest with subgroup tags (\texttt{native\_\allowbreak{}prose}, \texttt{esl\_\allowbreak{}prose}, \texttt{academic\_\allowbreak{}formal}, \texttt{camera\_\allowbreak{}original}, \texttt{social\_\allowbreak{}recompressed}); a leaky manifest with one source ID in both train and test and one near-duplicate pair; a manifest containing 50 CIFAKE $32 \times 32$ images.
@@ -871,14 +887,12 @@ Each \texttt{NFT-}$k$ verifies \texttt{NFR}$k$. Tests are grouped into detection
     \item \textbf{Relevant Requirements:} \hyperref[req:NFR7]{NFR7}, \hyperref[req:FR12]{FR12}, \hyperref[haz:H10]{H10}.
 \end{itemize}
 
-\vnvcase{test:NFT-10}{NFT-10}{ESL and Re-Compressed Image Fairness Audit}
+\vnvcase{test:NFT-10}{NFT-10}{Subgroup Reporting and Disclosure}
 \begin{itemize}[leftmargin=*]
-    \item \textbf{Type:} Fairness; dynamic, automatic; milestone gate.
-    \item \textbf{Initial State:} \texttt{C7} and \texttt{C2} with subgroup-tagged negative (authentic) slices: native-English, \ESL{}, and formal academic prose; camera-original and JPEG re-encoded photos (quality 70 and 50).
-    \item \textbf{Input/Condition:} The \hyperref[test:FT-15]{FT-15} slice evaluator on all tagged subgroups.
-    \item \textbf{Output/Result:} (1) Report assessed and full \FPR{}, negative-class coverage, denominators, and 95\% Wilson intervals for each subgroup, including both \ESL{}--native and formal--native differences. Each required authentic slice has at least \MinFairnessSliceSize{} source-distinct items. Two-class Macro-$F_1$ is marked not applicable on authentic-only slices; UT-C7 rejects a missing class in the main two-class benchmark, not these \FPR{} audits. An empty/undersized required slice blocks the audit, and $A_0=0$ is an undefined assessed \FPR{}, not zero. (2) If either defined subgroup \FPR{} exceeds \MaxFPR{}, add that subgroup limitation to \texttt{limitations[]} and verify its rendered wording. Undefined assessment is disclosed as insufficient evidence. Intervals describe uncertainty; they do not replace the \SRS{} point-estimate gate.
-    \item \textbf{How Test Will Be Performed:} Runs during \hyperref[test:NFT-1]{NFT-1}; the \UI{} check uses Playwright.
-    \item \textbf{Relevant Requirements:} \hyperref[req:NFR10]{NFR10}, \hyperref[req:FR3]{FR3}, \hyperref[req:FR14]{FR14}, \hyperref[req:SR1]{SR1}, \hyperref[req:SR2]{SR2}, \hyperref[haz:H1]{H1}, \hyperref[haz:H10]{H10}.
+    \item \textbf{Input:} Run the frozen \hyperref[test:FT-15]{FT-15} evaluator on the authentic native, ESL and formal text slices and on camera originals and paired quality-70 and quality-50 JPEGs for each retained modality. Use the minimum source-group counts and saved subgroup labels in Appendix~\ref{subsec:data-protocol}.
+    \item \textbf{Pass:} Recompute assessed and full-population false-positive rates, negative-class coverage, denominators, differences and 95\% Wilson intervals for each subgroup rate from the raw outcomes. The report must agree and every defined subgroup rate above \MaxFPR{} must produce a visible, specific limitation in the product. A rate above the ceiling can satisfy the disclosure criterion if it is accurately reported and disclosed. The overall model gates in \hyperref[test:NFT-1]{NFT-1} and the scope decision still apply.
+    \item \textbf{Fail or blocked:} Missing or incorrect reporting or disclosure for an evaluable slice fails the test. A required slice with too few source groups or zero assessed negatives blocks completion and must be marked as insufficient evidence, with any independently observed failures also recorded. Report authentic-only Macro-$F_1$ as inapplicable.
+    \item \textbf{Evidence and trace:} Save counts, report and Playwright captures of limitations for each triggered slice. \hyperref[req:NFR10]{NFR10}, \hyperref[req:FR3]{FR3}, \hyperref[req:FR14]{FR14}, \hyperref[haz:H1]{H1}, \hyperref[haz:H10]{H10}.
 \end{itemize}
 
 \subsubsection{Usability, Accessibility, Portability, and Installability (\texttt{NFR2}, \texttt{NFR5}, \texttt{NFR6})}\label{subsubsec:nfr-usability}
@@ -935,14 +949,12 @@ Each \texttt{NFT-}$k$ verifies \texttt{NFR}$k$. Tests are grouped into detection
     \item \textbf{Relevant Requirements:} \hyperref[req:NFR4]{NFR4}, \hyperref[req:FR8]{FR8}, \hyperref[req:FR9]{FR9}, \hyperref[req:FR11]{FR11}, \hyperref[req:SR8]{SR8}, \hyperref[haz:H4]{H4}.
 \end{itemize}
 
-\vnvcase{test:NFT-8}{NFT-8}{Availability, Fault Recovery, and Concurrent Load}
+\vnvcase{test:NFT-8}{NFT-8}{Availability, Recovery and Overload}
 \begin{itemize}[leftmargin=*]
-    \item \textbf{Type:} Reliability and availability; dynamic, automatic; milestone gate.
-    \item \textbf{Initial State:} Service and extension active; a monitor calls \texttt{GET /healthz} every \HealthProbeInterval{}.
-    \item \textbf{Input/Condition:} Over an evaluation window of \AvailabilityWindow{}, the script repeats two phases: (1) 50 malformed, oversized, bomb, and simulated-timeout requests back to back; (2) 50 valid requests in bursts of \MaxConcurrentReqs{} across several sessions.
-    \item \textbf{Output/Result:} Availability (successful health probes divided by all probes in the window) is $\ge$ \MinServiceUptime{}; no unhandled crash or deadlock occurs; every Phase 1 request ends in pre-admission rejection or \texttt{failed}; every Phase 2 request completes with correct \UUID{}v4 binding.
-    \item \textbf{How Test Will Be Performed:} pytest with \texttt{httpx.AsyncClient} drives the load while the monitor logs probes and worker liveness.
-    \item \textbf{Relevant Requirements:} \hyperref[req:NFR8]{NFR8}, \hyperref[req:FR2]{FR2}, \hyperref[req:FR6]{FR6}, \hyperref[req:FR10]{FR10}, \hyperref[req:SR4]{SR4}, \hyperref[req:SR6]{SR6}, \hyperref[req:SR7]{SR7}, \hyperref[req:SR9]{SR9}, \hyperref[haz:H6]{H6}--\hyperref[haz:H9]{H9}.
+    \item \textbf{A. End-to-end availability.} On the ready reference build with real detectors, schedule one check every \AvailabilityProbeInterval{} starting at the beginning of the \AvailabilityWindow{} window, for 120 scheduled checks. Alternate selecting the text and same-origin image on the generated \texttt{FX-PAGE-SCOPE} page and trigger each from the extension. If a modality is explicitly deferred under \SRS{} Table~18, run the retained modality and record the scope. Use the team-service route. Each scheduled check must reach a correctly bound \texttt{completed} or \texttt{inconclusive} card with its required fields by \MaxResponseTime{} plus \MaxUiRenderLatency{} from the scheduled time. Missed, late, misbound and failed checks stay in the denominator as downtime. At least 119 of 120 must pass (\MinServiceUptime{}). Save the scheduled and observed times, request key, status and failure reason. Health endpoint results are diagnostic.
+    \item \textbf{B. Fault recovery.} Send 50 consecutive fault cases, cycling through the 10{,}000{,}001-code-point text, mislabelled SVG, bomb header, a valid check held past its deadline, and a valid check with an injected unrecoverable dependency error. Wait for each outcome. The first three must be rejected before admission. The last two must report \texttt{failed} with the respective reason and no low-risk summary. If a provider route is enabled, repeat the dependency fault with a stub provider after fixture-specific consent. Release the fault injection and run one fresh valid text and image check. Both must produce a usable, correctly bound terminal result without restarting the service.
+    \item \textbf{C. Valid-request overload.} Record the configured simultaneous admission capacity $C \ge \MaxConcurrentReqs{}$. Across distinct sessions, submit $C$ valid inputs and hold their workers after admission at a test barrier. While they are pending, send one more valid request and require a prompt pre-admission busy response with no worker started. Release the barrier before the deadline. Every admitted request must keep its binding and receive the fixture's expected terminal result. A fresh check must be admitted and succeed after capacity is freed. Retain the admission, worker and result trace for each key.
+    \item \textbf{Execution and trace.} Use Playwright for A and for rendered fault/busy states, and pytest/HTTPX for fault injection and the overload barrier. Report B and C separately from the availability window. \hyperref[req:NFR8]{NFR8}, \hyperref[req:FR2]{FR2}, \hyperref[req:FR6]{FR6}, \hyperref[req:FR10]{FR10}, \hyperref[haz:H6]{H6}--\hyperref[haz:H9]{H9}.
 \end{itemize}
 
 \vnvcase{test:NFT-9}{NFT-9}{Detector Modularity, Style Compliance, and License Manifest}
@@ -1016,7 +1028,7 @@ Table~\ref{TblTraceFunc} maps every \texttt{FR} and \texttt{SR} to tests. Table~
 \phantomsection\label{req:NFR5}\textbf{NFR5} & Browser compatibility & \hyperref[test:NFT-5]{NFT-5}, \hyperref[test:FT-1]{FT-1} & $100\%$ UC1--UC4 pass on three \OS{}es\\
 \phantomsection\label{req:NFR6}\textbf{NFR6} & Installability & \hyperref[test:NFT-6]{NFT-6} & $\le$ \MaxInstallTime{}; $\le$ \MaxDevSetupTime{}\\
 \phantomsection\label{req:NFR7}\textbf{NFR7} & Evaluation reproducibility & \hyperref[test:NFT-7]{NFT-7}, \hyperref[test:FT-15]{FT-15} & $|\Delta| \le$ \MaxReproDelta{}\\
-\phantomsection\label{req:NFR8}\textbf{NFR8} & Reliability and fault isolation & \hyperref[test:NFT-8]{NFT-8}, \hyperref[test:FT-10]{FT-10}, \hyperref[test:FT-13]{FT-13} & Availability $\ge$ \MinServiceUptime{} over \AvailabilityWindow{}\\
+\phantomsection\label{req:NFR8}\textbf{NFR8} & Availability and fault isolation & \hyperref[test:NFT-8]{NFT-8}, \hyperref[test:FT-10]{FT-10}, \hyperref[test:FT-13]{FT-13} & End-to-end availability $\ge$ \MinServiceUptime{} over \AvailabilityWindow{}; separate fault recovery and capacity evidence\\
 \phantomsection\label{req:NFR9}\textbf{NFR9} & Detector modularity & \hyperref[test:NFT-9]{NFT-9} & 0 changed \UI{} or coordinator lines\\
 \phantomsection\label{req:NFR10}\textbf{NFR10} & Linguistic fairness auditing & \hyperref[test:NFT-10]{NFT-10}, \hyperref[test:FT-15]{FT-15} & Per-slice tables and \UI{} disclosure\\
 \midrule
@@ -1026,13 +1038,13 @@ Table~\ref{TblTraceFunc} maps every \texttt{FR} and \texttt{SR} to tests. Table~
 \phantomsection\label{req:NFR.E.4}\textbf{NFR.E.4} & Visual and keyboard accessibility & \hyperref[test:NFT-2]{NFT-2} & Axe plus keyboard/visual checklist\\
 \phantomsection\label{req:NFR.E.5}\textbf{NFR.E.5} & Style and license compliance & \hyperref[test:NFT-9]{NFT-9} & Zero lint or type errors; all licenses recorded\\
 \midrule
-\phantomsection\label{haz:H1}\textbf{H1} & False positive on legitimate or \ESL{} content & \hyperref[test:FT-5]{FT-5}, \hyperref[test:FT-6]{FT-6}, \hyperref[test:FT-9]{FT-9}, \hyperref[test:NFT-1]{NFT-1}, \hyperref[test:NFT-10]{NFT-10} & No accusatory terms; \FPR{} $\le$ \MaxFPR{}; slice audit\\
+\phantomsection\label{haz:H1}\textbf{H1} & False positive on legitimate or \ESL{} content & \hyperref[test:FT-5]{FT-5}, \hyperref[test:FT-6]{FT-6}, \hyperref[test:FT-9]{FT-9}, \hyperref[test:NFT-1]{NFT-1}, \hyperref[test:NFT-10]{NFT-10} & Visible false-flag warning and comprehension in \hyperref[test:NFT-2]{NFT-2}, non-accusatory wording, and \FPR{} gates\\
 \phantomsection\label{haz:H2}\textbf{H2} & False-negative reassurance & \hyperref[test:FT-2]{FT-2}, \hyperref[test:FT-3]{FT-3}, \hyperref[test:FT-6]{FT-6}, \hyperref[test:FT-7]{FT-7}, \hyperref[test:NFT-1]{NFT-1} & Minimum bounds; non-guarantee notice; $F_1$ gate\\
 \phantomsection\label{haz:H3}\textbf{H3} & Ungrounded explanation or prompt injection & \hyperref[test:FT-8]{FT-8}, \hyperref[test:FT-9]{FT-9} & Locators resolve and support each claim; fixed-feature twins have equal status/score; real-detector runs preserve grounding and consent policy\\
 \phantomsection\label{haz:H4}\textbf{H4} & Unscoped capture, transfer, or retention & \hyperref[test:FT-1]{FT-1}, \hyperref[test:FT-2]{FT-2}, \hyperref[test:FT-11]{FT-11}, \hyperref[test:FT-12]{FT-12}, \hyperref[test:FT-14]{FT-14}, \hyperref[test:FT-16]{FT-16}, \hyperref[test:NFT-4]{NFT-4} & Selected node only; consent gate; 0 bytes persisted; bounded release\\
 \phantomsection\label{haz:H5}\textbf{H5} & Over-trust in an uncalibrated score & \hyperref[test:FT-5]{FT-5}, \hyperref[test:FT-6]{FT-6}, \hyperref[test:FT-7]{FT-7}, \hyperref[test:NFT-2]{NFT-2} & Visible uncertainty; $\ge$ \MinUnderstandingRate{} comprehension\\
 \phantomsection\label{haz:H6}\textbf{H6} & Silent timeout or failure shown as safe & \hyperref[test:FT-10]{FT-10}, \hyperref[test:NFT-3]{NFT-3}, \hyperref[test:NFT-8]{NFT-8} & \texttt{failed} at \MaxResponseTime{}; no low-risk summary\\
-\phantomsection\label{haz:H7}\textbf{H7} & Malicious payload or hostile host page & \hyperref[test:FT-2]{FT-2}, \hyperref[test:FT-3]{FT-3}, \hyperref[test:FT-4]{FT-4}, \hyperref[test:FT-16]{FT-16}, \hyperref[test:NFT-8]{NFT-8} & Rejection within \MaxUiRenderLatency{}; inert rendering; controls not alterable by page\\
+\phantomsection\label{haz:H7}\textbf{H7} & Hostile input or valid-request overload & \hyperref[test:FT-2]{FT-2}, \hyperref[test:FT-3]{FT-3}, \hyperref[test:FT-4]{FT-4}, \hyperref[test:FT-16]{FT-16}, \hyperref[test:NFT-8]{NFT-8} & Inert rendering and safe rejection; excess valid work cannot disrupt admitted checks\\
 \phantomsection\label{haz:H8}\textbf{H8} & Stale or out-of-order result overwrite & \hyperref[test:FT-13]{FT-13}, \hyperref[test:FT-14]{FT-14} & Exact binding across reversed delays, tabs, and cancel races\\
 \phantomsection\label{haz:H9}\textbf{H9} & Cross-session state leakage & \hyperref[test:FT-13]{FT-13}, \hyperref[test:NFT-8]{NFT-8} & 403/404 on a foreign \texttt{req\_\allowbreak{}id}; 0 bytes disclosed\\
 \phantomsection\label{haz:H10}\textbf{H10} & Leaky, irreproducible, or biased benchmark & \hyperref[test:FT-15]{FT-15}, \hyperref[test:NFT-1]{NFT-1}, \hyperref[test:NFT-7]{NFT-7}, \hyperref[test:NFT-10]{NFT-10} & Disjoint splits; eligibility filter; exact recomputation; $|\Delta| \le$ \MaxReproDelta{}\\
@@ -1339,8 +1351,8 @@ Table~\ref{TblVnVSymbolicConstants} restates the \SRS{} Table~6 constants used b
 \phantomsection\label{const:MAX_UNIT_SUITE_TIME}\texttt{MAX\_\allowbreak{}UNIT\_\allowbreak{}SUITE\_\allowbreak{}TIME} & 60 & s & Full unit run time in CI (Section~\ref{subsec:unit-scope})\\
 \phantomsection\label{const:MIN_INSTALL_PASS_RATE}\texttt{MIN\_\allowbreak{}INSTALL\_\allowbreak{}PASS\_\allowbreak{}RATE} & 0.90 & Proportion & Share of participants installing in time, from \hyperref[req:NFR.E.2]{NFR.E.2} (\hyperref[test:NFT-6]{NFT-6})\\
 \phantomsection\label{const:MIN_LIKERT_MEAN}\texttt{MIN\_\allowbreak{}LIKERT\_\allowbreak{}MEAN} & 4.0 & of 5 & Secondary usability indicator, not a pass/fail gate (\hyperref[test:NFT-2]{NFT-2})\\
-\phantomsection\label{const:HEALTH_PROBE_INTERVAL}\texttt{HEALTH\_\allowbreak{}PROBE\_\allowbreak{}INTERVAL} & 1 & s & Availability probe period (\hyperref[test:NFT-8]{NFT-8})\\
-\phantomsection\label{const:AVAILABILITY_WINDOW}\texttt{AVAILABILITY\_\allowbreak{}WINDOW} & 30 & min & Evaluation window for availability, 1{,}800 probes (\hyperref[test:NFT-8]{NFT-8})\\
+\phantomsection\label{const:AVAILABILITY_PROBE_INTERVAL}\texttt{AVAILABILITY\_\allowbreak{}PROBE\_\allowbreak{}INTERVAL} & 15 & s & Cadence of scheduled end-to-end checks (\hyperref[test:NFT-8]{NFT-8})\\
+\phantomsection\label{const:AVAILABILITY_WINDOW}\texttt{AVAILABILITY\_\allowbreak{}WINDOW} & 30 & min & Availability window, 120 scheduled checks (\hyperref[test:NFT-8]{NFT-8})\\
 \phantomsection\label{const:MARGIN_EPSILON}\texttt{MARGIN\_\allowbreak{}EPSILON} & $10^{-9}$ & Probability & Floating-point tolerance on the abstention margin (\hyperref[ut:C6]{UT-C6})\\
 \phantomsection\label{const:BENCHMARK_TRAIN_SIZE}\texttt{BENCHMARK\_\allowbreak{}TRAIN\_\allowbreak{}SIZE} & 2{,}000 & Items per modality & Fixed balanced baseline-training budget\\
 \phantomsection\label{const:BENCHMARK_VALIDATION_SIZE}\texttt{BENCHMARK\_\allowbreak{}VALIDATION\_\allowbreak{}SIZE} & 1{,}000 & Items per modality & Calibration/threshold selection, disjoint from test\\
@@ -1376,7 +1388,7 @@ For the available construction tools, run \texttt{python3 test/fixtures/generate
 \texttt{FX-IMG-BOUNDS} & \texttt{images/\allowbreak{}bounds/} & Deterministic solid-color images at the eight dimension and byte cases of \hyperref[test:FT-3]{FT-3}; byte padding uses a PNG \texttt{tEXt} chunk; the bomb is a valid IHDR declaring $30{,}000 \times 30{,}000$ with a truncated IDAT.\\
 \texttt{FX-IMG-ADV} & \texttt{images/\allowbreak{}adversarial/} & SVG with script renamed \texttt{.png}; animated GIF; MP4 signature fixture; JPEG truncated at 50\%; ELF binary with \texttt{.jpg} name (\hyperref[test:FT-4]{FT-4}).\\
 \texttt{FX-EVID} & \texttt{evidence/} & 10 synthetic items with declared stub features outside the band: 3 positive/3 negative text cases and 2 positive/2 negative image cases; labels control the stub, not authorship claims (\hyperref[test:FT-5]{FT-5}, \hyperref[test:FT-7]{FT-7}).\\
-\texttt{FX-ABST} & \texttt{abstention/} & 10 borderline items; 5 \CTwoPA{}-valid photos with scripted $\hat{p} = 0.88$; 20 team-written opinion, satire, and poetry items of 200--1{,}500 characters (\hyperref[test:FT-6]{FT-6}).\\
+\texttt{FX-ABST} & \texttt{abstention/} & Generated opinion, satire and uncertain-scope inputs plus a deliberate false-flag scenario. The frozen real-detector eligibility manifest is separate (\hyperref[test:FT-5]{FT-5}, \hyperref[test:FT-6]{FT-6}).\\
 \texttt{FX-INJ} & \texttt{injection/} & 15 text and 10 image payloads with instructions in text or \EXIF{} \texttt{ImageDescription}, \texttt{UserComment}, \texttt{XPComment}, each with a clean twin (\hyperref[test:FT-8]{FT-8}).\\
 \texttt{FX-GROUND} & \texttt{grounding/} & 10 stubbed explanation drafts with contradicted values or unregistered sources; \texttt{references.json} registry (\hyperref[test:FT-8]{FT-8}).\\
 \texttt{FX-PROV} & \texttt{images/\allowbreak{}provenance/} & 30 $1024 \times 1024$ team photos: Class A signed with \texttt{c2patool} and a test certificate; Class B re-encoded at quality 70 with metadata removed; Class C edited after signing or with contradicting \EXIF{} (\hyperref[test:FT-9]{FT-9}).\\
@@ -1384,7 +1396,7 @@ For the available construction tools, run \texttt{python3 test/fixtures/generate
 \texttt{FX-PII} & \texttt{pii/} & Synthetic request-specific canaries in generated text, notes and PNG metadata; no actual personal data required (\hyperref[test:FT-12]{FT-12}, \hyperref[test:NFT-4]{NFT-4}).\\
 \texttt{FX-PERF} & \texttt{perf/} & 100 text items spread over 150--10{,}000 characters and 100 images spread over $64 \times 64$ to $4096 \times 4096$ and up to 10.0\,MB (\hyperref[test:NFT-3]{NFT-3}).\\
 \texttt{FX-BENCH} & \texttt{data/\allowbreak{}manifests/} & \texttt{text\_\allowbreak{}test.json}: RAID \cite{RaidBenchmark2024} and HC3 \cite{HC3Guo2023} eligible slices, Liang et al.\ \ESL{} essays \cite{Liang2023ESL}, formal academic prose; \texttt{image\_\allowbreak{}test.json}: GenImage \cite{GenImage2023} subset and team photos re-encoded at quality 70 and 50; \texttt{leaky.json}; \texttt{cifake\_\allowbreak{}research.json} with 50 CIFAKE \cite{CIFAKE2023} images (\hyperref[test:FT-15]{FT-15}, \hyperref[test:NFT-1]{NFT-1}, \hyperref[test:NFT-10]{NFT-10}).\\
-\texttt{FX-USE} & \texttt{usability/} & Separate onboarding page plus three unseen scored pages: a strong-signal product review (Item 1), a satirical \ESL{}-style passage (Item 2), and an image check forced to time out through a controlled provider/proxy delay (Item 3) (\hyperref[test:NFT-2]{NFT-2}, \hyperref[test:NFT-6]{NFT-6}).\\
+\texttt{FX-USE} & \texttt{usability/} & Separate onboarding page plus three unseen scored pages: a higher-signal product review with the visible false-flag warning (Item 1), a satirical \ESL{}-style passage (Item 2), and an image check forced to time out through a controlled provider/proxy delay (Item 3) (\hyperref[test:NFT-2]{NFT-2}, \hyperref[test:NFT-6]{NFT-6}).\\
 \end{tabularx}
 
 \subsection{Data Collection, Analysis, and Evidence Freeze Protocol}\label{subsec:data-protocol}
@@ -1396,6 +1408,8 @@ This protocol connects each claim to its selected method, input population, obse
 \textbf{Dataset license gate (\hyperref[test:NFT-9]{NFT-9}; before the Nov 16 freeze).} GenImage lists CC BY-NC-SA 4.0 plus additional noncommercial terms \cite{GenImageLicense}; HC3 lists CC BY-SA 4.0, with stricter source terms taking precedence \cite{HC3License}. These are candidate corpora, not cleared MIT assets. Raymond records each selected source/subset\textquotesingle s terms and intended evaluation use; Richard independently checks \texttt{SRS-C4}. External corpus files stay outside the MIT repository/release under their original licenses; commit only permitted manifests, acquisition instructions, attribution and aggregate results. Separation does not itself establish compatibility. Unclear or incompatible terms require a compatible replacement or a documented TA-approved constraint decision before benchmark acceptance; no restricted data or derived weights are automatically relicensed as MIT.
 
 \textbf{Selection and leakage control.} Pin each dataset URL/revision, license, native item ID and parent source/prompt ID. Group all items from the same source/prompt or image derivation before splitting. Union exact SHA-256 duplicates and near-duplicates: text uses NFKC-normalized, case-folded whitespace-token 5-gram Jaccard similarity $\ge$ \NearTextSimilarity{}; images use a 64-bit perceptual hash (grayscale $32\times32$ resize, two-dimensional cosine transform, median-thresholded top-left $8\times8$ coefficients; preprocessing/library version recorded) with Hamming distance $\le$ \NearImageDistance{}. Empty/too-short normalized comparisons are inspected manually. Rank source groups by SHA-256 of \texttt{42|dataset|group\_id}; in that order allocate whole groups to train, validation, then test quotas while preserving class/source strata. Deterministically choose the required examples within allocated groups; all unused members of a group remain excluded from other splits. Retain the grouping report and rejected-item reasons. The frozen manifests list every selected ID, split, label, subgroup, native bounds and byte hash. This is the required fetch/split algorithm; its implementation is scheduled, not claimed to exist already.
+
+\textbf{Benchmark target rationale.} Macro-$F_1$ weighs the authentic and synthetic classes equally, so the 0.80 floor requires a high average of their two class-level scores. The 10\% ceilings limit how often an authentic item is incorrectly flagged among assessments and across all eligible negatives. The coverage floor prevents satisfying the selective tests by abstaining on most inputs. A +0.10 Macro-$F_1$ improvement on the same assessed subset requires a material gain over the declared baseline before adding a more complex detector. These are provisional acceptance targets for the defined corpus and use. Interpret them alongside user-study evidence and subgroup results. If a gate fails, record the failed threshold, common subset and Table~18 scope decision in the benchmark report.
 
 \textbf{Thresholds, calibration and comparison.} Freeze one candidate checkpoint per retained modality, exact dependency locks, preprocessing/configuration hashes, baseline settings and $\tau_{\text{abs}}$ after validation. Test outcomes cannot select them. \hyperref[test:NFT-1]{NFT-1} retains all four SRS gates on its fixed two-class test. Also report Brier score, a reliability diagram with \CalibrationBins{} equal-width bins, expected calibration error (ECE), per-bin counts and a risk--coverage curve as descriptive diagnostics. These diagnostics examine whether a displayed calibrated score is supported; they add no unapproved numerical acceptance gate. Undefined scores are reported explicitly. Separate raw feature outputs, outcomes and counts permit independent recomputation; exact count metrics use numerator/denominator pairs and decimal exports use \MetricTolerance{}.
 
@@ -1413,13 +1427,14 @@ This protocol connects each claim to its selected method, input population, obse
 The instrument is administered in \hyperref[test:NFT-2]{NFT-2} and \hyperref[test:NFT-6]{NFT-6}. Part I measures comprehension and decides the \hyperref[req:NFR2]{NFR2} result using Table~\ref{TblScoringKey}. Part II measures perceived usability on a five-point scale ($1$ = strongly disagree, $5$ = strongly agree) and is a secondary indicator.
 
 \subsubsection*{Part I: Comprehension Questions (Asked During Tasks 1--3)}
-Only the neutral prompts below are read or shown to participants. The expected statuses, fixture descriptions and Table~\ref{TblScoringKey} remain in facilitator/scorer materials.
+Only the neutral prompts below are read or shown to participants. The facilitator gives everyone the same instructions about using the extension, without defining warning text or demonstrating any scored result. Expected statuses, fixture descriptions and the scoring key stay in the facilitator materials.
 \begin{enumerate}[leftmargin=*, label=\textbf{C\arabic*.}]
     \item \textbf{Item 1:} Look at its result card.
     \begin{enumerate}[label=(\alph*)]
         \item What is the status of this check?
         \item Which evidence item contributed most, and is it an Observed Input Signal, External Reference, or Model Inference?
         \item Does this result prove the item is authentic, or prove the author committed fraud?
+        \item In your own words, what does the warning on the result card mean for this item?
     \end{enumerate}
     \item \textbf{Item 2:} Look at its result card.
     \begin{enumerate}[label=(\alph*)]
@@ -1447,7 +1462,8 @@ Only the neutral prompts below are read or shown to participants. The expected s
 \endfoot
 C1(a) & (a) Status & Completed.\\
 C3(a) & (a) Status & No; it failed or timed out.\\
-C1(c) & (b) Uncertainty and limitations & No; it cites the non-guarantee or limitation notice.\\
+C1(c) & (b) Uncertainty and limitations & No; the check does not prove authenticity or fraud.\\
+C1(d) & (b) Uncertainty and limitations & A genuine item can receive the same flag, so the flag alone cannot establish generation or manipulation.\\
 C2(a) & (b) Uncertainty and limitations & Signals were weak or conflicting, or the passage is satire or opinion outside what Verity assesses.\\
 C3(b) & (b) Uncertainty and limitations & No; a failed check gives no reassurance.\\
 C1(b) & (c) Evidence or next step & Names the listed primary evidence item and its displayed source tag.\\
@@ -1486,6 +1502,8 @@ This appendix documents the AI tools used to prepare this plan, how each member 
 
 \noindent\textbf{Rubric follow-up: OpenAI Codex (GPT-6, November 2, 2026).} At Calvin Salsali\textquotesingle s request, Codex checked the published Avenue V\&V Plan rubric and publisher license statements, aligned the FT-8 gate/traceability criteria, removed participant-facing status hints, clarified the satire fixture and license gate, corrected the announced PoC window, and added emoji boundary inputs. The accompanying PR records the specification, fixture and PDF checks. This follow-up does not confirm other members\textquotesingle{} personal attestations.
 
+\noindent\textbf{TA feedback follow-up: OpenAI Codex (GPT-6, November 16, 2026).} At Jaden Moore's request, Codex compared the plan, SRS and Hazard Analysis with the rubric, peer issues and TA findings. It drafted the updates to availability, overload, abstention, warning comprehension, subgroup decisions, fixtures and the feedback register.
+
 \subsection{How and Where Used}
 \begin{itemize}[leftmargin=*]
     \item \textbf{Richard Han} used Gemini 3.1 Pro to structure the validation, fuzzing, and privacy tests (\hyperref[test:FT-2]{FT-2}--\hyperref[test:FT-4]{FT-4}, \hyperref[test:FT-8]{FT-8}, \hyperref[test:FT-12]{FT-12}, \hyperref[test:NFT-4]{NFT-4}, \hyperref[test:NFT-7]{NFT-7}) and to audit the traceability tables against \texttt{H1}--\texttt{H10}. He used Claude to identify cross-document inconsistencies and draft the November 2 revision.
@@ -1504,6 +1522,8 @@ The original draft records the following member verification attestations, which
 \end{enumerate}
 
 \noindent\textbf{Checks completed during the review revision.} Codex compared the SRS-derived constants and requirement identifiers with the PR-head SRS/HA, ran the eight executable specification checks, exercised the fixture generator and independently checked its hashes/bounds, compiled the revised LaTeX and inspected the rendered PDF. The PR records the exact commands and results. These are document/input checks; the absent product harness and future human studies remain planned. Each member's personal history and the reported Claude version are supplied by the team, not inferred from successful automated checks.
+
+\noindent\textbf{Checks completed during the TA feedback follow-up.} Codex reran the eight specification assertions against the revised SRS and Hazard Analysis. They cover the lifecycle partition and precedence, pending/readiness, metric counterexamples and coverage, and agreement of the nine safety statements. The extension and detectors have separate execution checks. Codex generated the synthetic fixtures twice and checked their hashes and text bounds, matched the revised test criteria to their SRS and hazard references, and inspected the rebuilt PDFs. Product runs, study results and personal verification claims require their own evidence.
 
 \newpage
 
