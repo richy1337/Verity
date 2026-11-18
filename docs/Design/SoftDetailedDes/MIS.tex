@@ -7,7 +7,6 @@
 \usepackage{amssymb}
 \usepackage{graphicx}
 \usepackage{colortbl}
-\usepackage{xr}
 \usepackage{hyperref}
 \usepackage{longtable}
 \usepackage{xfrac}
@@ -21,7 +20,6 @@
 \usepackage{fullpage}
 
 \hypersetup{
-bookmarks=true,     % show bookmarks bar?
 colorlinks=true,       % false: boxed links; true: colored links
 linkcolor=red,          % color of internal links (change box color with linkbordercolor)
 citecolor=blue,      % color of links to bibliography
@@ -31,7 +29,6 @@ urlcolor=cyan          % color of external links
 
 \usepackage{array}
 
-\externaldocument{../../SRS/SRS}
 
 \input{../../Comments.text}
 \input{../../Common.text}
@@ -40,14 +37,16 @@ urlcolor=cyan          % color of external links
 \newcommand{\ty}[1]{\textsf{#1}}
 \newcommand{\key}{\ty{CheckKey}}
 \newcommand{\Const}[1]{\texttt{#1}}
+\setlength{\emergencystretch}{2em}
+\setcounter{tocdepth}{2}
 
 \begin{document}
 
-\title{Module Interface Specification for \progname{}}
+\title{Module Interface Specification for Verity}
 
 \author{\authname}
 
-\date{\today}
+\date{November 18, 2026}
 
 \maketitle
 
@@ -55,33 +54,51 @@ urlcolor=cyan          % color of external links
 
 \section{Revision History}
 
-\begin{tabularx}{\textwidth}{p{3cm}p{2cm}X}
-\toprule {\bf Date} & {\bf Version} & {\bf Notes}\\
+\begin{tabularx}{\textwidth}{p{2.3cm}p{3.2cm}X}
+\toprule {\bf Date} & {\bf Developer(s)} & {\bf Change}\\
 \midrule
-2026-11-16 & Revision $-1$ & Richard Han and Calvin Salsali prepared this revision with the AI assistance disclosed below. The revision defines operations and data types for the ten modules, including the service decision, consent, and cleanup interfaces.\\
+2026-11-16 & Richard Han, Calvin Salsali & Prepared Revision $-1$ with the AI assistance disclosed below. The revision defines operations and data types for the ten modules, including the service decision, consent, and cleanup interfaces.\\
+2026-11-18 & Jaden Moore (Codex-assisted proposal) & Clarified testable contracts and constants, aligned verification references, and completed design navigation.\\
 \bottomrule
 \end{tabularx}
 
-~\newpage
+\clearpage
 
 \section{Symbols, Abbreviations and Acronyms}
 
-\newpage
+Table~\ref{TblAcronyms} expands the document abbreviations. Shared mathematical and record notation is defined in Section~\ref{sec:notation}.
+
+\begin{longtable}{@{}p{0.25\linewidth}p{0.69\linewidth}@{}}
+\caption{Interface specification abbreviations}\label{TblAcronyms}\\
+\toprule Abbreviation & Meaning \\ \midrule
+\endhead
+\hyperref[sec:notation]{API, UI} & Application programming interface; user interface \\
+\hyperref[sec:m8]{C2PA, EXIF} & Coalition for Content Provenance and Authenticity; Exchangeable Image File Format \\
+\hyperref[sec:introduction]{MG, MIS} & Module Guide; Module Interface Specification \\
+\hyperref[sec:introduction]{SRS, HA, V\&V} & Software Requirements Specification; Hazard Analysis; verification and validation \\
+\hyperref[sec:introduction]{FR, NFR, SR, INV} & Functional requirement; nonfunctional requirement; safety requirement; invariant \\
+\hyperref[sec:notation]{FPR, UUIDv4} & False-positive rate; Universally Unique Identifier version 4 \\
+\bottomrule
+\end{longtable}
+
+\clearpage
 
 \tableofcontents
 
-\newpage
+\listoftables
+
+\clearpage
 
 \pagenumbering{arabic}
 
-\section{Introduction}
+\section{Introduction}\label{sec:introduction}
 
 This document specifies the ten modules in the
 \href{\pdfbase/Design/SoftArchitecture/MG.pdf}{Module Guide (MG)}. It uses the course Module Interface Specification (MIS) template, based on \citet{HoffmanAndStrooper1995}. Each contract lists its dependencies, state, environment, constants, operation signatures and observable behaviour. We collect shared record types here so the same terminology is used on both sides of an interface.
 
-The \href{\pdfbase/SRS/SRS.pdf}{Software Requirements Specification (SRS)} defines the behaviour and limits. The \href{\pdfbase/HazardAnalysis/HazardAnalysis.pdf}{Hazard Analysis} documents the harms addressed by the interfaces. The \href{\pdfbase/VnVPlan/VnVPlan.pdf}{Verification and Validation Plan} documents the planned tests. The design describes a prospective implementation.
+The \href{\pdfbase/SRS/SRS.pdf}{Software Requirements Specification (SRS)} defines the behaviour and limits. The \href{\pdfbase/HazardAnalysis/HazardAnalysis.pdf}{Hazard Analysis} documents the harms addressed by the interfaces. The \href{\pdfbase/VnVPlan/VnVPlan.pdf}{Verification and Validation Plan} documents the planned tests. The design describes a prospective implementation. FR, NFR, SR and INV denote functional requirements, nonfunctional requirements, safety requirements and invariants. The user interface (UI) consumes these application programming interfaces (APIs).
 
-\section{Notation}
+\section{Notation}\label{sec:notation}
 
 An operation $f(x:T)\to U$ takes a value of type $T$ and returns a value of type $U$. Fields are listed in parentheses. A vertical bar between types denotes alternatives. $\operatorname{Optional}(T)$ is either a value of $T$ or absent, and $\operatorname{Seq}(T)$ is an ordered sequence. $\varnothing$ denotes an empty set or map. Time on a host is measured by a monotonic clock. Compare timestamps only on the same clock unless they have been explicitly aligned. A status transition is written $s\to s'$.
 
@@ -89,42 +106,95 @@ A returned reason is safe to show or log and contains no raw selection. All oper
 
 \renewcommand{\arraystretch}{1.2}
 \begin{longtable}{@{}p{0.25\linewidth}p{0.72\linewidth}@{}}
+\caption{Shared interface types}\label{TblTypes}\\
+\toprule \textbf{Type} & \textbf{Meaning} \\ \midrule
+\endfirsthead
 \toprule \textbf{Type} & \textbf{Meaning} \\ \midrule
 \endhead
-\ty{Session}, \ty{RequestId} & Opaque authenticated session context and an opaque request identifier. A request identifier alone grants no access. \\
+\ty{BrowserDocument}, \ty{RenderSurface} & Browser-owned document and extension-owned display surface. \\
+\ty{InputEvent}, \ty{Channel} & User input event and authenticated transport channel. \\
+\ty{Clock}, \ty{FileSet}, \ty{Directory}, \ty{Storage} & Monotonic time source, versioned files, output directory and persistent storage. \\
+\ty{Session}, \ty{RequestId} & Opaque authenticated session context and a fresh UUIDv4 request identifier (Universally Unique Identifier, version 4). A request identifier alone grants no access. \\
 \key & Pair of initiating session identity and request identifier. Services check the session against trusted transport context. \\
+\ty{Boolean}, \ty{Origin} & True or false; a scheme, host and port identifying a network origin. $\mathbb{N}_0$ denotes nonnegative integers. \\
+\ty{ModelArtifact} & Loaded immutable model parameters, tokenizer or parser resources. \\
 \ty{Unit} & Successful operation with no data returned. \\
 \ty{Modality} & Text or image. \\
 \ty{Approve}, \ty{Decline} & Alternatives of an explicit user decision. \\
-\ty{WorkEvent} & A trusted worker result, timeout, dependency error or accepted cancellation, bound to its check. \\
+\ty{WorkEvent} & Tagged worker result, timeout, dependency error or accepted cancellation, with check key and a trusted work capability. Client-supplied events never receive that capability. \\
+\ty{RequestRecord} & Status, authenticated owner, admission instant, deadline, approved route and request-owned work handle. \\
 \ty{WorkerLease} & Opaque authorization for one worker and check. \\
 \ty{LocalInstant} & Timestamp on the cleanup owner's monotonic clock. \\
 \ty{CleanupReceipt} & Key, local completion time and cleanup outcome. \\
 \ty{MetricReport} & Per-class and per-slice counts and metrics, with eligibility and coverage denominators. \\
 \ty{Gesture}, \ty{View} & Explicit browser invocation for one selection, and a trusted extension view scoped to its tab and session. \\
 \ty{RawItem} & One text or static image selection with modality, declared media attributes and optional user-entered context. Modality is text or image. \\
-\ty{Item} & Bounded text or safely decoded static image with safe descriptors. The transient content is accessible only to work authorized for the check. \\
+\ty{Item} & Bounded text or validated static image with safe descriptors; image content includes the bounded original container for metadata inspection and a safely decoded pixel view. The transient content is accessible only to work authorized for the check. \\
 \ty{Route} & Team service, or a configured third-party provider with recipient, transfer scope and current retention terms. \\
+\ty{ConsentPreview} & Modality, recipient identity, transfer scope, retention terms, policy version and route eligibility. Contains no raw content. \\
 \ty{Consent} & One-time authorization binding session, check key, selected item, intended recipient, scope and policy version. \\
 \ty{Job} & Check key, one request-scoped input and selected route with optional consent. Browser UI state and admitted service state are recorded separately. \\
-\ty{Reason} & Enumerated outcome category, such as invalid input, unsupported host, busy, timeout, dependency failure, unauthorized or weak evidence. \\
+\ty{Reason} & One of invalid input, input unavailable, unsupported host, busy, timeout, dependency failure, unauthorized, weak evidence, view unavailable, invalid state, not initialized, configuration mismatch, cleanup violation, invalid manifest or missing outcomes; with safe explanatory text. Unknown and foreign keys both return unauthorized. \\
 \ty{Status} & Pending, completed, inconclusive, failed or cancelled. \\
 \ty{Evidence} & Claim, nonempty safe locator and source kind (Observed Input Signal, External Reference or Model Inference). Only supported claims are displayed. \\
-\ty{Signals} & Candidate evidence and optional detector score, model version, modality, applicability and availability. \\
-\ty{Provenance} & Present and valid, absent or stripped, or inconsistent. A parser outage is a dependency condition and is distinct from absent metadata. \\
+\ty{Signals} & Candidate evidence, optional score in $[0,1]$, model version, modality, required-work availability, applicability (supported, unsupported or uncertain), and optional separate \ty{Provenance}. \\
+\ty{Provenance} & Separate EXIF presence/structure and C2PA verification observations. Each records present and valid, absent or stripped, or inconsistent, plus the check performed. Absent or stripped means absence observed, not proof of removal. EXIF presence is not cryptographic authenticity. Unsupported verification is unavailable, not valid; a parser outage is a dependency condition. \\
 \ty{Assessment} & Optional direction (higher or lower synthetic/manipulation signal), evidence, visible uncertainty, limits and a next check. \\
-\ty{Update} & Check key, status, and optional assessment or reason. Failed/cancelled updates have no direction. Inconclusive updates can have supported observations and have no direction. \\
+\ty{Update} & Check key, status, and optional assessment or reason. The status determines the variant: pending has no assessment; completed requires an assessment with direction and supported evidence; inconclusive requires limits and guidance; failed/cancelled require a reason and have no direction. Inconclusive updates can have supported observations and have no direction. \\
 \ty{Decision} & Completed with an assessment, or inconclusive with limitations and guidance. Includes no job or session state. \\
-\ty{Config} & Frozen modality, task, model and decision settings. Runtime settings and offline run settings are separate instances. \\
+\ty{Config} & Module-specific immutable configuration. Host settings include trusted endpoint and supported origins; coordinator settings include capacity and worker configuration; buffer settings include cleanup policy; offline settings include output directory, seed and model profiles. Detector/decision settings contain versioned task and modality; frozen model, applicability-gate and calibration profile identifiers; score direction; abstention margin; supported domain; and required signal set. Runtime and offline settings are separate instances. An absent genre profile cannot assert supported applicability. \\
+\ty{LeaseRecord} & Authorized worker capability, transient item references and open/closed marker for one check. \\
+\ty{ViewRecord} & Active key, local status, cancellation marker and safe display model. \\
 \ty{Manifest}, \ty{Run} & Labelled corpus revision, item identity and split metadata. Run adds frozen settings, outcomes, audit and metric report. \\
 \bottomrule
 \end{longtable}
 
-\noindent The numeric limits below are exported from the relevant modules as named values defined in the SRS symbolic constants table. In the contracts, a caller depends on the named limit. The service processing deadline, UI display deadline and cleanup interval measure three distinct events.
+\noindent The numeric limits below are exported from the relevant modules. SRS values are reproduced here; the delivery-record bound is a design decision. In the contracts, a caller depends on the named limit. The service processing deadline, UI display deadline and cleanup interval measure three distinct events. The delivery-record age is a design bound for safe status metadata only: one minute permits transient transport retries while bounding storage; it never permits raw content retention.
+
+\begin{longtable}{@{}p{0.56\linewidth}p{0.38\linewidth}@{}}
+\caption{Exported constant values (SRS unless marked design)}\label{TblConstants}\\
+\toprule Constant & Value and unit \\ \midrule
+\endfirsthead
+\toprule Constant & Value and unit \\ \midrule
+\endhead
+\Const{MIN\_\allowbreak{}TEXT\_\allowbreak{}LENGTH} & 150 Unicode code points \\
+\Const{MAX\_\allowbreak{}TEXT\_\allowbreak{}LENGTH} & 10,000 Unicode code points \\
+\Const{MAX\_\allowbreak{}IMAGE\_\allowbreak{}SIZE} & 10.0 MB ($10{,}000{,}000$ bytes) \\
+\Const{MIN\_\allowbreak{}IMAGE\_\allowbreak{}DIM} & $64\times64$ pixels, inclusive per axis \\
+\Const{MAX\_\allowbreak{}IMAGE\_\allowbreak{}DIM} & $4096\times4096$ pixels, inclusive per axis \\
+\Const{MAX\_\allowbreak{}RESPONSE\_\allowbreak{}TIME} & 10.0 seconds from service admission \\
+\Const{MAX\_\allowbreak{}CONCURRENT\_\allowbreak{}REQS} & 10 isolated admitted requests \\
+\Const{MAX\_\allowbreak{}DELIVERY\_\allowbreak{}RECORD\_\allowbreak{}AGE} & 60 seconds after terminal decision (design) \\
+\Const{MAX\_\allowbreak{}RETENTION\_\allowbreak{}TIME} & 1.0 second after local terminal decision \\
+\Const{MAX\_\allowbreak{}UI\_\allowbreak{}RENDER\_\allowbreak{}LATENCY} & 500 milliseconds \\
+\Const{MAX\_\allowbreak{}CANCEL\_\allowbreak{}UI\_\allowbreak{}LATENCY} & 200 milliseconds \\
+\Const{MIN\_\allowbreak{}F1\_\allowbreak{}SCORE} & 0.80 assessed macro-average $F_1$ \\
+\Const{MIN\_\allowbreak{}COVERAGE} & 0.70 of all eligible items \\
+\Const{MAX\_\allowbreak{}FPR} & 0.10 for assessed and full-negative accounting \\
+\Const{MIN\_\allowbreak{}BASELINE\_\allowbreak{}DELTA} & $+0.10$ assessed macro-average $F_1$ \\
+\Const{MAX\_\allowbreak{}REPRO\_\allowbreak{}DELTA} & 0.005 absolute macro-average $F_1$ difference \\
+\bottomrule
+\end{longtable}
+
+\textbf{Wire-contract preservation.} The shared records abstract the SRS S.5 transport envelope; they do not replace it. M1 preserves the required request fields \texttt{req\_id}, \texttt{session\_token}, \texttt{modality}, \texttt{payload} and \texttt{consent\_granted}. It preserves the response fields \texttt{req\_id}, \texttt{status}, \texttt{signals[]}, \texttt{uncertainty}, \texttt{limitations[]} and \texttt{verification\_\allowbreak{}steps[]}. Optional user context remains part of the explicitly selected transfer scope. Evidence source kinds serialize as \texttt{observed\_\allowbreak{}signal}, \texttt{external\_\allowbreak{}reference} or \texttt{inference}; their descriptive labels are display text. M5 checks session ownership against trusted transport context rather than trusting a payload field.
+
+\textbf{Initialization and failures.} M4 is a stateless library. M1--M3 and M5--M10 are abstract objects: one registry per owning extension/service process, and one M10 object per offline run. In particular, M2 and M3 keep maps across views rather than creating an implicit global active tab. Each abstract object exports the common operation
+\[
+\texttt{initialize}(p:\ty{Config})\to\ty{Unit}\mid\ty{Reason}.
+\]
+Its Boolean state $\mathit{ready}$ is initially false. Successful initialization establishes empty maps and immutable configuration $p$, then sets $\mathit{ready}'=\mathrm{true}$ and $out:=\ty{Unit}$. Invalid or unavailable configuration gives $out:=\ty{Reason}$ and leaves $\mathit{ready}=\mathrm{false}$. Reinitialization returns invalid state without replacing active work. Except M4, every operation requires $\mathit{ready}$; otherwise $out:=\text{not initialized}$ with no state change. Model loading occurs here, not when handling a request. For M1--M3 the configuration additionally contains the trusted endpoint/host settings; M10 configuration contains its output directory, fixed at initialization. Configuration contains no user payload. Expected failures use the declared Reason alternative; $exc:=\text{none}$ in every contract. State-changing operations return a receipt or acknowledgment of their effect where documented below. All preserve ownership and terminal-state absorption.
+
+\textbf{State convention.} $X'$ denotes post-state and $out$ the returned value. Each abstract object also has the shared Boolean ready and immutable configuration state from initialization. Loaded model parameters and calibration tables are in-memory state of M7, M8 and M9 respectively; configuration identifiers name those artifacts rather than substituting for their loaded values. For operations receiving a configuration argument, it must match the initialized profile; mismatch returns configuration mismatch without model reload. An unmentioned state or environment variable is unchanged. Empty initial maps satisfy their ownership invariants. For every successful operation, the output has the declared type and the stated invariants hold; rejected authorization never discloses another key's state. The operation descriptions below define the output/effect beyond these common rules.
+
+\textbf{Data ownership.} Each field has one module owner. M1 owns host authorization metadata; M2 owns the unsent selected item and consent until dispatch; M3 owns safe display state; M5 owns service lifecycle and delivery metadata; M6 owns admitted raw-content buffers and worker references; M7--M9 own only loaded immutable analysis artifacts between calls; M10 owns the offline run. A module may read another's value through its interface without owning a second mutable copy. Call-local input/output values are temporary borrows, not additional module state. Dispatch transfers staged payload ownership from M2 to the service's M6 and clears the browser staging reference; transport copies are request-owned work released on completion, cancellation or error. M1 and M4 retain no content after their calls. The selected webpage remains external browser state, outside application-owned buffers. M6 cleanup controls its own process's buffers; M2 releases browser staging independently when its local check ends. Safe display records may remain visible and contain no raw or reconstructive excerpts.
+
+\textbf{Operation effects.} Read/query operations return data without changing module state; command operations return only Unit on success except the documented acknowledgments. M1 capture and transport, M2 begin/authorize, M5 admission/advance/cancel, M6 hold/release and M10 evaluate/recompute return a key, receipt, safe update or recorded run as acknowledgment of an external or state-changing action. These exceptions avoid a second query racing with that action. Expected failures always return Reason; no exception carries a raw item.
 
 \section{Module Decomposition}
 
-\begin{table}[h!]
+The hierarchy assigns one specification to each leaf module in the MG.
+
+\begin{table}[ht]
 \centering
 \begin{tabular}{p{0.3\textwidth} p{0.6\textwidth}}
 \toprule
@@ -141,7 +211,7 @@ A returned reason is safe to show or log and contains no raw selection. All oper
 & Temporary content\\
 \midrule
 
-\multirow{4}{0.3\textwidth}{Software Decision} & Text signals\\
+\multirow{4}{0.3\textwidth}{Software-Decision-Hiding} & Text signals\\
 & Image signals and provenance\\
 & Assessment policy\\
 & Offline evaluation\\
@@ -152,11 +222,12 @@ A returned reason is safe to show or log and contains no raw selection. All oper
 \label{TblMH}
 \end{table}
 
-\newpage
-~\newpage
+\clearpage
 
 %% ------------------------------------------------------------------ M1
 \section{MIS of M1 Browser and host bridge} \label{sec:m1}
+
+M1 isolates browser access and the authenticated service connection from its callers.
 
 \subsection{Module}
 
@@ -168,6 +239,8 @@ No design module.
 
 \subsection{Syntax}
 
+The following constants and operations form the public interface. Shared initialization is defined in Section~\ref{sec:notation}.
+
 \subsubsection{Exported Constants}
 
 None.
@@ -179,36 +252,41 @@ None.
 \hline
 \textbf{Name} & \textbf{In} & \textbf{Out} & \textbf{Exceptions} \\
 \hline
-\texttt{readSelection} & $g:\ty{Gesture}$ & $\ty{RawItem}\mid\ty{Reason}$ & \\
-\texttt{send} & $s:\ty{Session},\ j:\ty{Job}$ & $\ty{Update}\mid\ty{Reason}$ & \\
-\texttt{sendCancel} & $s:\ty{Session},\ k:\key$ & $\ty{Update}\mid\ty{Reason}$ & \\
-\texttt{draw} & $v:\ty{View},\ u:\ty{Update}\mid\ty{Reason}$ & $\ty{Unit}\mid\ty{Reason}$ & \\
+\texttt{initialize} & $p:\ty{Config}$ & $\ty{Unit}\mid\ty{Reason}$ & None \\
+\texttt{readSelection} & $g:\ty{Gesture}$ & $\ty{RawItem}\mid\ty{Reason}$ & None \\
+\texttt{send} & $s:\ty{Session},\ j:\ty{Job}$ & $\ty{Update}\mid\ty{Reason}$ & None \\
+\texttt{sendCancel} & $s:\ty{Session},\ k:\key$ & $\ty{Update}\mid\ty{Reason}$ & None \\
+\texttt{draw} & $v:\ty{View},\ u:\ty{Update}\mid\ty{Reason}$ & $\ty{Unit}\mid\ty{Reason}$ & None \\
 \hline
 \end{tabular}
 \end{center}
 
 \subsection{Semantics}
 
+The state and environment below are private; callers rely on the operation effects.
+
 \subsubsection{State Variables}
 
-Active extension authorization by tab and gesture. Initially empty.
+$G:\ty{View}\rightharpoonup\ty{Gesture}$ records current capture authorization; $H:\ty{Origin}\rightharpoonup(\mathbb{N}_0\times\ty{Boolean})$ maps image origins to capture-lease counts and whether a permission was newly acquired. Initially both maps are empty. No gesture authorizes a different tab or document.
 
 \subsubsection{Environment Variables}
 
 \begin{itemize}
-\item $\mathit{page}$: the webpage open in the user's tab, including the user's current text or image selection. Read by \texttt{readSelection}; never modified. Navigating away invalidates the current gesture.
-\item $\mathit{gesture}$: the user's explicit browser invocation (context menu or keyboard shortcut) on the selection. Read by \texttt{readSelection}.
-\item $\mathit{screen}$: the extension-controlled view region of the browser window. Changed by \texttt{draw}, which replaces the displayed content with the rendered update or reason.
-\item $\mathit{link}$: the encrypted connection to the configured team service. Changed by \texttt{send} and \texttt{sendCancel}, which transmit one command and receive its reply.
-\item $\mathit{clock}$: the browser host's monotonic clock. Read only.
+\item $\mathit{page}:\ty{BrowserDocument}$: the webpage open in the user's tab, including the user's current text or image selection. Read by \texttt{readSelection}; never modified. Navigating away invalidates the current gesture.
+\item $\mathit{gesture}:\ty{Gesture}$: the user's explicit browser invocation (context menu or keyboard shortcut) on the selection. Read by \texttt{readSelection}.
+\item $\mathit{screen}:\ty{RenderSurface}$: the extension-controlled view region of the browser window. Changed by \texttt{draw}, which replaces the displayed content with the rendered update or reason.
+\item $\mathit{link}:\ty{Channel}$: the encrypted connection to the configured team service. Changed by \texttt{send} and \texttt{sendCancel}, which transmit one command and receive its reply.
+\item $\mathit{clock}:\ty{Clock}$: the browser host's monotonic clock. Read only.
 \end{itemize}
 
 \subsubsection{Assumptions}
 
+The shared initialization and authorization rules in Section~\ref{sec:notation} apply. Payload validity is checked by the operations, not assumed.
+
 \subsubsection{Access Routine Semantics}
 
 \noindent \texttt{readSelection}():
-Check that the gesture is current, user initiated and scoped to its tab. Read only its chosen item. An expired or restricted gesture returns a corrective reason. A change of page invalidates the gesture authorization.
+Check that the gesture is current, user initiated and scoped to its tab. Read only its chosen item. For a remote image, apply the scoped optional-origin capture protocol in the MG, including the byte bound, no credentials, no redirects and permission-lease release. An expired or restricted gesture returns a corrective reason. A change of page invalidates the gesture authorization.
 
 \medskip\noindent \texttt{send}(), \texttt{sendCancel}():
 Carry the command over the authenticated encrypted connection. A response belongs to the same initiating context. Return a transport reason on connection failure and never retry a content transfer using a different route.
@@ -218,9 +296,13 @@ Render within the extension-controlled view. Treat all text as inert. If that vi
 
 \subsubsection{Local Functions}
 
+None exported or required to define this interface.
+
 %% ------------------------------------------------------------------ M2
-\newpage
+\clearpage
 \section{MIS of M2 Selection and consent} \label{sec:m2}
+
+M2 binds one scoped selection and its consent to a fresh check.
 
 \subsection{Module}
 
@@ -232,6 +314,8 @@ M1.
 
 \subsection{Syntax}
 
+The following constants and operations form the public interface. Shared initialization is defined in Section~\ref{sec:notation}.
+
 \subsubsection{Exported Constants}
 
 None.
@@ -243,48 +327,57 @@ None.
 \hline
 \textbf{Name} & \textbf{In} & \textbf{Out} & \textbf{Exceptions} \\
 \hline
-\texttt{begin} & $g:\ty{Gesture}$ & $\key\mid\ty{Reason}$ & \\
-\texttt{preview} & $k:\key$ & $\ty{Modality}\times\ty{Route}\mid\ty{Reason}$ & \\
-\texttt{authorize} & $k:\key,\ a:\ty{Approve}\mid\ty{Decline}$ & $\ty{Update}\mid\ty{Reason}$ & \\
-\texttt{discard} & $k:\key$ & $\ty{Unit}\mid\ty{Reason}$ & \\
+\texttt{initialize} & $p:\ty{Config}$ & $\ty{Unit}\mid\ty{Reason}$ & None \\
+\texttt{begin} & $g:\ty{Gesture}$ & $\key\mid\ty{Reason}$ & None \\
+\texttt{preview} & $k:\key$ & $\ty{ConsentPreview}\mid\ty{Reason}$ & None \\
+\texttt{authorize} & $k:\key,\ a:\ty{Approve}\mid\ty{Decline}$ & $\ty{Update}\mid\ty{Reason}$ & None \\
+\texttt{discard} & $k:\key$ & $\ty{Unit}\mid\ty{Reason}$ & None \\
 \hline
 \end{tabular}
 \end{center}
 
 \subsection{Semantics}
 
+The state and environment below are private; callers rely on the operation effects.
+
 \subsubsection{State Variables}
 
-One local selection and pending consent per active view. Initially absent.
+$Q:\ty{View}\rightharpoonup\ty{Job}$ stores at most one staged job and optional consent per view. Initially $Q=\varnothing$. A consent in $Q$ binds exactly its job key, item and route.
 
 \subsubsection{Environment Variables}
 
 \begin{itemize}
-\item $\mathit{consentPrompt}$: the consent disclosure shown on screen for a proposed third-party route. Changed by \texttt{preview}, which displays recipient, scope and retention terms, and cleared by \texttt{authorize} and \texttt{discard}.
-\item $\mathit{userDecision}$: the user's Approve or Decline action entered with keyboard or mouse. Read by \texttt{authorize}.
+\item $\mathit{consentPrompt}:\ty{RenderSurface}$: the consent disclosure shown on screen for a proposed third-party route. Changed by \texttt{preview}, which displays recipient, scope and retention terms, and cleared by \texttt{authorize} and \texttt{discard}.
+\item $\mathit{userDecision}:\ty{InputEvent}$: the user's Approve or Decline action entered with keyboard or mouse. Read by \texttt{authorize}.
 \end{itemize}
 
 \subsubsection{Assumptions}
 
+The shared initialization and authorization rules in Section~\ref{sec:notation} apply. Payload validity is checked by the operations, not assumed.
+
 \subsubsection{Access Routine Semantics}
 
 \noindent \texttt{begin}():
-Read the item through M1, replace any unsent selection in the same view and obtain a fresh check key. Make its modality and bounds available before processing. Reject restricted, missing or out-of-scope selections without a provider call.
+Read the item through M1, replace any unsent selection in the same view and obtain a fresh UUIDv4 check key bound to its authenticated session. Make its modality and bounds available before processing. Reject restricted, missing or out-of-scope selections without a provider call.
 
 \medskip\noindent \texttt{preview}():
-Return the selected route and modality for that key. When a third party is proposed, include recipient, content scope, retention rules and the limit on recalling already delivered data. Unknown or incompatible terms disable that route.
+Return a ConsentPreview for that key, including its modality and route eligibility. When a third party is proposed, include recipient, content scope, retention rules and the limit on recalling already delivered data. Unknown or incompatible terms disable that route.
 
 \medskip\noindent \texttt{authorize}():
-A team-service check proceeds on the user's explicit check action. A third-party check requires explicit approval after its preview. Decline clears the unsent item and returns a local cancelled update without admitting service work or sending content. Approval for the active key authorizes exactly the disclosed item, scope and recipient. Dispatch once through M1 and clear the staging reference when the check ends or the view is replaced. An expired decision cannot authorize a later gesture.
+A team-service check proceeds on the user's explicit check action. A third-party check requires explicit approval after its preview. Decline clears the unsent item and returns a local cancelled update without admitting service work or sending content. Approval for the active key authorizes exactly the disclosed item, scope and recipient. Dispatch once through M1, transfer payload ownership and clear the staging reference as described in Section~\ref{sec:notation}. An expired decision cannot authorize a later gesture. Duplicate authorization after dispatch returns invalid state and sends nothing; item, route or policy-version changes require a new preview and approval.
 
 \medskip\noindent \texttt{discard}():
 Clear an unsent selection and its authorization. An admitted check is cancelled through the result card and request coordinator.
 
 \subsubsection{Local Functions}
 
+None exported or required to define this interface.
+
 %% ------------------------------------------------------------------ M3
-\newpage
+\clearpage
 \section{MIS of M3 Result card} \label{sec:m3}
+
+M3 owns the active result binding and uncertainty presentation for each view.
 
 \subsection{Module}
 
@@ -296,9 +389,11 @@ M1.
 
 \subsection{Syntax}
 
+The following constants and operations form the public interface. Shared initialization is defined in Section~\ref{sec:notation}.
+
 \subsubsection{Exported Constants}
 
-\Const{MAX\_UI\_RENDER\_LATENCY}, \Const{MAX\_CANCEL\_UI\_LATENCY}.
+\Const{MAX\_\allowbreak{}UI\_\allowbreak{}RENDER\_\allowbreak{}LATENCY}, \Const{MAX\_\allowbreak{}CANCEL\_\allowbreak{}UI\_\allowbreak{}LATENCY}.
 
 \subsubsection{Exported Access Programs}
 
@@ -307,29 +402,34 @@ M1.
 \hline
 \textbf{Name} & \textbf{In} & \textbf{Out} & \textbf{Exceptions} \\
 \hline
-\texttt{start} & $v:\ty{View},\ k:\key$ & $\ty{Unit}$ & \\
-\texttt{accept} & $v:\ty{View},\ u:\ty{Update}$ & $\ty{Unit}\mid\ty{Reason}$ & \\
-\texttt{reject} & $v:\ty{View},\ k:\key,\ r:\ty{Reason}$ & $\ty{Unit}$ & \\
-\texttt{cancel} & $v:\ty{View},\ k:\key$ & $\ty{Unit}\mid\ty{Reason}$ & \\
+\texttt{initialize} & $p:\ty{Config}$ & $\ty{Unit}\mid\ty{Reason}$ & None \\
+\texttt{start} & $v:\ty{View},\ k:\key$ & $\ty{Unit}\mid\ty{Reason}$ & None \\
+\texttt{accept} & $v:\ty{View},\ u:\ty{Update}$ & $\ty{Unit}\mid\ty{Reason}$ & None \\
+\texttt{reject} & $v:\ty{View},\ k:\key,\ r:\ty{Reason}$ & $\ty{Unit}\mid\ty{Reason}$ & None \\
+\texttt{cancel} & $v:\ty{View},\ k:\key$ & $\ty{Unit}\mid\ty{Reason}$ & None \\
 \hline
 \end{tabular}
 \end{center}
 
 \subsection{Semantics}
 
+The state and environment below are private; callers rely on the operation effects.
+
 \subsubsection{State Variables}
 
-Active check key, view status, cancellation marker and safe display model per view. Initially empty.
+$V:\ty{View}\rightharpoonup\ty{ViewRecord}$, initially empty. $V(v)$ contains only the active key for view $v$. Once locally cancelled, that key cannot receive an assessment; changing the active key clears all prior evidence.
 
 \subsubsection{Environment Variables}
 
 \begin{itemize}
-\item $\mathit{card}$: the result card region on screen. Changed by \texttt{start} (clears previous evidence, shows pending after admission), \texttt{accept} (shows the update), \texttt{reject} (shows the corrective reason) and \texttt{cancel} (shows cancelled).
-\item $\mathit{keyboard}$: keyboard and pointer input on the card's controls, such as the cancel control. Read only.
-\item $\mathit{clock}$: the browser host's monotonic clock, used to meet \Const{MAX\_UI\_RENDER\_LATENCY} and \Const{MAX\_CANCEL\_UI\_LATENCY}. Read only.
+\item $\mathit{card}:\ty{RenderSurface}$: the result card region on screen. Changed by \texttt{start} (clears previous evidence, shows pending after admission), \texttt{accept} (shows the update), \texttt{reject} (shows the corrective reason) and \texttt{cancel} (shows cancelled).
+\item $\mathit{keyboard}:\ty{InputEvent}$: keyboard and pointer input on the card's controls, such as the cancel control. Read only.
+\item $\mathit{clock}:\ty{Clock}$: the browser host's monotonic clock, used to meet \Const{MAX\_\allowbreak{}UI\_\allowbreak{}RENDER\_\allowbreak{}LATENCY} and \Const{MAX\_\allowbreak{}CANCEL\_\allowbreak{}UI\_\allowbreak{}LATENCY}. Read only.
 \end{itemize}
 
 \subsubsection{Assumptions}
+
+The shared initialization and authorization rules in Section~\ref{sec:notation} apply. Payload validity is checked by the operations, not assumed.
 
 \subsubsection{Access Routine Semantics}
 
@@ -337,19 +437,23 @@ Active check key, view status, cancellation marker and safe display model per vi
 Replace the previous view binding with the new check and clear the previous evidence. Show pending only after admission is acknowledged. A terminal reply that reaches the active view before the pending update may render directly.
 
 \medskip\noindent \texttt{accept}():
-Require the full active key, an open view and an allowed transition. Ignore mismatched, stale and post-terminal replies. Display a valid update by \Const{MAX\_UI\_RENDER\_LATENCY} of receipt. Show source kind and locator for evidence, visible uncertainty, plain-language limits and a next check. Use a text label and keyboard-accessible controls. A higher-signal result warns that an authentic item can be flagged. A lower-risk label requires a valid completed update with the lower-signal direction. A malformed completed result is displayed as a failed check, with no verdict.
+Require the full active key, an open view and an allowed transition. Ignore mismatched, stale and post-terminal replies. Display a valid update by \Const{MAX\_\allowbreak{}UI\_\allowbreak{}RENDER\_\allowbreak{}LATENCY} of receipt. Show source kind and locator for evidence, visible uncertainty, plain-language limits and a next check. Use a text label and keyboard-accessible controls. A higher-signal result warns that an authentic item can be flagged. A lower-risk label requires a valid completed update with the lower-signal direction. A malformed completed result is displayed as a local failed check, with no verdict; it does not rewrite an already terminal service record. An active pre-admission rejection renders by \Const{MAX\_\allowbreak{}UI\_\allowbreak{}RENDER\_\allowbreak{}LATENCY} from rejection receipt.
 
 \medskip\noindent \texttt{reject}():
-Display a corrective reason for an active pre-admission rejection. There is no service status or detector result.
+Display a corrective reason for an active pre-admission rejection. There is no service status or detector result. $out:=\ty{Unit}$ after rendering; unmatched keys leave the view unchanged.
 
 \medskip\noindent \texttt{cancel}():
-For an active pending check, immediately set the local cancellation marker, remove assessment fields, show cancelled by \Const{MAX\_CANCEL\_UI\_LATENCY}, and request service cancellation through M1. Service receipt and cleanup confirmation are separate. Suppress all later assessments for that view and key even if a result was already on its way.
+For an active pending check, immediately set the local cancellation marker, remove assessment fields, show cancelled by \Const{MAX\_\allowbreak{}CANCEL\_\allowbreak{}UI\_\allowbreak{}LATENCY}, and request service cancellation through M1. Service receipt and cleanup confirmation are separate. Suppress all later assessments for that view and key even if a result was already on its way.
 
 \subsubsection{Local Functions}
 
+None exported or required to define this interface.
+
 %% ------------------------------------------------------------------ M4
-\newpage
+\clearpage
 \section{MIS of M4 Input validation} \label{sec:m4}
+
+M4 admits only bounded inert text or supported static image content.
 
 \subsection{Module}
 
@@ -361,9 +465,11 @@ No design module.
 
 \subsection{Syntax}
 
+The following constants and operations form the public interface. Shared initialization is defined in Section~\ref{sec:notation}.
+
 \subsubsection{Exported Constants}
 
-\Const{MIN\_TEXT\_LENGTH}, \Const{MAX\_TEXT\_LENGTH}, \Const{MAX\_IMAGE\_SIZE},\newline \Const{MIN\_IMAGE\_DIM}, \Const{MAX\_IMAGE\_DIM}.
+\Const{MIN\_\allowbreak{}TEXT\_\allowbreak{}LENGTH}, \Const{MAX\_\allowbreak{}TEXT\_\allowbreak{}LENGTH}, \Const{MAX\_\allowbreak{}IMAGE\_\allowbreak{}SIZE},\newline \Const{MIN\_\allowbreak{}IMAGE\_\allowbreak{}DIM}, \Const{MAX\_\allowbreak{}IMAGE\_\allowbreak{}DIM}.
 
 \subsubsection{Exported Access Programs}
 
@@ -372,12 +478,14 @@ No design module.
 \hline
 \textbf{Name} & \textbf{In} & \textbf{Out} & \textbf{Exceptions} \\
 \hline
-\texttt{validate} & $x:\ty{RawItem}$ & $\ty{Item}\mid\ty{Reason}$ & \\
+\texttt{validate} & $x:\ty{RawItem}$ & $\ty{Item}\mid\ty{Reason}$ & None \\
 \hline
 \end{tabular}
 \end{center}
 
 \subsection{Semantics}
+
+The state and environment below are private; callers rely on the operation effects.
 
 \subsubsection{State Variables}
 
@@ -389,16 +497,22 @@ None. The module has no interaction outside the software.
 
 \subsubsection{Assumptions}
 
+No initialization is required. Raw input is untrusted; validation is an output condition, not a caller precondition.
+
 \subsubsection{Access Routine Semantics}
 
 \noindent \texttt{validate}():
-For text, require valid UTF-8 and count decoded characters. Apply inclusive minimum and maximum bounds. Keep the selection as inert text. For an image, check the byte bound before decoding, require a supported static Portable Network Graphics (PNG), Joint Photographic Experts Group (JPEG) or WebP format, compare headers with the decoded type, and bound both dimensions and decoding work. Allow only the selected item and the explicitly supplied context. Reject empty, out-of-bounds, inconsistent, unsupported or corrupt content with a specific reason and release temporary decode references. No detector is invoked on rejection.
+For text, require valid UTF-8 and count Unicode code points, not UTF-8 bytes or JavaScript UTF-16 code units. Apply inclusive minimum and maximum bounds. Keep the selection as inert text. For an image, use decimal MB ($10^6$ bytes) and check the byte bound before decoding, require a supported static Portable Network Graphics (PNG), Joint Photographic Experts Group (JPEG) or WebP format, compare headers with the decoded type, and bound both dimensions and decoding work. Allow only the selected item and the explicitly supplied context. Reject empty, out-of-bounds, inconsistent, unsupported or corrupt content with a specific reason and release temporary decode references. No detector is invoked on rejection. $out:=\ty{Item}$ on success, otherwise $out:=\ty{Reason}$; no module state changes.
 
 \subsubsection{Local Functions}
 
+None exported or required to define this interface.
+
 %% ------------------------------------------------------------------ M5
-\newpage
+\clearpage
 \section{MIS of M5 Request coordinator} \label{sec:m5}
+
+M5 serializes request admission and terminal decisions while preserving session isolation.
 
 \subsection{Module}
 
@@ -410,9 +524,11 @@ M4, M6--M9.
 
 \subsection{Syntax}
 
+The following constants and operations form the public interface. Shared initialization is defined in Section~\ref{sec:notation}.
+
 \subsubsection{Exported Constants}
 
-\Const{MAX\_RESPONSE\_TIME}, \Const{MAX\_CONCURRENT\_REQS}.
+\Const{MAX\_\allowbreak{}RESPONSE\_\allowbreak{}TIME}, \Const{MAX\_\allowbreak{}CONCURRENT\_\allowbreak{}REQS}, \Const{MAX\_\allowbreak{}DELIVERY\_\allowbreak{}RECORD\_\allowbreak{}AGE}.
 
 \subsubsection{Exported Access Programs}
 
@@ -421,60 +537,72 @@ M4, M6--M9.
 \hline
 \textbf{Name} & \textbf{In} & \textbf{Out} & \textbf{Exceptions} \\
 \hline
-\texttt{admit} & $s:\ty{Session},\ j:\ty{Job}$ & $\ty{Update}\mid\ty{Reason}$ & \\
-\texttt{advance} & $k:\key,\ e:\ty{WorkEvent}$ & $\ty{Update}\mid\ty{Reason}$ & \\
-\texttt{cancel} & $s:\ty{Session},\ k:\key$ & $\ty{Update}\mid\ty{Reason}$ & \\
-\texttt{status} & $s:\ty{Session},\ k:\key$ & $\ty{Update}\mid\ty{Reason}$ & \\
+\texttt{initialize} & $p:\ty{Config}$ & $\ty{Unit}\mid\ty{Reason}$ & None \\
+\texttt{admit} & $s:\ty{Session},\ j:\ty{Job}$ & $\ty{Update}\mid\ty{Reason}$ & None \\
+\texttt{advance} & $k:\key,\ e:\ty{WorkEvent}$ & $\ty{Update}\mid\ty{Reason}$ & None \\
+\texttt{cancel} & $s:\ty{Session},\ k:\key$ & $\ty{Update}\mid\ty{Reason}$ & None \\
+\texttt{status} & $s:\ty{Session},\ k:\key$ & $\ty{Update}\mid\ty{Reason}$ & None \\
 \hline
 \end{tabular}
 \end{center}
 
 \subsection{Semantics}
 
+The state and environment below are private; callers rely on the operation effects.
+
 \subsubsection{State Variables}
 
-A map from admitted keys to status, owner, deadline, route and work handle, plus bounded admission capacity. Initially empty.
+Let $R:\key\rightharpoonup\ty{RequestRecord}$ be a partial map. Each record contains status, authenticated owner, local admission time, deadline, route and authorized work handle. Initially $R=\varnothing$. For every $k\in\operatorname{dom}(R)$, the record owner equals the session component of $k$. Let $P$ count pending records and $K$ be the configured admission capacity; $0\le P\le K$ and $K\ge\Const{MAX\_\allowbreak{}CONCURRENT\_\allowbreak{}REQS}$. A terminal record never changes status.
 
 \subsubsection{Environment Variables}
 
 \begin{itemize}
-\item $\mathit{clock}$: the service host's monotonic clock. Read by \texttt{admit} to set the deadline and by \texttt{advance} to decide whether the deadline is reached. Never modified.
+\item $\mathit{clock}:\ty{Clock}$: the service host's monotonic clock. Read by \texttt{admit} to set the deadline and by \texttt{advance} to decide whether the deadline is reached. Never modified.
 \end{itemize}
 
 \subsubsection{Assumptions}
 
+The shared initialization and authorization rules in Section~\ref{sec:notation} apply. Payload validity is checked by the operations, not assumed.
+
 \subsubsection{Access Routine Semantics}
 
 \noindent \texttt{admit}():
-Check the owner, key freshness, current consent and capacity, then validate through M4. Discard rejected work before entry into the state map. Consume each provider consent once and bind it to the validated item and provider policy. For success, register transient ownership in M6, enter pending, set the deadline to admission time plus \Const{MAX\_RESPONSE\_TIME}, and dispatch to the correct detector. Deploy enough capacity for the SRS concurrency target. Refuse excess pre-admission work with a busy reason. Never substitute a provider for the approved route.
+Check the owner, key freshness, current consent and capacity, then validate through M4. Discard rejected work before entry into the state map. Consume each provider consent once and bind it to the validated item and provider policy. For success, register transient ownership in M6, enter pending, set the deadline to admission time plus \Const{MAX\_\allowbreak{}RESPONSE\_\allowbreak{}TIME}, and dispatch to the correct detector. Deploy enough capacity for the SRS concurrency target. Refuse excess pre-admission work with a busy reason. Never substitute a provider for the approved route.
 
 \medskip\noindent \texttt{advance}():
-Only the check's trusted worker, cancellation handler or timer can deliver a work event. While pending, let $c$ mean accepted cancellation, $d$ mean deadline reached, $e$ mean unrecoverable dependency error, and $a$ mean required work has finished or been declared unavailable. An available result from M9 is either completed or inconclusive. Evaluate the following in order as one atomic decision.
+Only the check's trusted worker, cancellation handler or timer can deliver a work event. While pending, let $c$ mean accepted cancellation, $d$ mean deadline reached, $e$ mean unrecoverable dependency error, and $a$ mean required work has finished or been declared unavailable. Let $v$ be a total Boolean that is false until $a$ and true exactly when M9 supplies a supported completed assessment. An available result from M9 is either completed or inconclusive. Evaluate the following in order as one atomic decision.
 
-\begin{center}
+\begin{table}[H]
+\centering
+\caption{Atomic lifecycle decision, matching SRS S.9.1}\label{TblLifecycle}
 \begin{tabularx}{0.92\linewidth}{@{}lX@{}}
 \toprule Condition & Next state \\ \midrule
 $c$ & cancelled \\
 $\neg c \land (d\lor e)$ & failed, with the appropriate reason \\
 $\neg c \land \neg d \land \neg e \land \neg a$ & pending \\
-$\neg c \land \neg d \land \neg e \land a$ & completed if M9 produces a supported assessment, otherwise inconclusive \\
+$\neg c \land \neg d \land \neg e \land a \land \neg v$ & inconclusive \\
+$\neg c \land \neg d \land \neg e \land a \land v$ & completed \\
 \bottomrule
 \end{tabularx}
-\end{center}
+\end{table}
 
-Once terminal, the status is fixed. On the first terminal decision, stop request-owned work and invoke M6 cleanup. Retain only the safe response needed for delivery. Unrecognized work events and late updates cannot mutate the state. A foreign key exposes no state.
+The five rows are disjoint and total over all 32 assignments of $(c,d,e,a,v)$; UT-C4 in the V\&V Plan specifies exhaustive verification of them. Partial unavailable work without an unrecoverable error sets $a$ when resolved and $v=\mathrm{false}$, producing inconclusive. Once terminal, the status is fixed. On the first terminal decision, stop request-owned work and invoke M6 cleanup. Retain only the safe response needed for delivery. Unrecognized work events and late updates cannot mutate the state. A foreign key exposes no state.
 
 \medskip\noindent \texttt{cancel}():
 Check the authenticated owner. For pending work, submit an accepted cancellation event to the same decision as \texttt{advance}. A terminal request remains terminal. Duplicate cancellation is safe.
 
 \medskip\noindent \texttt{status}():
-Return only the requesting session's safe view of the specified check. After the response lifetime ends, retire the record and return the same generic reason as for an unknown key.
+Return only the requesting session's safe view of the specified check. Retire its safe record on a terminal delivery acknowledgment, or by \Const{MAX\_\allowbreak{}DELIVERY\_\allowbreak{}RECORD\_\allowbreak{}AGE} after its terminal decision, whichever occurs first; then return the same generic reason as for an unknown key. The record contains no raw item or reconstructive evidence excerpt. Expiry is scheduled at the terminal decision and does not depend on a later status poll. Read-only status queries return the stored safe update. M1 sends a terminal delivery acknowledgment internally after successful receipt; only the authenticated owner may acknowledge it.
 
 \subsubsection{Local Functions}
 
+None exported or required to define this interface.
+
 %% ------------------------------------------------------------------ M6
-\newpage
+\clearpage
 \section{MIS of M6 Temporary content} \label{sec:m6}
+
+M6 controls worker access to transient content and records its logical release.
 
 \subsection{Module}
 
@@ -486,9 +614,11 @@ No design module.
 
 \subsection{Syntax}
 
+The following constants and operations form the public interface. Shared initialization is defined in Section~\ref{sec:notation}.
+
 \subsubsection{Exported Constants}
 
-\Const{MAX\_RETENTION\_TIME}.
+\Const{MAX\_\allowbreak{}RETENTION\_\allowbreak{}TIME}.
 
 \subsubsection{Exported Access Programs}
 
@@ -497,44 +627,53 @@ No design module.
 \hline
 \textbf{Name} & \textbf{In} & \textbf{Out} & \textbf{Exceptions} \\
 \hline
-\texttt{hold} & $k:\key,\ x:\ty{Item}$ & $\ty{Unit}\mid\ty{Reason}$ & \\
-\texttt{borrow} & $k:\key,\ w:\ty{WorkerLease}$ & $\ty{Item}\mid\ty{Reason}$ & \\
-\texttt{release} & $k:\key,\ t:\ty{LocalInstant}$ & $\ty{CleanupReceipt}\mid\ty{Reason}$ & \\
+\texttt{initialize} & $p:\ty{Config}$ & $\ty{Unit}\mid\ty{Reason}$ & None \\
+\texttt{hold} & $k:\key,\ x:\ty{Item}$ & $\ty{WorkerLease}\mid\ty{Reason}$ & None \\
+\texttt{borrow} & $k:\key,\ w:\ty{WorkerLease}$ & $\ty{Item}\mid\ty{Reason}$ & None \\
+\texttt{release} & $k:\key,\ t:\ty{LocalInstant}$ & $\ty{CleanupReceipt}\mid\ty{Reason}$ & None \\
 \hline
 \end{tabular}
 \end{center}
 
 \subsection{Semantics}
 
+The state and environment below are private; callers rely on the operation effects.
+
 \subsubsection{State Variables}
 
-Map of live check keys to authorized worker leases and their transient input references. Initially empty.
+$B:\key\rightharpoonup\ty{LeaseRecord}$, initially empty. A live lease reads only its own key. Closed records contain no item references; late workers cannot recreate a closed key. Closed-key rejection persists through the safe delivery-record lifetime without retaining content.
 
 \subsubsection{Environment Variables}
 
 \begin{itemize}
-\item $\mathit{disk}$: persistent storage and log files on the browser host and service host. No access program changes $\mathit{disk}$ with raw payload content; it is unchanged by \texttt{hold}, \texttt{borrow} and \texttt{release}.
-\item $\mathit{clock}$: the cleanup owner's monotonic clock. Read by \texttt{release} to check the cleanup bound \Const{MAX\_RETENTION\_TIME}.
+\item $\mathit{disk}:\ty{Storage}$: persistent storage and log files on the browser host and service host. No access program changes $\mathit{disk}$ with raw payload content; it is unchanged by \texttt{hold}, \texttt{borrow} and \texttt{release}.
+\item $\mathit{clock}:\ty{Clock}$: the cleanup owner's monotonic clock. Read by \texttt{release} to check the cleanup bound \Const{MAX\_\allowbreak{}RETENTION\_\allowbreak{}TIME}.
 \end{itemize}
 
 \subsubsection{Assumptions}
 
+The shared initialization and authorization rules in Section~\ref{sec:notation} apply. Payload validity is checked by the operations, not assumed.
+
 \subsubsection{Access Routine Semantics}
 
 \noindent \texttt{hold}():
-Register one validated item for a fresh key. This registry, its workers and exception handlers never write raw payloads to persistent storage or logs.
+Register one validated item for a fresh key and return its unforgeable worker lease. M5 delegates that lease only to request-owned work and calls borrow before passing the item to a detector. Formally $B'(k)=\operatorname{open}(x,w)$ and $out:=w$; a closed or occupied key returns invalid state. This registry, workers and exception handlers never persist raw payloads.
 
 \medskip\noindent \texttt{borrow}():
 Require a live lease authorized only for the same key. Expose data only for the lease duration and track references owned by that work. A missing, foreign or revoked lease returns the same reason.
 
 \medskip\noindent \texttt{release}():
-Revoke leases, stop request-owned work and drop application-owned references, including queued and staging copies, by \Const{MAX\_RETENTION\_TIME} after the local terminal decision. Return a receipt only after cleanup. Repeating release leaves the key closed. The receipt covers application-owned references and worker exit. Report a cleanup violation if the bound is missed. The operation cannot recall content that has already reached an approved external recipient.
+Revoke leases, stop request-owned work and drop application-owned service references, including queued copies, by \Const{MAX\_\allowbreak{}RETENTION\_\allowbreak{}TIME} after the local terminal decision. The argument $t$ is the recorded local terminal-decision instant; measure the bound from $t$, never from the later cleanup-call time. Set $B\,\!\prime(k)$ to a closed record with no item references. Return a receipt only after cleanup. Repeating release leaves the key closed. The receipt covers application-owned references and worker exit. Report a cleanup violation if the bound is missed. The operation cannot recall content that has already reached an approved external recipient.
 
 \subsubsection{Local Functions}
 
+None exported or required to define this interface.
+
 %% ------------------------------------------------------------------ M7
-\newpage
+\clearpage
 \section{MIS of M7 Text signals} \label{sec:m7}
+
+M7 produces versioned text signals with explicit domain applicability.
 
 \subsection{Module}
 
@@ -546,6 +685,8 @@ No design module.
 
 \subsection{Syntax}
 
+The following constants and operations form the public interface. Shared initialization is defined in Section~\ref{sec:notation}.
+
 \subsubsection{Exported Constants}
 
 None.
@@ -557,35 +698,44 @@ None.
 \hline
 \textbf{Name} & \textbf{In} & \textbf{Out} & \textbf{Exceptions} \\
 \hline
-\texttt{extractText} & $x:\ty{Item},\ p:\ty{Config}$ & $\ty{Signals}\mid\ty{Reason}$ & \\
+\texttt{initialize} & $p:\ty{Config}$ & $\ty{Unit}\mid\ty{Reason}$ & None \\
+\texttt{extractText} & $x:\ty{Item},\ p:\ty{Config}$ & $\ty{Signals}\mid\ty{Reason}$ & None \\
 \hline
 \end{tabular}
 \end{center}
 
 \subsection{Semantics}
 
+The state and environment below are private; callers rely on the operation effects.
+
 \subsubsection{State Variables}
 
-Read-only loaded detector and attribution configuration.
+$p_7:\ty{Config}$ is immutable after initialization; it identifies the loaded text detector, attribution strategy and applicability gate. $D_7:\operatorname{Optional}(\ty{ModelArtifact})$ holds loaded detector and applicability resources, absent before initialization. No request content is retained between calls.
 
 \subsubsection{Environment Variables}
 
 \begin{itemize}
-\item $\mathit{modelFiles}$: the approved, versioned text model files on the service host's disk. Read when the detector is loaded; never modified.
+\item $\mathit{modelFiles}:\ty{FileSet}$: the approved, versioned text model files on the service host's disk. Read when the detector is loaded; never modified.
 \end{itemize}
 
 \subsubsection{Assumptions}
 
+The shared initialization and authorization rules in Section~\ref{sec:notation} apply. Payload validity is checked by the operations, not assumed.
+
 \subsubsection{Access Routine Semantics}
 
 \noindent \texttt{extractText}():
-Require an admitted text item and a compatible frozen detector. Return versioned statistical observations, model inferences and source locators. Treat item and optional context as data throughout. For unsupported domain, report applicability as uncertain and withhold a directional score when it cannot be justified. For model or runtime failure, return a dependency reason. The result carries no raw submission or request state.
+Require an admitted text item and a compatible frozen detector. Return versioned statistical observations, model inferences and source locators. Treat item and optional context as data throughout. For unsupported domain, report applicability as uncertain and withhold a directional score when it cannot be justified. For model or runtime failure, return a dependency reason. The result carries no raw submission or request state. Applicability is supported only if the frozen, version-matched genre gate supports the selected domain; a declared opinion/satire context, unavailable genre profile or uncertain gate result prevents directional assessment. The MG states the required held-out genre release gate.
 
 \subsubsection{Local Functions}
 
+None exported or required to define this interface.
+
 %% ------------------------------------------------------------------ M8
-\newpage
+\clearpage
 \section{MIS of M8 Image signals and provenance} \label{sec:m8}
+
+M8 produces image signals with separately interpreted provenance observations.
 
 \subsection{Module}
 
@@ -597,6 +747,8 @@ No design module.
 
 \subsection{Syntax}
 
+The following constants and operations form the public interface. Shared initialization is defined in Section~\ref{sec:notation}.
+
 \subsubsection{Exported Constants}
 
 None.
@@ -608,35 +760,44 @@ None.
 \hline
 \textbf{Name} & \textbf{In} & \textbf{Out} & \textbf{Exceptions} \\
 \hline
-\texttt{extractImage} & $x:\ty{Item},\ p:\ty{Config}$ & $\ty{Signals}\times\ty{Provenance}\mid\ty{Reason}$ & \\
+\texttt{initialize} & $p:\ty{Config}$ & $\ty{Unit}\mid\ty{Reason}$ & None \\
+\texttt{extractImage} & $x:\ty{Item},\ p:\ty{Config}$ & $\ty{Signals}\mid\ty{Reason}$ & None \\
 \hline
 \end{tabular}
 \end{center}
 
 \subsection{Semantics}
 
+The state and environment below are private; callers rely on the operation effects.
+
 \subsubsection{State Variables}
 
-Read-only visual model and metadata parser configuration.
+$p_8:\ty{Config}$ is immutable after initialization and identifies the visual model and provenance parsers. $D_8:\operatorname{Optional}(\ty{ModelArtifact})$ holds loaded resources, absent before initialization. No request content is retained between calls.
 
 \subsubsection{Environment Variables}
 
 \begin{itemize}
-\item $\mathit{modelFiles}$: the approved, versioned image model and provenance parser files on the service host's disk. Read when the detector is loaded; never modified.
+\item $\mathit{modelFiles}:\ty{FileSet}$: the approved, versioned image model and provenance parser files on the service host's disk. Read when the detector is loaded; never modified.
 \end{itemize}
 
 \subsubsection{Assumptions}
 
+The shared initialization and authorization rules in Section~\ref{sec:notation} apply. Payload validity is checked by the operations, not assumed.
+
 \subsubsection{Access Routine Semantics}
 
 \noindent \texttt{extractImage}():
-Require a supported image from M4's input contract. Return visual observations and model inferences separately from camera metadata (Exchangeable Image File Format, EXIF) and Content Credentials (Coalition for Content Provenance and Authenticity, C2PA) checks. Distinguish present and valid, absent or stripped, and inconsistent. Treat missing metadata as a limited observation. If required parsing or model work fails, identify the unavailable dependency so the coordinator can apply its failure policy.
+Require a supported image from M4's input contract. Return a Signals record containing visual observations and model inferences separately from camera metadata (Exchangeable Image File Format, EXIF) and Content Credentials (Coalition for Content Provenance and Authenticity, C2PA) checks. Use the separate provenance fields defined in Table~\ref{TblTypes}; do not infer deliberate stripping from absence. Treat missing metadata as a limited observation and never treat EXIF presence as verified authorship. If required parsing or model work fails, identify the unavailable dependency so the coordinator can apply its failure policy.
 
 \subsubsection{Local Functions}
 
+None exported or required to define this interface.
+
 %% ------------------------------------------------------------------ M9
-\newpage
+\clearpage
 \section{MIS of M9 Assessment policy} \label{sec:m9}
+
+M9 applies a frozen decision profile and abstains when a directional assessment is unsupported.
 
 \subsection{Module}
 
@@ -647,6 +808,8 @@ Assessment policy
 No design module.
 
 \subsection{Syntax}
+
+The following constants and operations form the public interface. Shared initialization is defined in Section~\ref{sec:notation}.
 
 \subsubsection{Exported Constants}
 
@@ -659,37 +822,56 @@ None. Thresholds are validation-derived fields of the profile.
 \hline
 \textbf{Name} & \textbf{In} & \textbf{Out} & \textbf{Exceptions} \\
 \hline
-\texttt{assess} & $q:\ty{Signals},\ p:\ty{Config}$ & $\ty{Decision}$ & \\
+\texttt{initialize} & $p:\ty{Config}$ & $\ty{Unit}\mid\ty{Reason}$ & None \\
+\texttt{assess} & $q:\ty{Signals},\ p:\ty{Config}$ & $\ty{Decision}\mid\ty{Reason}$ & None \\
 \hline
 \end{tabular}
 \end{center}
 
 \subsection{Semantics}
 
+The state and environment below are private; callers rely on the operation effects.
+
 \subsubsection{State Variables}
 
-Read-only calibration and decision profile for the model version and modality.
+$p_9:\ty{Config}$ is immutable after initialization and identifies compatible calibration/decision profiles by model and modality. $D_9:\operatorname{Optional}(\ty{ModelArtifact})$ holds loaded calibration parameters and decision tables, absent before initialization. No request state is retained.
 
 \subsubsection{Environment Variables}
 
 \begin{itemize}
-\item $\mathit{profileFile}$: the released calibration and decision profile file on the service host's disk. Read when the profile is loaded; never modified.
+\item $\mathit{profileFile}:\ty{FileSet}$: the released calibration and decision profile file on the service host's disk. Read when the profile is loaded; never modified.
 \end{itemize}
 
 \subsubsection{Assumptions}
 
+The shared initialization and authorization rules in Section~\ref{sec:notation} apply. Payload validity is checked by the operations, not assumed.
+
 \subsubsection{Access Routine Semantics}
 
 \noindent \texttt{assess}():
-Verify model version, applicable task, required signal availability and each evidence claim's support. If a binary score is available, let $\hat p$ denote its calibrated synthetic/manipulation score and $\tau>0$ the frozen abstention margin. A directional check completes only when the profile applies, there is at least one supported observed signal, the signals agree and $|\hat p-0.5|\ge\tau$. The lower-signal direction additionally requires $\hat p\le0.5-\tau$. Return inconclusive when a condition is absent or cannot be evaluated. Opinion or satire alone has no bearing on truth. Use domain support and signal agreement to decide whether the generation task applies.
+Verify model version, applicable task, required signal availability and each evidence claim's support. If a binary score is available, let $\hat p$ denote its calibrated synthetic/manipulation score and $0<\tau\le0.5$ the frozen abstention margin. A directional check completes only when the profile applies, there is at least one supported observed signal, the signals agree and $|\hat p-0.5|\ge\tau$. The lower-signal direction additionally requires $\hat p\le0.5-\tau$. Return inconclusive when a condition is absent or cannot be evaluated. Opinion or satire alone has no bearing on truth. Use domain support and signal agreement to decide whether the generation task applies.
 
-Every decision has limitations and an independent next step. An abstention may display safe supporting observations. Missing provenance alone cannot drive a higher-signal decision. A dependency error reaches M5 separately from this decision. A score describes an assessment of the selected item within the detector's task.
+Let $b$ mean that the profile matches, applicability is supported, all required signals are available and non-conflicting, at least one observed signal is grounded, and the score is defined. Then
+\[
+out:=\begin{cases}
+\text{completed, lower direction},& b\land\hat p\le0.5-\tau,\\
+\text{completed, higher direction},& b\land\hat p\ge0.5+\tau,\\
+\text{inconclusive},&\text{otherwise}.
+\end{cases}
+\]
+Undefined scores are never compared numerically. Evidence text contains safe descriptors and offsets or external locators, never raw selected excerpts that would survive cleanup.
+
+Every completed or inconclusive decision includes the coded limitation \texttt{LIMIT\_\allowbreak{}NO\_\allowbreak{}GUARANTEE}, rendered as ``This assessment does not guarantee authenticity or prove fraud,'' plus task-specific limitations and an independent next step. An abstention may display safe supporting observations. Missing provenance alone cannot drive a higher-signal decision. A dependency error reaches M5 separately from this decision. A score describes an assessment of the selected item within the detector's task.
 
 \subsubsection{Local Functions}
 
+None exported or required to define this interface.
+
 %% ------------------------------------------------------------------ M10
-\newpage
+\clearpage
 \section{MIS of M10 Offline evaluation} \label{sec:m10}
+
+M10 evaluates licensed benchmark inputs independently of live browsing.
 
 \subsection{Module}
 
@@ -701,9 +883,11 @@ M4, M7--M9.
 
 \subsection{Syntax}
 
+The following constants and operations form the public interface. Shared initialization is defined in Section~\ref{sec:notation}.
+
 \subsubsection{Exported Constants}
 
-SRS evaluation targets \Const{MIN\_F1\_SCORE}, \Const{MIN\_COVERAGE}, \Const{MAX\_FPR},\newline \Const{MIN\_BASELINE\_DELTA}, \Const{MAX\_REPRO\_DELTA}.
+SRS evaluation targets \Const{MIN\_\allowbreak{}F1\_\allowbreak{}SCORE}, \Const{MIN\_\allowbreak{}COVERAGE}, \Const{MAX\_\allowbreak{}FPR},\newline \Const{MIN\_\allowbreak{}BASELINE\_\allowbreak{}DELTA}, \Const{MAX\_\allowbreak{}REPRO\_\allowbreak{}DELTA}.
 
 \subsubsection{Exported Access Programs}
 
@@ -712,47 +896,56 @@ SRS evaluation targets \Const{MIN\_F1\_SCORE}, \Const{MIN\_COVERAGE}, \Const{MAX
 \hline
 \textbf{Name} & \textbf{In} & \textbf{Out} & \textbf{Exceptions} \\
 \hline
-\texttt{evaluate} & $m:\ty{Manifest},\ p:\ty{Config}$ & $\ty{Run}\mid\ty{Reason}$ & \\
-\texttt{recompute} & $r:\ty{Run}$ & $\ty{MetricReport}\mid\ty{Reason}$ & \\
+\texttt{initialize} & $p:\ty{Config}$ & $\ty{Unit}\mid\ty{Reason}$ & None \\
+\texttt{evaluate} & $m:\ty{Manifest},\ p:\ty{Config}$ & $\ty{Run}\mid\ty{Reason}$ & None \\
+\texttt{recompute} & $r:\ty{Run}$ & $\ty{MetricReport}\mid\ty{Reason}$ & None \\
 \hline
 \end{tabular}
 \end{center}
 
 \subsection{Semantics}
 
+The state and environment below are private; callers rely on the operation effects.
+
 \subsubsection{State Variables}
 
-Run-local manifest, split assignments, frozen configurations and item outcomes. No browse-session state.
+$r:\operatorname{Optional}(\ty{Run})$, initially absent; $p_{10}:\ty{Config}$, fixed at initialization. The run contains only licensed benchmark identities and outcomes, never live browse-session state.
 
 \subsubsection{Environment Variables}
 
 \begin{itemize}
-\item $\mathit{datasetFiles}$: the versioned labelled benchmark files on the developer host's disk. Read by \texttt{evaluate}; never modified.
-\item $\mathit{outputDir}$: the experiment output directory on the developer host's disk. Changed by \texttt{evaluate}, which writes the run record, and by \texttt{recompute}, which writes the metric report.
+\item $\mathit{datasetFiles}:\ty{FileSet}$: the versioned labelled benchmark files on the developer host's disk. Read by \texttt{evaluate}; never modified.
+\item $\mathit{outputDir}:\ty{Directory}$: the experiment output directory on the developer host's disk. Changed by \texttt{evaluate}, which writes the run record, and by \texttt{recompute}, which writes the metric report.
 \end{itemize}
 
 \subsubsection{Assumptions}
 
+The shared initialization and authorization rules in Section~\ref{sec:notation} apply. Payload validity is checked by the operations, not assumed.
+
 \subsubsection{Access Routine Semantics}
 
 \noindent \texttt{evaluate}():
-Verify the licensed corpus revision, labels and input eligibility. Keep related sources and duplicate groups in one split. Record exact-duplicate and near-duplicate checks, seed, split identities, subgroup tags, model/version settings and frozen validation thresholds before evaluating held-out examples. Use the same modality and assessment contracts as live analysis. Record one outcome per eligible item, including abstentions and errors. Never access live selections.
+Verify the licensed corpus revision, labels and input eligibility. Keep related sources and duplicate groups in one split. Record exact-duplicate and near-duplicate checks, seed, split identities, subgroup tags, model/version settings and frozen validation thresholds before evaluating held-out examples. Use the same modality and assessment contracts as live analysis. Record one outcome per eligible item, including abstentions and errors. Set $r\,\!\prime$ to the recorded run, write its artifact in the configured output directory, and return $out:=r\,\!\prime$. Never access live selections.
 
 \medskip\noindent \texttt{recompute}():
-Compute assessed-only macro-average $F_1$ and the baseline delta on the same assessed IDs. Compute coverage over all eligible items and false-positive rates with explicit denominators, following SRS NFR1. Separately report full-population diagnostics, abstention/error counts, slice and per-class coverage, and the observed environment. Signal an invalid manifest or missing outcomes instead of reporting an acceptance pass.
+For binary ground-truth label $y_i$ and directional prediction $\hat o_i$, let $I$ be all eligible held-out IDs, $A$ the IDs with completed directional assessments, $N_0=|\{i\in I:y_i=0\}|$, $A_0=|\{i\in A:y_i=0\}|$, and $\mathrm{FP}=|\{i\in A:y_i=0\land\hat o_i=1\}|$. Compute assessed-only macro-average $F_1$ and the baseline delta on the same assessed IDs. Compute coverage over all eligible items and false-positive rates with explicit denominators, following SRS NFR1: $\mathrm{Coverage}=|A|/|I|$, $\mathrm{FPR}_{\mathrm{assessed}}=\mathrm{FP}/A_0$ and $\mathrm{FPR}_{\mathrm{full}}=\mathrm{FP}/N_0$. Pass only if assessed macro-average $F_1\ge\Const{MIN\_\allowbreak{}F1\_\allowbreak{}SCORE}$, baseline improvement $\ge\Const{MIN\_\allowbreak{}BASELINE\_\allowbreak{}DELTA}$ on the same $A$, coverage $\ge\Const{MIN\_\allowbreak{}COVERAGE}$ and both FPRs $\le\Const{MAX\_\allowbreak{}FPR}$. An empty required two-class test population or undefined assessed-negative FPR cannot pass. Authentic-only fairness slices report FPR and coverage and mark two-class $F_1$ not applicable. Separately report full-population diagnostics, abstention/error counts, slice and per-class coverage, and the observed environment. Recompute only from input $r$, without changing its outcomes, and write and return $out:=\ty{MetricReport}$. Signal an invalid manifest or missing outcomes instead of reporting an acceptance pass.
 
 \subsubsection{Local Functions}
 
-\newpage
+None exported or required to define this interface.
+
+\clearpage
 
 \bibliographystyle {plainnat}
 \bibliography {../../../refs/References}
 
-\newpage
+\clearpage
 
-\newpage{}
+\clearpage{}
 
 \section{Appendix --- Generative AI Use Disclosure}
+
+The original contributors' disclosure is retained as their report. The dated review entry records the present agent work separately.
 
 \subsection{AI Tools Used}
 
@@ -767,12 +960,37 @@ types, module signatures, operation descriptions and lifecycle table.
 
 \subsection{Verification of AI-Generated Content}
 
-\noindent The team read through the full document and checked the AI-generated content for correctness and consistency. Module names, secrets, requirement identifiers, hazard identifiers and symbolic constants were compared against the SRS, Hazard Analysis, V\&V Plan and course checklists, and any errors or inconsistencies were corrected by hand.
+\noindent The original PR reports that the team read through the full document and checked the AI-generated content for correctness and consistency. Module names, secrets, requirement identifiers, hazard identifiers and symbolic constants were compared against the SRS, Hazard Analysis, V\&V Plan and course checklists, and any errors or inconsistencies were corrected by hand.
 
-\medskip\noindent As an extra check, the AI tools were also asked to review their own generated content against the same sources. Any issues raised in that review were checked by the team before changes were accepted.
+\medskip\noindent The original PR also reports that the AI tools were asked to review their own generated content against the same sources. Any issues raised in that review were checked by the team before changes were accepted.
 
-\newpage{}
+\clearpage{}
+
+\subsection{Codex-Assisted Review on November 18, 2026}
+
+The original text names Claude Fable 5.2, while the source commit credits Claude Opus 5.5. This review cannot resolve that discrepancy; the original authors must confirm the actual tool/version and human checks.
+
+At Jaden Moore's request, OpenAI Codex (GPT-6) reviewed PR \#69 against the supplied 41-point rubric, current SRS, Hazard Analysis, V\&V Plan and MG/MIS checklists. It revised constant definitions, consent-preview typing, lifecycle conditions, wire-contract mapping, benchmark acceptance, state ownership, the module-level implementation schedule and design navigation, and rebuilt both PDFs. Checks included the eight existing SRS/HA specification tests, all 32 lifecycle guard assignments, trace/dependency/constant audits, LaTeX compilation and rendered-page inspection. These are agent verification; independent human review and personal reflection attestations remain the responsibility of the named contributors.
 
 \section{Appendix --- Reflection}
+
+The synthesis below addresses the design prompts; the final subsection identifies the accounts that require the contributors themselves.
+
+\subsection{Team Synthesis: Design Reasoning}
+
+This synthesis records reasoning visible in the design and this review, not a claim that individual team members have attested to personal experiences.
+
+\begin{enumerate}
+\item \textbf{What works well.} The same ten-module boundary appears in both documents. M5 owns service status while M3 owns the view binding; this makes cancellation and late-result suppression separate, testable obligations.
+\item \textbf{Difficulties and corrections.} The consent prose originally promised more than its return signature could express. The ConsentPreview record now carries the full disclosure. Explicit initialization, lease creation and constant values remove assumptions an independent implementer otherwise had to invent.
+\item \textbf{Sources of decisions.} Scoped consent, non-accusatory output and safe failure come from SRS FR4--FR11 and SR1--SR9. The side-panel, image-capture and genre-gate choices answer the V\&V Plan's design-verification actions. These are traceable engineering decisions; no new stakeholder conversation is claimed.
+\item \textbf{Other-document impact.} The current SRS is retained, including its 1.0-second logical cleanup bound and strict request-binding INV3. The availability definition now follows NFT-8. Future changed thresholds or scope must be coordinated with the SRS and V\&V Plan; these interface repairs do not revise those requirements.
+\item \textbf{Limitations (LO\_ProbSolutions).} The design cannot guarantee forensic erasure or recall already transmitted bytes. Genre recognition and cross-domain detector quality remain release gates. More data and resources would support held-out generators, real language-background slices, independent replay and broader accessibility studies; they would not make a detector proof of authenticity.
+\item \textbf{Alternatives (LO\_Explores).} An in-page authoritative overlay exposes controls to host-page interference, so the design selects an extension-owned panel. Persistent history makes recovery easier but retains sensitive selections, so only short-lived safe delivery records are kept. A monolithic detector/decision module reduces interface work but couples model replacement to abstention rules; M7/M8 and M9 separate those changes.
+\end{enumerate}
+
+\subsection{Individual Accounts and Peer Implementation}
+
+The supplied PR contains no individual reflection responses. Calvin Salsali, Raymond Tao, Jaden Moore and Richard Han must contribute their own first-person accounts of the six prompts above and confirm their actual verification work. This draft does not attribute coursework, discussions or completed reviews to them. The rubric makes the reflection due five days after the original deadline; for the Nov 16 milestone that is Nov 21, 2026. Reflection question 7 (LO\_ComprehendInstruct) belongs after implementing another team's module for Design Revision 0; that account must cite the actual implementation PR and discuss specification gaps. The later account must also discuss another team implementing one of Verity's modules, if applicable, and identify what clearer documentation would have helped. No peer implementation is claimed for Revision $-1$.
 
 \end{document}

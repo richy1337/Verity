@@ -5,7 +5,7 @@ on:
     branches: main
     paths: [docs/**, refs/**, Makefile, .github/scripts/**, .github/workflows/latex-pages.yml]
   pull_request:
-    branches: main
+    branches: [main, docs/design-doc-rev-1]
     paths: [docs/**, refs/**, Makefile, .github/scripts/**, .github/workflows/latex-pages.yml]
   workflow_dispatch:
 

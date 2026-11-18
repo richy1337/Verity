@@ -42,9 +42,9 @@
 
 \begin{document}
 
-\title{Module Guide for \progname{}}
+\title{Module Guide for Verity}
 \author{\authname}
-\date{\today}
+\date{November 18, 2026}
 
 \maketitle
 
@@ -52,10 +52,11 @@
 
 \section{Revision History}
 
-\begin{tabularx}{\textwidth}{p{3cm}p{2cm}X}
-\toprule {\bf Date} & {\bf Version} & {\bf Notes}\\
+\begin{tabularx}{\textwidth}{p{2.3cm}p{3.2cm}X}
+\toprule {\bf Date} & {\bf Developer(s)} & {\bf Change}\\
 \midrule
-2026-11-16 & Revision $-1$ & Richard Han and Calvin Salsali prepared this revision with the AI assistance disclosed below. The revision establishes the browser, service and offline boundaries, assigns ten module secrets, and traces the design to the SRS and Hazard Analysis.\\
+2026-11-16 & Richard Han, Calvin Salsali & Prepared Revision $-1$ with the AI assistance disclosed below. The revision establishes the browser, service and offline boundaries, assigns ten module secrets, and traces the design to the SRS and Hazard Analysis.\\
+2026-11-18 & Jaden Moore (Codex-assisted proposal) & Clarified testable contracts and constants, aligned verification references, and completed design navigation.\\
 \bottomrule
 \end{tabularx}
 
@@ -63,7 +64,25 @@
 
 \section{Reference Material}
 
-\subsection{Abbreviations and Acronyms}
+The following abbreviations are used in the module directory and trace tables.
+
+\begin{longtable}{@{}lp{0.68\linewidth}@{}}
+\caption{Design abbreviations}\label{TblAcronyms}\\
+\toprule Abbreviation & Meaning \\ \midrule
+\endfirsthead
+\toprule Abbreviation & Meaning \\ \midrule
+\endhead
+\hyperref[SecConnection]{AC, LC, ULC} & Anticipated, likely and unlikely change \\
+\hyperref[SecConnection]{API, CI} & Application programming interface; continuous integration \\
+\hyperref[SecConnection]{C, H} & Hazard Analysis component and hazard identifiers \\
+\hyperref[SecConnection]{C2PA, EXIF} & Coalition for Content Provenance and Authenticity; Exchangeable Image File Format \\
+\hyperref[SecConnection]{FR, NFR, SR, INV} & Functional, nonfunctional, safety requirement and invariant \\
+\hyperref[SecConnection]{M, S} & Design module and SRS subsystem identifiers \\
+\hyperref[SecConnection]{MG, MIS} & Module Guide and Module Interface Specification \\
+\hyperref[SecConnection]{SRS, HA} & Software Requirements Specification and Hazard Analysis \\
+\hyperref[SecConnection]{UI, V\&V} & User interface; verification and validation \\
+\bottomrule
+\end{longtable}
 
 \newpage
 
@@ -87,11 +106,16 @@ The starting point is the course Module Guide template and its decomposition by 
 
 \section{Anticipated and Unlikely Changes} \label{SecChange}
 
+Likely changes identify decisions to hide; the fixed decisions explain the limits of that flexibility.
+
 \subsection{Anticipated Changes} \label{SecAchange}
 
-Each row is one change owned by one module. When an SRS change affects two secrets, it has two rows so the ownership stays clear.
+Each anticipated change has exactly one owning leaf module. Several independent changes may affect the same secret, so the mapping is many-to-one in that direction. LC1, LC3 and LC4 each have separate rows for their independently changeable parts; together LC1--LC6 are covered. Shared public contracts stay stable when a hidden implementation changes.
 
 \begin{longtable}{@{}llp{0.59\linewidth}l@{}}
+\caption{Anticipated changes and owning modules}\label{TblAC}\\
+\toprule Design & SRS & Likely change & Owner \\ \midrule
+\endfirsthead
 \toprule Design & SRS & Likely change & Owner \\ \midrule
 \endhead
 AC1 & LC1 & Change text detector weights or architecture. & \modref{7} \\
@@ -148,7 +172,7 @@ The three groups below are categories for decomposition. Implement the ten leaf 
 & Temporary content\\
 \midrule
 
-\multirow{4}{0.3\textwidth}{Software Decision Module} & Text signals\\
+\multirow{4}{0.3\textwidth}{Software-Decision-Hiding Module} & Text signals\\
 & Image signals and provenance\\
 & Assessment policy\\
 & Offline evaluation\\
@@ -167,25 +191,29 @@ The three groups below are categories for decomposition. Implement the ten leaf 
 
 \textbf{Evidence is a condition of completion.} M9 needs a supported, calibrated decision and at least one grounded observation. M3 still checks the response envelope. A source tag tells the reader where a signal came from. A missing provenance manifest is recorded as missing and carries no claim about who made the image. An inconclusive check and an execution failure show different explanations and neither receives a low-risk badge.
 
-\textbf{Bounded concurrency.} M5 sizes the reference setup to admit at least the SRS concurrent-request target. A capacity refusal is shown as a busy service response before admission. Already admitted work keeps its own deadline and cancellation handling. Availability is measured through complete checks in the declared evaluation window, alongside recovery and capacity tests.
+\textbf{Bounded concurrency.} M5 sizes the reference setup to admit at least the SRS concurrent-request target. A capacity refusal is shown as a busy service response before admission. Already admitted work keeps its own deadline and cancellation handling. Availability follows NFT-8 in the V\&V Plan: successful \texttt{GET /healthz} probes divided by all scheduled probes in its declared window. End-to-end valid-check recovery and capacity are separate mandatory outcomes; a healthy endpoint alone does not establish recovery.
 
 \section{Module Decomposition} \label{SecMD}
+
+All ten leaf modules are implemented by Verity. M1 wraps browser and operating-system services; it is not supplied entirely by the host. M4 is a library; M1--M3 and M5--M10 are abstract objects initialized once per extension, service or offline-run instance, as specified in the MIS.
 
 A secret is the decision a module hides. A service is what another module may rely on.
 
 \subsection{Hardware Hiding Modules (\modref{1})}
 
 \begin{description}
-\item[Secrets:] Host API and service transport adapters.
+\item[Secrets:] Host integration adapter strategy.
 \item[Services:] Read a selection on explicit browser invocation, provide a trusted view surface, and carry messages between the extension and the team service (S1). Changes AC8 and AC10.
 \end{description}
 
 \subsection{Behaviour-Hiding Module}
 
+These modules implement capture, display, validation, coordination and transient content handling.
+
 \subsubsection{Selection and consent (\modref{2})}
 
 \begin{description}
-\item[Secrets:] Selection and consent workflow rules.
+\item[Secrets:] Scoped submission workflow.
 \item[Services:] Start a check for one item, obtain scoped consent if required, and send only the authorized item (S1, C1). Change AC12.
 \end{description}
 
@@ -199,51 +227,53 @@ A secret is the decision a module hides. A service is what another module may re
 \subsubsection{Input validation (\modref{4})}
 
 \begin{description}
-\item[Secrets:] Admission and safe decoding rules.
+\item[Secrets:] Input admissibility policy.
 \item[Services:] Return one bounded text or static image item, or a specific rejection before any detector is called (S2, C3). Change AC6.
 \end{description}
 
 \subsubsection{Request coordinator (\modref{5})}
 
 \begin{description}
-\item[Secrets:] Request scheduling and terminal-state arbitration.
+\item[Secrets:] Request execution policy.
 \item[Services:] Bind a check to its request and session, dispatch approved work, and settle it once. Track waiting and in-flight work within a bounded capacity (S2, C4). Change AC7.
 \end{description}
 
 \subsubsection{Temporary content (\modref{6})}
 
 \begin{description}
-\item[Secrets:] Transient payload ownership and reclamation.
+\item[Secrets:] Transient content lifecycle strategy.
 \item[Services:] Hold per-request content in memory and release application-owned references and work when the request ends (S2, C5). Change AC13.
 \end{description}
 
-\subsection{Software Decision Module}
+\subsection{Software-Decision-Hiding Module}
+
+These modules hide detector, assessment and offline-evaluation decisions.
 
 \subsubsection{Text signals (\modref{7})}
 
 \begin{description}
-\item[Secrets:] Text scoring and evidence extraction method.
+\item[Secrets:] Text analysis strategy.
 \item[Services:] Produce candidate text signals and their sources from a validated input (S3, C6). Changes AC1 and AC4.
 \end{description}
 
 \subsubsection{Image signals and provenance (\modref{8})}
 
 \begin{description}
-\item[Secrets:] Visual and provenance signal extraction method.
+\item[Secrets:] Image analysis strategy.
 \item[Services:] Return visual signals and a separate provenance observation from a supported image (S3, C6). Changes AC2 and AC5.
 \end{description}
 
 \subsubsection{Assessment policy (\modref{9})}
 
 \begin{description}
-\item[Secrets:] Calibration and abstention policy.
+\item[Secrets:] Assessment decision policy.
 \item[Services:] Convert signals into an evidence-backed assessment or an inconclusive result, with a reason and next step (S3, C6). Change AC3.
 \end{description}
 
 \subsubsection{Offline evaluation (\modref{10})}
 
 \begin{description}
-\item[Secrets:] Benchmark split, replay and reporting procedure.
+\item[Secrets:] Offline evaluation procedure.
 \item[Services:] Evaluate frozen detector configurations and report all outcomes by dataset and slice (S4, C7). Change AC11.
 \end{description}
 
@@ -281,17 +311,22 @@ NFR7 & \modref{10} & Repeatable evaluation \\
 NFR8 & \modref{5}, \modref{4}, \modref{6} & Capacity, failure isolation and recovery \\
 NFR9 & \modref{7}, \modref{8}, \modref{9} & Replaceable signal producers \\
 NFR10 & \modref{10}, \modref{9}, \modref{3} & Fairness audit and user-facing limitations \\
-NFR.E.1--3 & \modref{1}, \modref{2} & Browser compatibility, installation and permissions \\
+NFR.E.1 & \modref{1} & Supported browser and operating-system compatibility \\
+NFR.E.2 & \modref{1}, \modref{2} & Installation and first-check workflow \\
+NFR.E.3 & \modref{2}, \modref{1} & Scoped permissions and restricted-page feedback \\
 NFR.E.4 & \modref{3}, \modref{2}, \modref{1} & Text labels, keyboard and contrast \\
-NFR.E.5 & \modref{10} and all code owners & Licensed versions and style checks in repository continuous integration (CI) \\
-SR1--3 & \modref{3}, \modref{9} & Uncertainty, no accusation, no authenticity guarantee \\
+NFR.E.5 & \modref{1}, \modref{2}, \modref{3}, \modref{4}, \modref{5}, \modref{6}, \modref{7}, \modref{8}, \modref{9}, \modref{10} & Licensed dependencies and coding standards; CI checks are maintained by Jaden Moore \\
+SR1 & \modref{3}, \modref{9} & Visible uncertainty and abstention \\
+SR2 & \modref{3}, \modref{9} & Non-accusatory framing of item-level signals \\
+SR3 & \modref{3}, \modref{9} & No authenticity guarantee; independent next step \\
 SR4 & \modref{5}, \modref{3}, \modref{9} & Safe handling of partial and failed checks \\
 SR5 & \modref{9}, \modref{7}, \modref{8}, \modref{3} & Source-grounded evidence \\
 SR6 & \modref{4}, \modref{1} & Input and browser boundaries \\
 SR7 & \modref{5}, \modref{3} & Match results to the initiating request \\
 SR8 & \modref{6}, \modref{2}, \modref{5} & Scoped access, consent and cleanup \\
 SR9 & \modref{5}, \modref{6}, \modref{3} & Session isolation throughout the check \\
-INV1--2 & \modref{5}, \modref{3}, \modref{9} & Single state and no silent reassurance \\
+INV1 & \modref{5}, \modref{3} & Single-valued state with absorbing terminal decisions \\
+INV2 & \modref{9}, \modref{5}, \modref{3} & No reassuring verdict on degraded or failed work \\
 INV3 & \modref{5}, \modref{3} & Strict result binding \\
 INV4 & \modref{6}, \modref{5}, \modref{2} & Bounded transient cleanup \\
 \bottomrule
@@ -302,6 +337,9 @@ INV4 & \modref{6}, \modref{5}, \modref{2} & Bounded transient cleanup \\
 \href{\repo/issues/65}{false-positive warnings} is tracked in the repository.
 
 \begin{longtable}{@{}p{0.12\linewidth}p{0.29\linewidth}p{0.52\linewidth}@{}}
+\caption{Hazards and design controls}\label{TblHazards}\\
+\toprule Hazard & Modules & Main control \\ \midrule
+\endfirsthead
 \toprule Hazard & Modules & Main control \\ \midrule
 \endhead
 H1 & \modref{9}, \modref{3}, \modref{10} & Evaluate false flags and warn that authentic items can be flagged. \\
@@ -345,17 +383,59 @@ An arrow from A to B means A needs B's specification to work. It is a dependency
 \label{FigUH}
 \end{figure}
 
+M10 is an offline application entry point rather than a live behaviour module dependency. Its independent position preserves the S4 boundary; the FR12 and FR14 rows establish why this software-decision module is required.
+
 The decision policy gets the same class of signals in live and offline use. This allows a frozen calibration and detector version to be checked before deployment. It also keeps a test-only label, error log or dataset out of the live result flow.
 
 \section{User Interfaces}
 
+An extension-owned side panel (using the \href{https://developer.chrome.com/docs/extensions/reference/api/sidePanel}{Chrome Side Panel API}) contains all authoritative consent and result controls. An in-page overlay, if added, is only a non-authoritative mirror and cannot collect consent. M2 presents the selected modality and any provider consent disclosure before dispatch. M3 shows the active request's five-state lifecycle, source-tagged evidence, uncertainty, limitations and next verification step. Authoritative consent and result controls reside in an extension-controlled view; webpage text is inert. Keyboard operation, text status labels and contrast are verified by NFT-2 and FT-16 in the V\&V Plan.
+
 \section{Design of Communication Protocols}
+
+\textbf{Image acquisition.} M1 reads only the selected image. If its bytes cannot be read under the current page's permission, M2 offers a separate user action to allow access to that image's HTTPS origin. M1 requests only that origin as an optional host permission, then fetches the selected URL from the extension context with credentials omitted, redirects rejected, cache bypassed and a streaming byte bound. It does not forward arbitrary URLs to the analysis service. Refusal, a redirected URL, expired gesture or unreadable protected resource returns an input-unavailable reason before analysis. M1 tracks concurrent capture leases and removes a permission acquired for these captures when the last lease ends; it does not revoke a pre-existing user grant. The manifest declares HTTPS origins as optional permissions so an exact origin can be requested at runtime; no broad host permission is granted at installation. This separates image acquisition permission from consent to send content to an analysis provider. Chrome documents the distinct scopes of \href{https://developer.chrome.com/docs/extensions/develop/concepts/activeTab}{active-tab access}, \href{https://developer.chrome.com/docs/extensions/develop/concepts/network-requests}{extension network access} and \href{https://developer.chrome.com/docs/extensions/reference/api/permissions}{optional permissions}; FT-1 Case D checks the proposed acquisition path.
+
+\textbf{Applicability.} M7's versioned applicability gate returns supported, unsupported or uncertain, using the selected text and explicitly supplied context. A declared opinion/satire selection is unsupported. Automatic genre recognition requires a released classifier and held-out genre data in the frozen model profile; without those artifacts its result is uncertain. M9 abstains on unsupported or uncertain applicability. There is no claim that benchmark fixture tags recognize genre in real input. Raymond Tao's model gate and held-out opinion/satire results are a prerequisite to enabling directional text output; a missed FR4 gate requires the SRS scope decision with the TA, as the V\&V Plan states.
+
+
+M1 transports request-scoped commands to the team service using the SRS S.5 analysis envelope over an authenticated encrypted connection. M5 validates the session and request key independently of caller-supplied identifiers. The MIS shared types are internal abstractions; the transport adapter preserves all SRS fields. Worker events are internal and cannot be submitted as trusted events by a webpage or client.
 
 \section{Database Design}
 
+Live checks use no persistent raw-content database. M6 tracks transient references and worker leases in memory; M5 retains only safe delivery records. Offline M10 records licensed benchmark identities, configurations and outcomes in run artifacts, without accessing live selections. The SRS cleanup bound concerns logical release of application-owned references, not forensic erasure.
+
 \section{Timeline}
 
+Table~\ref{TblSchedule} is the proposed implementation plan from this review to the Revision 0 demonstration. Dates are targets, not completion claims. Owners follow the existing team responsibilities; each reviewer is a different member. The January 18 design freeze precedes the February 1--12 demonstration window. The Nov 23--Dec 4 proof-of-concept window follows the current V\&V Plan.
+
+\begin{longtable}{@{}p{0.15\linewidth}p{0.21\linewidth}p{0.56\linewidth}@{}}
+\caption{Module implementation and integration schedule}\label{TblSchedule}\\
+\toprule Target window & Owner; reviewer & Deliverable, dependency and confidence check \\ \midrule
+\endfirsthead
+\toprule Target window & Owner; reviewer & Deliverable, dependency and confidence check \\ \midrule
+\endhead
+Nov 19--27 & M1: Calvin Salsali; Jaden Moore & Host bridge, scoped capture and trusted side panel; no module prerequisite. Exercise restricted pages, cross-origin images and encrypted service transport (FT-1). \\
+Nov 19--27 & M4: Jaden Moore; Richard Han & Stateless validator; no module prerequisite. Check all nine input classes, Unicode code points, media headers and decoding bounds (FT-2--FT-4). \\
+Nov 19--Dec 4 & M6: Richard Han; Jaden Moore & Memory ownership, lease revocation and cleanup receipts; no module prerequisite. Verify no raw disk/log writes and release after each terminal outcome (NFT-4, UT-C5). \\
+Nov 23--Dec 11 & M7: Raymond Tao; Richard Han & Text detector and applicability profile; freeze licensed model artifacts. Unit-check signal locators and unavailable/unsupported applicability; record held-out genre evidence before directional release (FT-8--FT-9). \\
+Nov 23--Dec 11 & M8: Raymond Tao; Richard Han & Visual detector and provenance parsers; freeze licensed model artifacts. Check original, metadata-absent and inconsistent images, plus parser failure (FT-6). \\
+Nov 30--Dec 11 & M9: Raymond Tao; Jaden Moore & Frozen calibration and abstention profile; use versioned M7/M8 signal fixtures. Verify margin boundaries, missing signals and no-guarantee wording (FT-7--FT-9). \\
+Nov 30--Dec 18 & M10: Richard Han; Raymond Tao & Replay harness using M4 and M7--M9. Recompute metrics from all eligible outcomes, audit split leakage and subgroup counts, and independently replay the frozen run (FT-15, NFT-1, NFT-7, NFT-10). \\
+Dec 7--18 & M2: Calvin Salsali; Richard Han & Selection/consent workflow on M1. Verify approval binds one item and route, decline sends nothing and stale consent is rejected (FT-1, FT-11). \\
+Dec 7--18 & M3: Calvin Salsali; Jaden Moore & Result card on M1. Check all status variants, keyboard controls, false-positive warning and late-result suppression (FT-5, FT-10, FT-14, FT-16). \\
+Dec 7--Jan 8 & M5: Jaden Moore; Richard Han & Coordinator on M4 and M6--M9; integrate stubs before real models. Exhaust lifecycle guards, timeout/cancel races and ten-request isolation (FT-10, FT-13--FT-14, UT-C4). \\
+Jan 4--15 & Jaden Moore; Calvin Salsali & Integrate M1--M10 and run the stub system suites, privacy checks, accessibility and static analysis in PR CI. Richard Han checks cleanup independently; Raymond Tao runs the real-model performance and fairness gates. \\
+Jan 18 & Jaden Moore; Richard Han & Freeze Design Revision 0: match MG/MIS to implemented interfaces, trace every requirement and record passed, failed and blocked tests. Resolve changed scope with the TA before claiming acceptance. \\
+Jan 19--29 & Calvin Salsali, Raymond Tao, Jaden Moore, Richard Han & Prepare Rev 0 build on the declared reference host. Jaden checks latency, availability and concurrency; Richard replays benchmark/privacy evidence; Calvin checks installation and keyboard flow; Raymond signs the model release profile. Each defect returns to its module owner. \\
+Feb 1--12 & Calvin Salsali, Raymond Tao, Jaden Moore, Richard Han & Demonstrate the integrated Rev 0 build and record feedback. Release requires applicable V\&V gates; blocked detector gates stay visibly inconclusive or require an approved scope revision. \\
+\bottomrule
+\end{longtable}
+
+Jaden Moore owns CI wiring. This follow-up adds a specification-check workflow for the existing eight SRS/HA checks and the MG/MIS consistency audit; the LaTeX workflow already compiles documentation. Product unit tests, static analysis and coverage gates in the V\&V Plan must be added as the modules land. The repository administrator must require successful checks in branch protection; a workflow file alone does not enforce a merge block. The final usability study and complete V\&V report remain later milestones.
+
 \section{Generative AI Use Disclosure}
+
+The original drafting disclosure is retained below as the contributors' report. The review subsection distinguishes the present agent checks from the contributors' human verification.
 
 \subsection{AI Tools Used}
 
@@ -369,9 +449,15 @@ The decision policy gets the same class of signals in live and offline use. This
 
 \subsection{Verification of AI-Generated Content}
 
-\noindent The team read through the full document and checked the AI-generated content for correctness and consistency. Module names, secrets, requirement identifiers, hazard identifiers and symbolic constants were compared against the SRS, Hazard Analysis, V\&V Plan and course checklists, and any errors or inconsistencies were corrected by hand.
+\noindent The original PR reports that the team read through the full document and checked the AI-generated content for correctness and consistency. Module names, secrets, requirement identifiers, hazard identifiers and symbolic constants were compared against the SRS, Hazard Analysis, V\&V Plan and course checklists, and any errors or inconsistencies were corrected by hand.
 
-\medskip\noindent As an extra check, the AI tools were also asked to review their own generated content against the same sources. Any issues raised in that review were checked by the team before changes were accepted.
+\medskip\noindent The original PR also reports that the AI tools were asked to review their own generated content against the same sources. Any issues raised in that review were checked by the team before changes were accepted.
+
+\subsection{Codex-Assisted Review on November 18, 2026}
+
+The original text names Claude Fable 5.2, while the source commit credits Claude Opus 5.5. This review cannot resolve that discrepancy; the original authors must confirm the actual tool/version and human checks.
+
+At Jaden Moore's request, OpenAI Codex (GPT-6) reviewed PR \#69 against the supplied 41-point rubric, current SRS, Hazard Analysis, V\&V Plan and MG/MIS checklists. It revised constant definitions, consent-preview typing, lifecycle conditions, wire-contract mapping, benchmark acceptance, state ownership, the module-level implementation schedule and design navigation, and rebuilt both PDFs. Checks included the eight existing SRS/HA specification tests, all 32 lifecycle guard assignments, trace/dependency/constant audits, LaTeX compilation and rendered-page inspection. These are agent verification; independent human review and personal reflection attestations remain the responsibility of the named contributors.
 
 \newpage{}
 
