@@ -81,24 +81,24 @@ jobs:
       # Keep the TeX package set on a fixed runner release. A failed package
       # download must stop this job rather than cache an empty installation.
       - name: Install TeX Live and pandoc
+        timeout-minutes: 15
         run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
+          # The regional EC2 mirror stalled twice on the same package. Use
+          # Ubuntu's HTTPS archives and bound retries before mirror failover.
+          printf 'https://archive.ubuntu.com/ubuntu/\tpriority:1\nhttps://security.ubuntu.com/ubuntu/\tpriority:2\n' \
+            | sudo tee /etc/apt/apt-mirrors.txt >/dev/null
+          apt_options=(-o Acquire::Retries=1
+                       -o Acquire::http::Timeout=30
+                       -o Acquire::https::Timeout=30)
+          sudo apt-get "${apt_options[@]}" update
+          sudo apt-get "${apt_options[@]}" install -y --no-install-recommends \
             texlive-latex-extra texlive-science texlive-fonts-extra \
             texlive-fonts-recommended texlive-latex-recommended lmodern pandoc
       - name: Verify the TeX toolchain is usable
         run: |
-          # A restored cache that skipped texlive's postinst would leave
-          # pdflatex unable to find packages. Fail here, loudly, rather than
-          # part way through compiling documents.
-          # Restoring cached package files skips their postinst scripts, and
-          # texlive's is what builds the ls-R filename database. Without this
-          # kpsewhich cannot see the restored packages, which surfaced as
-          # "lmodern.sty not found" on the first cache hit.
+          # Refresh TeX's filename and font maps, then exercise both the
+          # LaTeX and Markdown toolchains before compiling repository docs.
           sudo mktexlsr
-          # ...and updmap-sys is what builds the font map files. Without it
-          # pdflatex finds lmodern.sty but not the fonts it maps to, failing
-          # with "Font rm-lmr7 at 600 not found".
           sudo updmap-sys >/dev/null
 
           pdflatex --version | head -1
