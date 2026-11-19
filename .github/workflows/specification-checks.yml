@@ -1,0 +1,21 @@
+name: Specification checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  specification:
+    name: SRS, hazard and design contracts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Verify SRS and hazard specifications
+        run: python3 test/documentation/verify_specification.py --with-hazard
+      - name: Verify MG and MIS consistency
+        run: python3 test/documentation/verify_design.py
