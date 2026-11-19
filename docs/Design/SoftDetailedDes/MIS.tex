@@ -122,7 +122,7 @@ A returned reason is safe to show or log and contains no raw selection. All oper
 \ty{Modality} & Text or image. \\
 \ty{Approve}, \ty{Decline} & Alternatives of an explicit user decision. \\
 \ty{WorkEvent} & Tagged worker result, timeout, dependency error or accepted cancellation, with check key and a trusted work capability. Client-supplied events never receive that capability. \\
-\ty{RequestRecord} & Status, authenticated owner, admission instant, deadline, approved route and request-owned work handle. \\
+\ty{RequestRecord} & Status, authenticated owner, admission instant, deadline, approved route and opaque work handle; latest safe \ty{Update}; and optional terminal instant and delivery-expiry instant. \\
 \ty{WorkerLease} & Opaque authorization for one worker and check. \\
 \ty{LocalInstant} & Timestamp on the cleanup owner's monotonic clock. \\
 \ty{CleanupReceipt} & Key, local completion time and cleanup outcome. \\
@@ -235,7 +235,7 @@ Browser and host bridge
 
 \subsection{Uses}
 
-No design module.
+M4 (exported input limits).
 
 \subsection{Syntax}
 
@@ -286,7 +286,7 @@ The shared initialization and authorization rules in Section~\ref{sec:notation} 
 \subsubsection{Access Routine Semantics}
 
 \noindent \texttt{readSelection}():
-Check that the gesture is current, user initiated and scoped to its tab. Read only its chosen item. For a remote image, apply the scoped optional-origin capture protocol in the MG, including the byte bound, no credentials, no redirects and permission-lease release. An expired or restricted gesture returns a corrective reason. A change of page invalidates the gesture authorization.
+Check that the gesture is current, user initiated and scoped to its tab. Read only its chosen item. Preliminary capture-size checks use M4's exported input limits; they never replace M4 validation at service admission. For a remote image, apply the scoped optional-origin capture protocol in the MG, including the byte bound, no credentials, no redirects and permission-lease release. An expired or restricted gesture returns a corrective reason. A change of page invalidates the gesture authorization.
 
 \medskip\noindent \texttt{send}(), \texttt{sendCancel}():
 Carry the command over the authenticated encrypted connection. A response belongs to the same initiating context. Return a transport reason on connection failure and never retry a content transfer using a different route.
@@ -552,7 +552,7 @@ The state and environment below are private; callers rely on the operation effec
 
 \subsubsection{State Variables}
 
-Let $R:\key\rightharpoonup\ty{RequestRecord}$ be a partial map. Each record contains status, authenticated owner, local admission time, deadline, route and authorized work handle. Initially $R=\varnothing$. For every $k\in\operatorname{dom}(R)$, the record owner equals the session component of $k$. Let $P$ count pending records and $K$ be the configured admission capacity; $0\le P\le K$ and $K\ge\Const{MAX\_\allowbreak{}CONCURRENT\_\allowbreak{}REQS}$. A terminal record never changes status.
+Let $R:\key\rightharpoonup\ty{RequestRecord}$ be a partial map. Each record contains the RequestRecord fields from Table~\ref{TblTypes}, including its latest safe update and optional terminal/expiry times. The update is pending at admission and is replaced atomically with each status decision. Only the terminal/expiry times are absent until the first terminal decision; the expiry instant is then fixed to terminal time plus the delivery-record age. Initially $R=\varnothing$. For every $k\in\operatorname{dom}(R)$, the record owner equals the session component of $k$. Let $P$ count pending records and $K$ be the configured admission capacity; $0\le P\le K$ and $K\ge\Const{MAX\_\allowbreak{}CONCURRENT\_\allowbreak{}REQS}$. A terminal record never changes status.
 
 \subsubsection{Environment Variables}
 
@@ -592,7 +592,7 @@ The five rows are disjoint and total over all 32 assignments of $(c,d,e,a,v)$; U
 Check the authenticated owner. For pending work, submit an accepted cancellation event to the same decision as \texttt{advance}. A terminal request remains terminal. Duplicate cancellation is safe.
 
 \medskip\noindent \texttt{status}():
-Return only the requesting session's safe view of the specified check. Retire its safe record on a terminal delivery acknowledgment, or by \Const{MAX\_\allowbreak{}DELIVERY\_\allowbreak{}RECORD\_\allowbreak{}AGE} after its terminal decision, whichever occurs first; then return the same generic reason as for an unknown key. The record contains no raw item or reconstructive evidence excerpt. Expiry is scheduled at the terminal decision and does not depend on a later status poll. Read-only status queries return the stored safe update. M1 sends a terminal delivery acknowledgment internally after successful receipt; only the authenticated owner may acknowledge it.
+Return the stored safe update only to the requesting session. A timer retires each terminal record at its stored expiry instant, \Const{MAX\_\allowbreak{}DELIVERY\_\allowbreak{}RECORD\_\allowbreak{}AGE} after the terminal decision; subsequent queries return the same generic reason as for an unknown key. The record contains no raw item or reconstructive evidence excerpt. Expiry is scheduled at the terminal decision and does not depend on a later status poll. The status query itself leaves state unchanged; no delivery-acknowledgment operation is required.
 
 \subsubsection{Local Functions}
 
@@ -663,7 +663,7 @@ Register one validated item for a fresh key and return its unforgeable worker le
 Require a live lease authorized only for the same key. Expose data only for the lease duration and track references owned by that work. A missing, foreign or revoked lease returns the same reason.
 
 \medskip\noindent \texttt{release}():
-Revoke leases, stop request-owned work and drop application-owned service references, including queued copies, by \Const{MAX\_\allowbreak{}RETENTION\_\allowbreak{}TIME} after the local terminal decision. The argument $t$ is the recorded local terminal-decision instant; measure the bound from $t$, never from the later cleanup-call time. Set $B\,\!\prime(k)$ to a closed record with no item references. Return a receipt only after cleanup. Repeating release leaves the key closed. The receipt covers application-owned references and worker exit. Report a cleanup violation if the bound is missed. The operation cannot recall content that has already reached an approved external recipient.
+Revoke leases, stop request-owned work and drop application-owned service references, including queued copies, by \Const{MAX\_\allowbreak{}RETENTION\_\allowbreak{}TIME} after the local terminal decision. The argument $t$ is the recorded local terminal-decision instant; measure the bound from $t$, never from the later cleanup-call time. Set $B'(k)$ to a closed record with no item references. Return a receipt only after cleanup. Repeating release leaves the key closed. The receipt covers application-owned references and worker exit. Report a cleanup violation if the bound is missed. The operation cannot recall content that has already reached an approved external recipient.
 
 \subsubsection{Local Functions}
 
@@ -725,7 +725,7 @@ The shared initialization and authorization rules in Section~\ref{sec:notation} 
 \subsubsection{Access Routine Semantics}
 
 \noindent \texttt{extractText}():
-Require an admitted text item and a compatible frozen detector. Return versioned statistical observations, model inferences and source locators. Treat item and optional context as data throughout. For unsupported domain, report applicability as uncertain and withhold a directional score when it cannot be justified. For model or runtime failure, return a dependency reason. The result carries no raw submission or request state. Applicability is supported only if the frozen, version-matched genre gate supports the selected domain; a declared opinion/satire context, unavailable genre profile or uncertain gate result prevents directional assessment. The MG states the required held-out genre release gate.
+Require an admitted text item and a compatible frozen detector. Return versioned statistical observations, model inferences and source locators. Treat item and optional context as data throughout. For a known unsupported domain, report applicability as unsupported; for an undecidable domain, report uncertain and withhold a directional score when it cannot be justified. For model or runtime failure, return a dependency reason. The result carries no raw submission or request state. Applicability is supported only if the frozen, version-matched genre gate supports the selected domain; a declared opinion/satire context, unavailable genre profile or uncertain gate result prevents directional assessment. The MG states the required held-out genre release gate.
 
 \subsubsection{Local Functions}
 
@@ -925,10 +925,21 @@ The shared initialization and authorization rules in Section~\ref{sec:notation} 
 \subsubsection{Access Routine Semantics}
 
 \noindent \texttt{evaluate}():
-Verify the licensed corpus revision, labels and input eligibility. Keep related sources and duplicate groups in one split. Record exact-duplicate and near-duplicate checks, seed, split identities, subgroup tags, model/version settings and frozen validation thresholds before evaluating held-out examples. Use the same modality and assessment contracts as live analysis. Record one outcome per eligible item, including abstentions and errors. Set $r\,\!\prime$ to the recorded run, write its artifact in the configured output directory, and return $out:=r\,\!\prime$. Never access live selections.
+Validate the licensed corpus revision, labels and input eligibility. Assign related sources and duplicate groups to one split. Freeze exact/near-duplicate checks, seed, split identities, subgroup tags, model versions and validation thresholds before held-out evaluation. Apply live modality/assessment contracts and record exactly one outcome per eligible item, including abstentions and errors. Set $r'$ to this run, write its artifact in the configured output directory, and return $out:=r'$. Never access live selections.
 
 \medskip\noindent \texttt{recompute}():
 For binary ground-truth label $y_i$ and directional prediction $\hat o_i$, let $I$ be all eligible held-out IDs, $A$ the IDs with completed directional assessments, $N_0=|\{i\in I:y_i=0\}|$, $A_0=|\{i\in A:y_i=0\}|$, and $\mathrm{FP}=|\{i\in A:y_i=0\land\hat o_i=1\}|$. Compute assessed-only macro-average $F_1$ and the baseline delta on the same assessed IDs. Compute coverage over all eligible items and false-positive rates with explicit denominators, following SRS NFR1: $\mathrm{Coverage}=|A|/|I|$, $\mathrm{FPR}_{\mathrm{assessed}}=\mathrm{FP}/A_0$ and $\mathrm{FPR}_{\mathrm{full}}=\mathrm{FP}/N_0$. Pass only if assessed macro-average $F_1\ge\Const{MIN\_\allowbreak{}F1\_\allowbreak{}SCORE}$, baseline improvement $\ge\Const{MIN\_\allowbreak{}BASELINE\_\allowbreak{}DELTA}$ on the same $A$, coverage $\ge\Const{MIN\_\allowbreak{}COVERAGE}$ and both FPRs $\le\Const{MAX\_\allowbreak{}FPR}$. An empty required two-class test population or undefined assessed-negative FPR cannot pass. Authentic-only fairness slices report FPR and coverage and mark two-class $F_1$ not applicable. Separately report full-population diagnostics, abstention/error counts, slice and per-class coverage, and the observed environment. Recompute only from input $r$, without changing its outcomes, and write and return $out:=\ty{MetricReport}$. Signal an invalid manifest or missing outcomes instead of reporting an acceptance pass.
+
+For each fixed class $c\in\{0,1\}$, count $\mathrm{TP}_c$, $\mathrm{FP}_c$ and $\mathrm{FN}_c$ over $A$. Define
+\[
+ F_{1,c}=\begin{cases}
+ \dfrac{2\mathrm{TP}_c}{2\mathrm{TP}_c+\mathrm{FP}_c+\mathrm{FN}_c},
+ &2\mathrm{TP}_c+\mathrm{FP}_c+\mathrm{FN}_c>0,\\
+ 0,&\text{otherwise},
+ \end{cases}
+ \qquad F_1^{\mathrm{macro}}=\frac{F_{1,0}+F_{1,1}}{2}.
+\]
+Use the same fixed classes and convention for the baseline on identical assessed IDs; withholding a class cannot yield a perfect two-class score. Reject duplicate IDs, label/split mismatches and missing or extra outcomes before computing metrics.
 
 \subsubsection{Local Functions}
 
@@ -949,14 +960,14 @@ The original contributors' disclosure is retained as their report. The dated rev
 
 \subsection{AI Tools Used}
 
-\noindent OpenAI Codex (GPT-6) and Claude Fable 5.2 were used for drafting and revising this document and for ensuring consistency with the course checklists and the contracts in the team's previous documents.
+\noindent The original drafting record reports OpenAI Codex (GPT-6) and Claude Fable 5.2; the source commit additionally credits Claude Opus 5.5. Jaden Moore reports that both Claude tools may have been used. These are attributed drafting records; the original authors must confirm the exact versions and uses before the disclosure is treated as a verified history. The dated review below records the present tool use separately.
 
 \subsection{How and Where Used}
 
-\noindent Calvin Salsali used OpenAI Codex (GPT-6, November 2026) to draft the shared
+\noindent The original drafting record attributes to Calvin Salsali the use of OpenAI Codex (GPT-6, November 2026) to draft the shared
 types, module signatures, operation descriptions and lifecycle table.
 
-\medskip\noindent Richard Han used Claude Fable 5.2 to revise the document, check it against the course checklists, and check its consistency with the team's previous documents.
+\medskip\noindent The original drafting record attributes to Richard Han the use of Claude Fable 5.2 to revise the document, check it against the course checklists, and check its consistency with the team's previous documents.
 
 \subsection{Verification of AI-Generated Content}
 
@@ -968,7 +979,7 @@ types, module signatures, operation descriptions and lifecycle table.
 
 \subsection{Review on November 18, 2026}
 
-The original text names Claude Fable 5.2, while the source commit credits Claude Opus 5.5. This review cannot resolve that discrepancy; the original authors must confirm the actual tool/version and human checks.
+The tool records above may describe separate drafting passes. The original authors still need to confirm their exact tools, versions and completed human checks; this review does not certify those historical claims.
 
 At Jaden Moore's request, OpenAI Codex (GPT-6) reviewed PR \#69 against the supplied 41-point rubric, current SRS, Hazard Analysis, V\&V Plan and MG/MIS checklists. It revised constant definitions, consent-preview typing, lifecycle conditions, wire-contract mapping, benchmark acceptance, state ownership, the module-level implementation schedule and design navigation, and rebuilt both PDFs. Checks included the eight existing SRS/HA specification tests, all 32 lifecycle guard assignments, trace/dependency/constant audits, LaTeX compilation and rendered-page inspection. These are agent verification; independent human review and personal reflection attestations remain the responsibility of the named contributors.
 

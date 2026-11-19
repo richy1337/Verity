@@ -357,7 +357,7 @@ H10 & \modref{10} & Freeze inputs and settings, record omissions and report slic
 
 \section{Use Hierarchy Between Modules} \label{SecUse}
 
-An arrow from A to B means A needs B's specification to work. It is a dependency, so reply messages and data movement do not add arrows in the reverse direction. The horizontal bands give a valid build order from the bottom up. M2 and M3 depend on service message types, transported via M1, and do not import service modules directly.
+An arrow from A to B means A needs B's specification to work. It is a dependency, so reply messages and data movement do not add arrows in the reverse direction. The horizontal bands give a valid build order from the bottom up. M1 uses M4's exported input limits for bounded capture; the service still validates every submitted item through M4. M2 and M3 depend on service message types, transported via M1, and do not import service modules directly.
 
 \begin{figure}[H]
 \centering
@@ -370,12 +370,13 @@ An arrow from A to B means A needs B's specification to work. It is a dependency
 \node[unit] (m10) at (3.8,3.5) {M10};
 \node[unit] (m1) at (-3.05,1.2) {M1};
 \node[unit] (m6) at (-1.25,1.2) {M6};
-\node[unit] (m4) at (0,1.2) {M4};
+\node[unit] (m4) at (0,0) {M4};
 \node[unit] (m7) at (1.25,1.2) {M7};
 \node[unit] (m8) at (2.5,1.2) {M8};
 \node[unit] (m9) at (3.75,1.2) {M9};
 \draw[->] (m2) -- (m1);
 \draw[->] (m3) -- (m1);
+\draw[->] (m1) -- (m4);
 \foreach \i in {4,6,7,8,9} {\draw[->] (m5) -- (m\i);}
 \foreach \i in {4,7,8,9} {\draw[->,densely dashed] (m10) -- (m\i);}
 \end{tikzpicture}
@@ -414,7 +415,7 @@ Table~\ref{TblSchedule} is the proposed implementation plan from this review to 
 \endfirsthead
 \toprule Target window & Owner; reviewer & Deliverable, dependency and confidence check \\ \midrule
 \endhead
-Nov 19--27 & M1: Calvin Salsali; Jaden Moore & Host bridge, scoped capture and trusted side panel; no module prerequisite. Exercise restricted pages, cross-origin images and encrypted service transport (FT-1). \\
+Nov 19--27 & M1: Calvin Salsali; Jaden Moore & Host bridge, scoped capture and trusted side panel; M4's input-limit interface is the prerequisite, with transport stubs developed in parallel. Exercise restricted pages, cross-origin images and encrypted service transport (FT-1). \\
 Nov 19--27 & M4: Jaden Moore; Richard Han & Stateless validator; no module prerequisite. Check all nine input classes, Unicode code points, media headers and decoding bounds (FT-2--FT-4). \\
 Nov 19--Dec 4 & M6: Richard Han; Jaden Moore & Memory ownership, lease revocation and cleanup receipts; no module prerequisite. Verify no raw disk/log writes and release after each terminal outcome (NFT-4, UT-C5). \\
 Nov 23--Dec 11 & M7: Raymond Tao; Richard Han & Text detector and applicability profile; freeze licensed model artifacts. Unit-check signal locators and unavailable/unsupported applicability; record held-out genre evidence before directional release (FT-8--FT-9). \\
@@ -439,13 +440,13 @@ The original drafting disclosure is retained below as the contributors' report. 
 
 \subsection{AI Tools Used}
 
-\noindent OpenAI Codex (GPT-6) and Claude Fable 5.2 were used for drafting and revising this document and for ensuring consistency with the course checklists and the contracts in the team's previous documents.
+\noindent The original drafting record reports OpenAI Codex (GPT-6) and Claude Fable 5.2; the source commit additionally credits Claude Opus 5.5. Jaden Moore reports that both Claude tools may have been used. These are attributed drafting records; the original authors must confirm the exact versions and uses before the disclosure is treated as a verified history. The dated review below records the present tool use separately.
 
 \subsection{How and Where Used}
 
-\noindent Calvin Salsali used OpenAI Codex (GPT-6, November 2026) to draft the module descriptions, uses diagram, trace tables and companion interface contracts from the team's development plan, SRS, Hazard Analysis, V\&V Plan and course checklists.
+\noindent The original drafting record attributes to Calvin Salsali the use of OpenAI Codex (GPT-6, November 2026) to draft the module descriptions, uses diagram, trace tables and companion interface contracts from the team's development plan, SRS, Hazard Analysis, V\&V Plan and course checklists.
 
-\medskip\noindent Richard Han used Claude Fable 5.2 to revise the document, check it against the course checklists, and check its consistency with the team's previous documents.
+\medskip\noindent The original drafting record attributes to Richard Han the use of Claude Fable 5.2 to revise the document, check it against the course checklists, and check its consistency with the team's previous documents.
 
 \subsection{Verification of AI-Generated Content}
 
@@ -455,7 +456,7 @@ The original drafting disclosure is retained below as the contributors' report. 
 
 \subsection{Review on November 18, 2026}
 
-The original text names Claude Fable 5.2, while the source commit credits Claude Opus 5.5. This review cannot resolve that discrepancy; the original authors must confirm the actual tool/version and human checks.
+The tool records above may describe separate drafting passes. The original authors still need to confirm their exact tools, versions and completed human checks; this review does not certify those historical claims.
 
 At Jaden Moore's request, OpenAI Codex (GPT-6) reviewed PR \#69 against the supplied 41-point rubric, current SRS, Hazard Analysis, V\&V Plan and MG/MIS checklists. It revised constant definitions, consent-preview typing, lifecycle conditions, wire-contract mapping, benchmark acceptance, state ownership, the module-level implementation schedule and design navigation, and rebuilt both PDFs. Checks included the eight existing SRS/HA specification tests, all 32 lifecycle guard assignments, trace/dependency/constant audits, LaTeX compilation and rendered-page inspection. These are agent verification; independent human review and personal reflection attestations remain the responsibility of the named contributors.
 
