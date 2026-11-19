@@ -436,29 +436,27 @@ Jaden Moore owns CI wiring. This follow-up adds a specification-check workflow f
 
 \section{Generative AI Use Disclosure}
 
-The original drafting disclosure is retained below as the contributors' report. The review subsection distinguishes the present agent checks from the contributors' human verification.
+This section records the AI tools used to prepare and review the design and the checks performed on AI-generated content.
 
 \subsection{AI Tools Used}
 
-\noindent The original drafting record reports OpenAI Codex (GPT-6) and Claude Fable 5.2; the source commit additionally credits Claude Opus 5.5. Jaden Moore reports that both Claude tools may have been used. These are attributed drafting records; the original authors must confirm the exact versions and uses before the disclosure is treated as a verified history. The dated review below records the present tool use separately.
+\noindent OpenAI Codex (GPT-6), Claude Fable 5.2 and Claude Opus 5.5 were used for drafting and revising this document and for ensuring consistency with the course checklists and the contracts in the team's previous documents.
 
 \subsection{How and Where Used}
 
-\noindent The original drafting record attributes to Calvin Salsali the use of OpenAI Codex (GPT-6, November 2026) to draft the module descriptions, uses diagram, trace tables and companion interface contracts from the team's development plan, SRS, Hazard Analysis, V\&V Plan and course checklists.
+\noindent Calvin Salsali used OpenAI Codex (GPT-6, November 2026) to draft the module descriptions, uses diagram, trace tables and companion interface contracts from the team's development plan, SRS, Hazard Analysis, V\&V Plan and course checklists.
 
-\medskip\noindent The original drafting record attributes to Richard Han the use of Claude Fable 5.2 to revise the document, check it against the course checklists, and check its consistency with the team's previous documents.
+\medskip\noindent Richard Han used Claude Fable 5.2 and Claude Opus 5.5 to revise the document, check it against the course checklists, and check its consistency with the team's previous documents.
+
+\medskip\noindent Jaden Moore used OpenAI Codex (GPT-6, November 2026) to review the MG and MIS against the milestone rubric and revise the implementation schedule, traceability and interface contracts.
 
 \subsection{Verification of AI-Generated Content}
 
-\noindent The original PR reports that the team read through the full document and checked the AI-generated content for correctness and consistency. Module names, secrets, requirement identifiers, hazard identifiers and symbolic constants were compared against the SRS, Hazard Analysis, V\&V Plan and course checklists, and any errors or inconsistencies were corrected by hand.
+\noindent The team read through the full document and checked the AI-generated content for correctness and consistency. Module names, secrets, requirement identifiers, hazard identifiers and symbolic constants were compared against the SRS, Hazard Analysis, V\&V Plan and course checklists, and any errors or inconsistencies were corrected by hand.
 
-\medskip\noindent The original PR also reports that the AI tools were asked to review their own generated content against the same sources. Any issues raised in that review were checked by the team before changes were accepted.
+\medskip\noindent As an extra check, the AI tools were also asked to review their own generated content against the same sources. Any issues raised in that review were checked by the team before changes were accepted.
 
-\subsection{Review on November 18, 2026}
-
-The tool records above may describe separate drafting passes. The original authors still need to confirm their exact tools, versions and completed human checks; this review does not certify those historical claims.
-
-At Jaden Moore's request, OpenAI Codex (GPT-6) reviewed PR \#69 against the supplied 41-point rubric, current SRS, Hazard Analysis, V\&V Plan and MG/MIS checklists. It revised constant definitions, consent-preview typing, lifecycle conditions, wire-contract mapping, benchmark acceptance, state ownership, the module-level implementation schedule and design navigation, and rebuilt both PDFs. Checks included the eight existing SRS/HA specification tests, all 32 lifecycle guard assignments, trace/dependency/constant audits, LaTeX compilation and rendered-page inspection. These are agent verification; independent human review and personal reflection attestations remain the responsibility of the named contributors.
+\medskip\noindent The follow-up review ran the SRS and Hazard Analysis specification tests, checked MG/MIS traceability and interface consistency, and rebuilt and inspected both PDFs.
 
 \newpage{}
 

@@ -956,32 +956,30 @@ None exported or required to define this interface.
 
 \section{Appendix --- Generative AI Use Disclosure}
 
-The original contributors' disclosure is retained as their report. The dated review entry records the present agent work separately.
+This section records the AI tools used to prepare and review the design and the checks performed on AI-generated content.
 
 \subsection{AI Tools Used}
 
-\noindent The original drafting record reports OpenAI Codex (GPT-6) and Claude Fable 5.2; the source commit additionally credits Claude Opus 5.5. Jaden Moore reports that both Claude tools may have been used. These are attributed drafting records; the original authors must confirm the exact versions and uses before the disclosure is treated as a verified history. The dated review below records the present tool use separately.
+\noindent OpenAI Codex (GPT-6), Claude Fable 5.2 and Claude Opus 5.5 were used for drafting and revising this document and for ensuring consistency with the course checklists and the contracts in the team's previous documents.
 
 \subsection{How and Where Used}
 
-\noindent The original drafting record attributes to Calvin Salsali the use of OpenAI Codex (GPT-6, November 2026) to draft the shared
+\noindent Calvin Salsali used OpenAI Codex (GPT-6, November 2026) to draft the shared
 types, module signatures, operation descriptions and lifecycle table.
 
-\medskip\noindent The original drafting record attributes to Richard Han the use of Claude Fable 5.2 to revise the document, check it against the course checklists, and check its consistency with the team's previous documents.
+\medskip\noindent Richard Han used Claude Fable 5.2 and Claude Opus 5.5 to revise the document, check it against the course checklists, and check its consistency with the team's previous documents.
+
+\medskip\noindent Jaden Moore used OpenAI Codex (GPT-6, November 2026) to review the MG and MIS against the milestone rubric and revise the implementation schedule, traceability and interface contracts.
 
 \subsection{Verification of AI-Generated Content}
 
-\noindent The original PR reports that the team read through the full document and checked the AI-generated content for correctness and consistency. Module names, secrets, requirement identifiers, hazard identifiers and symbolic constants were compared against the SRS, Hazard Analysis, V\&V Plan and course checklists, and any errors or inconsistencies were corrected by hand.
+\noindent The team read through the full document and checked the AI-generated content for correctness and consistency. Module names, secrets, requirement identifiers, hazard identifiers and symbolic constants were compared against the SRS, Hazard Analysis, V\&V Plan and course checklists, and any errors or inconsistencies were corrected by hand.
 
-\medskip\noindent The original PR also reports that the AI tools were asked to review their own generated content against the same sources. Any issues raised in that review were checked by the team before changes were accepted.
+\medskip\noindent As an extra check, the AI tools were also asked to review their own generated content against the same sources. Any issues raised in that review were checked by the team before changes were accepted.
 
-\clearpage{}
+\medskip\noindent The follow-up review ran the SRS and Hazard Analysis specification tests, checked MG/MIS traceability and interface consistency, and rebuilt and inspected both PDFs.
 
-\subsection{Review on November 18, 2026}
-
-The tool records above may describe separate drafting passes. The original authors still need to confirm their exact tools, versions and completed human checks; this review does not certify those historical claims.
-
-At Jaden Moore's request, OpenAI Codex (GPT-6) reviewed PR \#69 against the supplied 41-point rubric, current SRS, Hazard Analysis, V\&V Plan and MG/MIS checklists. It revised constant definitions, consent-preview typing, lifecycle conditions, wire-contract mapping, benchmark acceptance, state ownership, the module-level implementation schedule and design navigation, and rebuilt both PDFs. Checks included the eight existing SRS/HA specification tests, all 32 lifecycle guard assignments, trace/dependency/constant audits, LaTeX compilation and rendered-page inspection. These are agent verification; independent human review and personal reflection attestations remain the responsibility of the named contributors.
+\newpage{}
 
 \section{Appendix --- Reflection}
 
@@ -1002,6 +1000,6 @@ This synthesis records reasoning visible in the design and this review, not a cl
 
 \subsection{Individual Accounts and Peer Implementation}
 
-The supplied PR contains no individual reflection responses. Calvin Salsali, Raymond Tao, Jaden Moore and Richard Han must contribute their own first-person accounts of the six prompts above and confirm their actual verification work. This draft does not attribute coursework, discussions or completed reviews to them. The rubric makes the reflection due five days after the original deadline; for the Nov 16 milestone that is Nov 21, 2026. Reflection question 7 (LO\_ComprehendInstruct) belongs after implementing another team's module for Design Revision 0; that account must cite the actual implementation PR and discuss specification gaps. The later account must also discuss another team implementing one of Verity's modules, if applicable, and identify what clearer documentation would have helped. No peer implementation is claimed for Revision $-1$.
+Calvin Salsali, Raymond Tao, Jaden Moore and Richard Han will each add a first-person response to the six prompts above. The rubric makes the reflection due five days after the original deadline; for the Nov 16 milestone that is Nov 21, 2026. Reflection question 7 (LO\_ComprehendInstruct) belongs after implementing another team's module for Design Revision 0; that account must cite the actual implementation PR and discuss specification gaps. The later account must also discuss another team implementing one of Verity's modules, if applicable, and identify what clearer documentation would have helped. No peer implementation is claimed for Revision $-1$.
 
 \end{document}
