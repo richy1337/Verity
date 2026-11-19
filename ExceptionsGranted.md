@@ -10,3 +10,9 @@ rationale needs to be explained to the instructor and permission needs to be
 granted.  Once granted, this file (ExceptionsGranted.md) should be used to
 explain the specifics of the exception.  In particular, what are the repos,
 where are they, and what are their contents.
+
+## Fall custom document
+
+The approved Fall custom document for Team 23 is the
+[Machine Learning Model Report](pdfs/CDs/MLReport/main.pdf).
+The team confirmed the approval for this milestone on November 16, 2026.

@@ -30,6 +30,10 @@ The repository includes the McMaster capstone documentation structure. The initi
 
 The Development Plan contains both the Proof of Concept Demonstration Plan and the Team Charter appendix.
 
+### Fall custom document
+
+- **CD-Fall Rev 0:** [Machine Learning Model Report](pdfs/CDs/MLReport/main.pdf) and [experiment evidence](docs/CDs/MLReport/experiment/).
+
 Generated documentation is intended to be published through GitHub Pages using the repository's existing GitHub Actions workflow.
 
 ## License
