@@ -62,30 +62,6 @@
 
 \newpage
 
-\section{Reference Material}
-
-The following abbreviations are used in the module directory and trace tables.
-
-\begin{longtable}{@{}lp{0.68\linewidth}@{}}
-\caption{Design abbreviations}\label{TblAcronyms}\\
-\toprule Abbreviation & Meaning \\ \midrule
-\endfirsthead
-\toprule Abbreviation & Meaning \\ \midrule
-\endhead
-\hyperref[SecConnection]{AC, LC, ULC} & Anticipated, likely and unlikely change \\
-\hyperref[SecConnection]{API, CI} & Application programming interface; continuous integration \\
-\hyperref[SecConnection]{C, H} & Hazard Analysis component and hazard identifiers \\
-\hyperref[SecConnection]{C2PA, EXIF} & Coalition for Content Provenance and Authenticity; Exchangeable Image File Format \\
-\hyperref[SecConnection]{FR, NFR, SR, INV} & Functional, nonfunctional, safety requirement and invariant \\
-\hyperref[SecConnection]{M, S} & Design module and SRS subsystem identifiers \\
-\hyperref[SecConnection]{MG, MIS} & Module Guide and Module Interface Specification \\
-\hyperref[SecConnection]{SRS, HA} & Software Requirements Specification and Hazard Analysis \\
-\hyperref[SecConnection]{UI, V\&V} & User interface; verification and validation \\
-\bottomrule
-\end{longtable}
-
-\newpage
-
 \tableofcontents
 
 \listoftables
@@ -388,23 +364,6 @@ M10 is an offline application entry point rather than a live behaviour module de
 
 The decision policy gets the same class of signals in live and offline use. This allows a frozen calibration and detector version to be checked before deployment. It also keeps a test-only label, error log or dataset out of the live result flow.
 
-\section{User Interfaces}
-
-An extension-owned side panel (using the \href{https://developer.chrome.com/docs/extensions/reference/api/sidePanel}{Chrome Side Panel API}) contains all authoritative consent and result controls. An in-page overlay, if added, is only a non-authoritative mirror and cannot collect consent. M2 presents the selected modality and any provider consent disclosure before dispatch. M3 shows the active request's five-state lifecycle, source-tagged evidence, uncertainty, limitations and next verification step. Authoritative consent and result controls reside in an extension-controlled view; webpage text is inert. Keyboard operation, text status labels and contrast are verified by NFT-2 and FT-16 in the V\&V Plan.
-
-\section{Design of Communication Protocols}
-
-\textbf{Image acquisition.} M1 reads only the selected image. If its bytes cannot be read under the current page's permission, M2 offers a separate user action to allow access to that image's HTTPS origin. M1 requests only that origin as an optional host permission, then fetches the selected URL from the extension context with credentials omitted, redirects rejected, cache bypassed and a streaming byte bound. It does not forward arbitrary URLs to the analysis service. Refusal, a redirected URL, expired gesture or unreadable protected resource returns an input-unavailable reason before analysis. M1 tracks concurrent capture leases and removes a permission acquired for these captures when the last lease ends; it does not revoke a pre-existing user grant. The manifest declares HTTPS origins as optional permissions so an exact origin can be requested at runtime; no broad host permission is granted at installation. This separates image acquisition permission from consent to send content to an analysis provider. Chrome documents the distinct scopes of \href{https://developer.chrome.com/docs/extensions/develop/concepts/activeTab}{active-tab access}, \href{https://developer.chrome.com/docs/extensions/develop/concepts/network-requests}{extension network access} and \href{https://developer.chrome.com/docs/extensions/reference/api/permissions}{optional permissions}; FT-1 Case D checks the proposed acquisition path.
-
-\textbf{Applicability.} M7's versioned applicability gate returns supported, unsupported or uncertain, using the selected text and explicitly supplied context. A declared opinion/satire selection is unsupported. Automatic genre recognition requires a released classifier and held-out genre data in the frozen model profile; without those artifacts its result is uncertain. M9 abstains on unsupported or uncertain applicability. There is no claim that benchmark fixture tags recognize genre in real input. Raymond Tao's model gate and held-out opinion/satire results are a prerequisite to enabling directional text output; a missed FR4 gate requires the SRS scope decision with the TA, as the V\&V Plan states.
-
-
-M1 transports request-scoped commands to the team service using the SRS S.5 analysis envelope over an authenticated encrypted connection. M5 validates the session and request key independently of caller-supplied identifiers. The MIS shared types are internal abstractions; the transport adapter preserves all SRS fields. Worker events are internal and cannot be submitted as trusted events by a webpage or client.
-
-\section{Database Design}
-
-Live checks use no persistent raw-content database. M6 tracks transient references and worker leases in memory; M5 retains only safe delivery records. Offline M10 records licensed benchmark identities, configurations and outcomes in run artifacts, without accessing live selections. The SRS cleanup bound concerns logical release of application-owned references, not forensic erasure.
-
 \section{Timeline}
 
 Table~\ref{TblSchedule} is the proposed implementation plan from this review to the Revision 0 demonstration. Dates are targets, not completion claims. Owners follow the existing team responsibilities; each reviewer is a different member. The January 18 design freeze precedes the February 1--12 demonstration window. The Nov 23--Dec 4 proof-of-concept window follows the current V\&V Plan.
@@ -415,7 +374,7 @@ Table~\ref{TblSchedule} is the proposed implementation plan from this review to 
 \endfirsthead
 \toprule Target window & Owner; reviewer & Deliverable, dependency and confidence check \\ \midrule
 \endhead
-Nov 19--27 & M1: Calvin Salsali; Jaden Moore & Host bridge, scoped capture and trusted side panel; M4's input-limit interface is the prerequisite, with transport stubs developed in parallel. Exercise restricted pages, cross-origin images and encrypted service transport (FT-1). \\
+Nov 19--27 & M1: Calvin Salsali; Jaden Moore & Host bridge, scoped capture and extension-controlled results; M4's input-limit interface is the prerequisite, with transport stubs developed in parallel. Exercise restricted pages, cross-origin images and encrypted service transport (FT-1). \\
 Nov 19--27 & M4: Jaden Moore; Richard Han & Stateless validator; no module prerequisite. Check all nine input classes, Unicode code points, media headers and decoding bounds (FT-2--FT-4). \\
 Nov 19--Dec 4 & M6: Richard Han; Jaden Moore & Memory ownership, lease revocation and cleanup receipts; no module prerequisite. Verify no raw disk/log writes and release after each terminal outcome (NFT-4, UT-C5). \\
 Nov 23--Dec 11 & M7: Raymond Tao; Richard Han & Text detector and applicability profile; freeze licensed model artifacts. Unit-check signal locators and unavailable/unsupported applicability; record held-out genre evidence before directional release (FT-8--FT-9). \\
@@ -433,6 +392,8 @@ Feb 1--12 & Calvin Salsali, Raymond Tao, Jaden Moore, Richard Han & Demonstrate 
 \end{longtable}
 
 Jaden Moore owns CI wiring. This follow-up adds a specification-check workflow for the existing eight SRS/HA checks and the MG/MIS consistency audit; the LaTeX workflow already compiles documentation. Product unit tests, static analysis and coverage gates in the V\&V Plan must be added as the modules land. The repository administrator must require successful checks in branch protection; a workflow file alone does not enforce a merge block. The final usability study and complete V\&V report remain later milestones.
+
+\clearpage
 
 \section{Generative AI Use Disclosure}
 

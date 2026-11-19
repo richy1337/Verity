@@ -64,25 +64,6 @@ urlcolor=cyan          % color of external links
 
 \clearpage
 
-\section{Symbols, Abbreviations and Acronyms}
-
-Table~\ref{TblAcronyms} expands the document abbreviations. Shared mathematical and record notation is defined in Section~\ref{sec:notation}.
-
-\begin{longtable}{@{}p{0.25\linewidth}p{0.69\linewidth}@{}}
-\caption{Interface specification abbreviations}\label{TblAcronyms}\\
-\toprule Abbreviation & Meaning \\ \midrule
-\endhead
-\hyperref[sec:notation]{API, UI} & Application programming interface; user interface \\
-\hyperref[sec:m8]{C2PA, EXIF} & Coalition for Content Provenance and Authenticity; Exchangeable Image File Format \\
-\hyperref[sec:introduction]{MG, MIS} & Module Guide; Module Interface Specification \\
-\hyperref[sec:introduction]{SRS, HA, V\&V} & Software Requirements Specification; Hazard Analysis; verification and validation \\
-\hyperref[sec:introduction]{FR, NFR, SR, INV} & Functional requirement; nonfunctional requirement; safety requirement; invariant \\
-\hyperref[sec:notation]{FPR, UUIDv4} & False-positive rate; Universally Unique Identifier version 4 \\
-\bottomrule
-\end{longtable}
-
-\clearpage
-
 \tableofcontents
 
 \listoftables
@@ -116,7 +97,7 @@ A returned reason is safe to show or log and contains no raw selection. All oper
 \ty{Clock}, \ty{FileSet}, \ty{Directory}, \ty{Storage} & Monotonic time source, versioned files, output directory and persistent storage. \\
 \ty{Session}, \ty{RequestId} & Opaque authenticated session context and a fresh UUIDv4 request identifier (Universally Unique Identifier, version 4). A request identifier alone grants no access. \\
 \key & Pair of initiating session identity and request identifier. Services check the session against trusted transport context. \\
-\ty{Boolean}, \ty{Origin} & True or false; a scheme, host and port identifying a network origin. $\mathbb{N}_0$ denotes nonnegative integers. \\
+\ty{Boolean} & True or false. $\mathbb{N}_0$ denotes nonnegative integers. \\
 \ty{ModelArtifact} & Loaded immutable model parameters, tokenizer or parser resources. \\
 \ty{Unit} & Successful operation with no data returned. \\
 \ty{Modality} & Text or image. \\
@@ -267,7 +248,7 @@ The state and environment below are private; callers rely on the operation effec
 
 \subsubsection{State Variables}
 
-$G:\ty{View}\rightharpoonup\ty{Gesture}$ records current capture authorization; $H:\ty{Origin}\rightharpoonup(\mathbb{N}_0\times\ty{Boolean})$ maps image origins to capture-lease counts and whether a permission was newly acquired. Initially both maps are empty. No gesture authorizes a different tab or document.
+$G:\ty{View}\rightharpoonup\ty{Gesture}$ records current capture authorization and is initially empty. No gesture authorizes a different tab or document.
 
 \subsubsection{Environment Variables}
 
@@ -279,24 +260,16 @@ $G:\ty{View}\rightharpoonup\ty{Gesture}$ records current capture authorization; 
 \item $\mathit{clock}:\ty{Clock}$: the browser host's monotonic clock. Read only.
 \end{itemize}
 
-\subsubsection{Assumptions}
-
-The shared initialization and authorization rules in Section~\ref{sec:notation} apply. Payload validity is checked by the operations, not assumed.
-
 \subsubsection{Access Routine Semantics}
 
 \noindent \texttt{readSelection}():
-Check that the gesture is current, user initiated and scoped to its tab. Read only its chosen item. Preliminary capture-size checks use M4's exported input limits; they never replace M4 validation at service admission. For a remote image, apply the scoped optional-origin capture protocol in the MG, including the byte bound, no credentials, no redirects and permission-lease release. An expired or restricted gesture returns a corrective reason. A change of page invalidates the gesture authorization.
+Check that the gesture is current, user initiated and scoped to its tab. Read only its chosen item. Preliminary capture-size checks use M4's exported input limits; they never replace M4 validation at service admission. If the browser cannot provide the selected item within the authorized scope and input bounds, return input unavailable. An expired or restricted gesture returns a corrective reason. A change of page invalidates the gesture authorization.
 
 \medskip\noindent \texttt{send}(), \texttt{sendCancel}():
 Carry the command over the authenticated encrypted connection. A response belongs to the same initiating context. Return a transport reason on connection failure and never retry a content transfer using a different route.
 
 \medskip\noindent \texttt{draw}():
 Render within the extension-controlled view. Treat all text as inert. If that view has been closed or its context has changed, return a view-unavailable reason. The host does not decide the active check or supply a verdict.
-
-\subsubsection{Local Functions}
-
-None exported or required to define this interface.
 
 %% ------------------------------------------------------------------ M2
 \clearpage
@@ -351,10 +324,6 @@ $Q:\ty{View}\rightharpoonup\ty{Job}$ stores at most one staged job and optional 
 \item $\mathit{userDecision}:\ty{InputEvent}$: the user's Approve or Decline action entered with keyboard or mouse. Read by \texttt{authorize}.
 \end{itemize}
 
-\subsubsection{Assumptions}
-
-The shared initialization and authorization rules in Section~\ref{sec:notation} apply. Payload validity is checked by the operations, not assumed.
-
 \subsubsection{Access Routine Semantics}
 
 \noindent \texttt{begin}():
@@ -368,10 +337,6 @@ A team-service check proceeds on the user's explicit check action. A third-party
 
 \medskip\noindent \texttt{discard}():
 Clear an unsent selection and its authorization. An admitted check is cancelled through the result card and request coordinator.
-
-\subsubsection{Local Functions}
-
-None exported or required to define this interface.
 
 %% ------------------------------------------------------------------ M3
 \clearpage
@@ -427,10 +392,6 @@ $V:\ty{View}\rightharpoonup\ty{ViewRecord}$, initially empty. $V(v)$ contains on
 \item $\mathit{clock}:\ty{Clock}$: the browser host's monotonic clock, used to meet \Const{MAX\_\allowbreak{}UI\_\allowbreak{}RENDER\_\allowbreak{}LATENCY} and \Const{MAX\_\allowbreak{}CANCEL\_\allowbreak{}UI\_\allowbreak{}LATENCY}. Read only.
 \end{itemize}
 
-\subsubsection{Assumptions}
-
-The shared initialization and authorization rules in Section~\ref{sec:notation} apply. Payload validity is checked by the operations, not assumed.
-
 \subsubsection{Access Routine Semantics}
 
 \noindent \texttt{start}():
@@ -444,10 +405,6 @@ Display a corrective reason for an active pre-admission rejection. There is no s
 
 \medskip\noindent \texttt{cancel}():
 For an active pending check, immediately set the local cancellation marker, remove assessment fields, show cancelled by \Const{MAX\_\allowbreak{}CANCEL\_\allowbreak{}UI\_\allowbreak{}LATENCY}, and request service cancellation through M1. Service receipt and cleanup confirmation are separate. Suppress all later assessments for that view and key even if a result was already on its way.
-
-\subsubsection{Local Functions}
-
-None exported or required to define this interface.
 
 %% ------------------------------------------------------------------ M4
 \clearpage
@@ -495,18 +452,10 @@ None.
 
 None. The module has no interaction outside the software.
 
-\subsubsection{Assumptions}
-
-No initialization is required. Raw input is untrusted; validation is an output condition, not a caller precondition.
-
 \subsubsection{Access Routine Semantics}
 
 \noindent \texttt{validate}():
 For text, require valid UTF-8 and count Unicode code points, not UTF-8 bytes or JavaScript UTF-16 code units. Apply inclusive minimum and maximum bounds. Keep the selection as inert text. For an image, use decimal MB ($10^6$ bytes) and check the byte bound before decoding, require a supported static Portable Network Graphics (PNG), Joint Photographic Experts Group (JPEG) or WebP format, compare headers with the decoded type, and bound both dimensions and decoding work. Allow only the selected item and the explicitly supplied context. Reject empty, out-of-bounds, inconsistent, unsupported or corrupt content with a specific reason and release temporary decode references. No detector is invoked on rejection. $out:=\ty{Item}$ on success, otherwise $out:=\ty{Reason}$; no module state changes.
-
-\subsubsection{Local Functions}
-
-None exported or required to define this interface.
 
 %% ------------------------------------------------------------------ M5
 \clearpage
@@ -560,10 +509,6 @@ Let $R:\key\rightharpoonup\ty{RequestRecord}$ be a partial map. Each record cont
 \item $\mathit{clock}:\ty{Clock}$: the service host's monotonic clock. Read by \texttt{admit} to set the deadline and by \texttt{advance} to decide whether the deadline is reached. Never modified.
 \end{itemize}
 
-\subsubsection{Assumptions}
-
-The shared initialization and authorization rules in Section~\ref{sec:notation} apply. Payload validity is checked by the operations, not assumed.
-
 \subsubsection{Access Routine Semantics}
 
 \noindent \texttt{admit}():
@@ -593,10 +538,6 @@ Check the authenticated owner. For pending work, submit an accepted cancellation
 
 \medskip\noindent \texttt{status}():
 Return the stored safe update only to the requesting session. A timer retires each terminal record at its stored expiry instant, \Const{MAX\_\allowbreak{}DELIVERY\_\allowbreak{}RECORD\_\allowbreak{}AGE} after the terminal decision; subsequent queries return the same generic reason as for an unknown key. The record contains no raw item or reconstructive evidence excerpt. Expiry is scheduled at the terminal decision and does not depend on a later status poll. The status query itself leaves state unchanged; no delivery-acknowledgment operation is required.
-
-\subsubsection{Local Functions}
-
-None exported or required to define this interface.
 
 %% ------------------------------------------------------------------ M6
 \clearpage
@@ -650,10 +591,6 @@ $B:\key\rightharpoonup\ty{LeaseRecord}$, initially empty. A live lease reads onl
 \item $\mathit{clock}:\ty{Clock}$: the cleanup owner's monotonic clock. Read by \texttt{release} to check the cleanup bound \Const{MAX\_\allowbreak{}RETENTION\_\allowbreak{}TIME}.
 \end{itemize}
 
-\subsubsection{Assumptions}
-
-The shared initialization and authorization rules in Section~\ref{sec:notation} apply. Payload validity is checked by the operations, not assumed.
-
 \subsubsection{Access Routine Semantics}
 
 \noindent \texttt{hold}():
@@ -664,10 +601,6 @@ Require a live lease authorized only for the same key. Expose data only for the 
 
 \medskip\noindent \texttt{release}():
 Revoke leases, stop request-owned work and drop application-owned service references, including queued copies, by \Const{MAX\_\allowbreak{}RETENTION\_\allowbreak{}TIME} after the local terminal decision. The argument $t$ is the recorded local terminal-decision instant; measure the bound from $t$, never from the later cleanup-call time. Set $B'(k)$ to a closed record with no item references. Return a receipt only after cleanup. Repeating release leaves the key closed. The receipt covers application-owned references and worker exit. Report a cleanup violation if the bound is missed. The operation cannot recall content that has already reached an approved external recipient.
-
-\subsubsection{Local Functions}
-
-None exported or required to define this interface.
 
 %% ------------------------------------------------------------------ M7
 \clearpage
@@ -718,18 +651,10 @@ $p_7:\ty{Config}$ is immutable after initialization; it identifies the loaded te
 \item $\mathit{modelFiles}:\ty{FileSet}$: the approved, versioned text model files on the service host's disk. Read when the detector is loaded; never modified.
 \end{itemize}
 
-\subsubsection{Assumptions}
-
-The shared initialization and authorization rules in Section~\ref{sec:notation} apply. Payload validity is checked by the operations, not assumed.
-
 \subsubsection{Access Routine Semantics}
 
 \noindent \texttt{extractText}():
-Require an admitted text item and a compatible frozen detector. Return versioned statistical observations, model inferences and source locators. Treat item and optional context as data throughout. For a known unsupported domain, report applicability as unsupported; for an undecidable domain, report uncertain and withhold a directional score when it cannot be justified. For model or runtime failure, return a dependency reason. The result carries no raw submission or request state. Applicability is supported only if the frozen, version-matched genre gate supports the selected domain; a declared opinion/satire context, unavailable genre profile or uncertain gate result prevents directional assessment. The MG states the required held-out genre release gate.
-
-\subsubsection{Local Functions}
-
-None exported or required to define this interface.
+Require an admitted text item and a compatible frozen detector. Return versioned statistical observations, model inferences and source locators. Treat item and optional context as data throughout. For a known unsupported domain, report applicability as unsupported; for an undecidable domain, report uncertain and withhold a directional score when it cannot be justified. For model or runtime failure, return a dependency reason. The result carries no raw submission or request state. Applicability is supported only if the frozen, version-matched genre gate supports the selected domain; a declared opinion/satire context, unavailable genre profile or uncertain gate result prevents directional assessment. Enable directional text assessment only after the versioned gate passes the held-out genre verification in the V\&V Plan.
 
 %% ------------------------------------------------------------------ M8
 \clearpage
@@ -780,18 +705,10 @@ $p_8:\ty{Config}$ is immutable after initialization and identifies the visual mo
 \item $\mathit{modelFiles}:\ty{FileSet}$: the approved, versioned image model and provenance parser files on the service host's disk. Read when the detector is loaded; never modified.
 \end{itemize}
 
-\subsubsection{Assumptions}
-
-The shared initialization and authorization rules in Section~\ref{sec:notation} apply. Payload validity is checked by the operations, not assumed.
-
 \subsubsection{Access Routine Semantics}
 
 \noindent \texttt{extractImage}():
 Require a supported image from M4's input contract. Return a Signals record containing visual observations and model inferences separately from camera metadata (Exchangeable Image File Format, EXIF) and Content Credentials (Coalition for Content Provenance and Authenticity, C2PA) checks. Use the separate provenance fields defined in Table~\ref{TblTypes}; do not infer deliberate stripping from absence. Treat missing metadata as a limited observation and never treat EXIF presence as verified authorship. If required parsing or model work fails, identify the unavailable dependency so the coordinator can apply its failure policy.
-
-\subsubsection{Local Functions}
-
-None exported or required to define this interface.
 
 %% ------------------------------------------------------------------ M9
 \clearpage
@@ -842,10 +759,6 @@ $p_9:\ty{Config}$ is immutable after initialization and identifies compatible ca
 \item $\mathit{profileFile}:\ty{FileSet}$: the released calibration and decision profile file on the service host's disk. Read when the profile is loaded; never modified.
 \end{itemize}
 
-\subsubsection{Assumptions}
-
-The shared initialization and authorization rules in Section~\ref{sec:notation} apply. Payload validity is checked by the operations, not assumed.
-
 \subsubsection{Access Routine Semantics}
 
 \noindent \texttt{assess}():
@@ -862,10 +775,6 @@ out:=\begin{cases}
 Undefined scores are never compared numerically. Evidence text contains safe descriptors and offsets or external locators, never raw selected excerpts that would survive cleanup.
 
 Every completed or inconclusive decision includes the coded limitation \texttt{LIMIT\_\allowbreak{}NO\_\allowbreak{}GUARANTEE}, rendered as ``This assessment does not guarantee authenticity or prove fraud,'' plus task-specific limitations and an independent next step. An abstention may display safe supporting observations. Missing provenance alone cannot drive a higher-signal decision. A dependency error reaches M5 separately from this decision. A score describes an assessment of the selected item within the detector's task.
-
-\subsubsection{Local Functions}
-
-None exported or required to define this interface.
 
 %% ------------------------------------------------------------------ M10
 \clearpage
@@ -918,10 +827,6 @@ $r:\operatorname{Optional}(\ty{Run})$, initially absent; $p_{10}:\ty{Config}$, f
 \item $\mathit{outputDir}:\ty{Directory}$: the experiment output directory on the developer host's disk. Changed by \texttt{evaluate}, which writes the run record, and by \texttt{recompute}, which writes the metric report.
 \end{itemize}
 
-\subsubsection{Assumptions}
-
-The shared initialization and authorization rules in Section~\ref{sec:notation} apply. Payload validity is checked by the operations, not assumed.
-
 \subsubsection{Access Routine Semantics}
 
 \noindent \texttt{evaluate}():
@@ -940,10 +845,6 @@ For each fixed class $c\in\{0,1\}$, count $\mathrm{TP}_c$, $\mathrm{FP}_c$ and $
  \qquad F_1^{\mathrm{macro}}=\frac{F_{1,0}+F_{1,1}}{2}.
 \]
 Use the same fixed classes and convention for the baseline on identical assessed IDs; withholding a class cannot yield a perfect two-class score. Reject duplicate IDs, label/split mismatches and missing or extra outcomes before computing metrics.
-
-\subsubsection{Local Functions}
-
-None exported or required to define this interface.
 
 \clearpage
 
@@ -983,23 +884,23 @@ types, module signatures, operation descriptions and lifecycle table.
 
 \section{Appendix --- Reflection}
 
-The synthesis below addresses the design prompts; the final subsection identifies the accounts that require the contributors themselves.
+The team synthesis covers the Revision $-1$ design prompts.
 
 \subsection{Team Synthesis: Design Reasoning}
 
-This synthesis records reasoning visible in the design and this review, not a claim that individual team members have attested to personal experiences.
+The six prompts cover the design's strengths, tradeoffs and limitations.
 
 \begin{enumerate}
 \item \textbf{What works well.} The same ten-module boundary appears in both documents. M5 owns service status while M3 owns the view binding; this makes cancellation and late-result suppression separate, testable obligations.
 \item \textbf{Difficulties and corrections.} The consent prose originally promised more than its return signature could express. The ConsentPreview record now carries the full disclosure. Explicit initialization, lease creation and constant values remove assumptions an independent implementer otherwise had to invent.
-\item \textbf{Sources of decisions.} Scoped consent, non-accusatory output and safe failure come from SRS FR4--FR11 and SR1--SR9. The side-panel, image-capture and genre-gate choices answer the V\&V Plan's design-verification actions. These are traceable engineering decisions; no new stakeholder conversation is claimed.
+\item \textbf{Sources of decisions.} Scoped consent, non-accusatory output and safe failure come from SRS FR4--FR11 and SR1--SR9. The V\&V Plan informs the requirement for an extension-controlled view and the verification of text applicability.
 \item \textbf{Other-document impact.} The current SRS is retained, including its 1.0-second logical cleanup bound and strict request-binding INV3. The availability definition now follows NFT-8. Future changed thresholds or scope must be coordinated with the SRS and V\&V Plan; these interface repairs do not revise those requirements.
 \item \textbf{Limitations (LO\_ProbSolutions).} The design cannot guarantee forensic erasure or recall already transmitted bytes. Genre recognition and cross-domain detector quality remain release gates. More data and resources would support held-out generators, real language-background slices, independent replay and broader accessibility studies; they would not make a detector proof of authenticity.
-\item \textbf{Alternatives (LO\_Explores).} An in-page authoritative overlay exposes controls to host-page interference, so the design selects an extension-owned panel. Persistent history makes recovery easier but retains sensitive selections, so only short-lived safe delivery records are kept. A monolithic detector/decision module reduces interface work but couples model replacement to abstention rules; M7/M8 and M9 separate those changes.
+\item \textbf{Alternatives (LO\_Explores).} An in-page overlay can expose controls to host-page interference. An extension-controlled view protects authoritative consent and results. Persistent history makes recovery easier but retains sensitive selections, so only short-lived safe delivery records are kept. A monolithic detector/decision module reduces interface work but couples model replacement to abstention rules; M7/M8 and M9 separate those changes.
 \end{enumerate}
 
-\subsection{Individual Accounts and Peer Implementation}
+\subsection{Reflection Deadline and Peer Implementation}
 
-Calvin Salsali, Raymond Tao, Jaden Moore and Richard Han will each add a first-person response to the six prompts above. The rubric makes the reflection due five days after the original deadline; for the Nov 16 milestone that is Nov 21, 2026. Reflection question 7 (LO\_ComprehendInstruct) belongs after implementing another team's module for Design Revision 0; that account must cite the actual implementation PR and discuss specification gaps. The later account must also discuss another team implementing one of Verity's modules, if applicable, and identify what clearer documentation would have helped. No peer implementation is claimed for Revision $-1$.
+The reflection is due November 21, 2026. After the Revision 0 peer implementation, answer question 7 (LO\_ComprehendInstruct) with the implementation PR and discuss what was missing from each team's specification, as applicable.
 
 \end{document}
