@@ -306,7 +306,7 @@ $\text{status}(r)$ & $\mathcal{R} \to \mathcal{S}_{\text{status}}$ & Current lif
 $\text{result}(r)$ & $\mathcal{R} \rightharpoonup \text{ResultRecord}$ & Assessment record associated with request $r$ (\hyperref[FR3]{FR3}, \hyperref[SR7]{SR7}).\\
 $\text{owner}(r)$ & $\mathcal{R} \to \text{SessionID}$ & Browser session that initiated request $r$ (\hyperref[FR10]{FR10}, \hyperref[SR9]{SR9}).\\
 $\text{TempBuffers}(r, t)$ & $\mathcal{R} \times \mathbb{R}_{\ge 0} \to \mathcal{P}(\text{Bytes})$ & Live application-owned raw payload references for request $r$ at time $t$ (\hyperref[FR9]{FR9}, \hyperref[SR8]{SR8}).\\
-$\text{TP}_c, \text{FP}_c, \text{TN}_c, \text{FN}_c$ & $\mathbb{N}$ & Class-$c$ confusion counts across held-out manifest $I$ (Section~\ref{subsec:formalization}).\\
+$\text{TP}_c, \text{FP}_c, \text{TN}_c, \text{FN}_c$ & $\mathbb{N}$ & Class-$c$ confusion counts (TP, FP, TN, FN) across held-out manifest $I$ (Section~\ref{subsec:formalization}).\\
 $F_{1,c}$, $\text{Macro-}F_1$ & $[0, 1]$ & Per-class harmonic mean and unweighted mean across classes.\\
 $\text{FPR}$ & $[0, 1]$ & False-positive rate on negative items ($\text{FP} / (\text{FP}+\text{TN})$).\\
 \bottomrule
@@ -316,7 +316,7 @@ $\text{FPR}$ & $[0, 1]$ & False-positive rate on negative items ($\text{FP} / (\
 \subsection*{Notations and Document Conventions}
 \label{subsec:conventions}
 
-Normative requirements use \textbf{``shall''} to specify externally observable black-box behaviour (``what, not how''). Identifier prefixes partition Goals (\textbf{G1}--\textbf{G6}), Constraints (\textbf{C1}--\textbf{C6}), Assumptions (\textbf{A1}--\textbf{A5}), Invariants (\textbf{INV1}--\textbf{INV4}), Use Cases (\textbf{UC1}--\textbf{UC4}), Functional (\textbf{FR1}--\textbf{FR14}), Non-Functional (\textbf{NFR1}--\textbf{NFR10}, \textbf{NFR.E.1}--\textbf{NFR.E.5}), verbatim Hazard-linked Safety/Security (\textbf{SR1}--\textbf{SR9}), and Likely/Unlikely Changes (\textbf{LC1}--\textbf{LC6}, \textbf{ULC1}--\textbf{ULC4}). MoSCoW priorities (\textbf{M/S/C/W}) govern Section~\ref{subsec:phase-in}, and full dependency links reside in Table~\ref{TblTraceabilityMatrix}. Every diagram defines boxes, borders, colors, and arrows in its own legend.
+Normative requirements use \textbf{``shall''} to specify externally observable black-box behaviour (``what, not how''). Identifier prefixes partition Goals (\textbf{G1}--\textbf{G6}), Constraints (\textbf{C1}--\textbf{C6}), Assumptions (\textbf{A1}--\textbf{A5}), Invariants (\textbf{INV1}--\textbf{INV4}), Use Cases (UC, \textbf{UC1}--\textbf{UC4}), Functional (FR, \textbf{FR1}--\textbf{FR14}), Non-Functional (NFR, \textbf{NFR1}--\textbf{NFR10}, \textbf{NFR.E.1}--\textbf{NFR.E.5}), verbatim Hazard-linked Safety/Security (SR, \textbf{SR1}--\textbf{SR9}), and Likely/Unlikely Changes (LC, \textbf{LC1}--\textbf{LC6}; ULC, \textbf{ULC1}--\textbf{ULC4}). MoSCoW priorities (\textbf{M/S/C/W}) govern Section~\ref{subsec:phase-in}, and full dependency links reside in Table~\ref{TblTraceabilityMatrix}. Every diagram defines boxes, borders, colors, and arrows in its own legend.
 
 \subsection*{Symbolic Constants}
 \label{subsec:symbolic-constants}
@@ -398,7 +398,7 @@ This section defines the product problem context, differentiable value, high-lev
 
 \subsection{Context and Overall Objective}\label{subsec:context-objective}
 
-Web users routinely confront suspicious text, product reviews, and images created or altered using generative Artificial Intelligence (\AI{}) and Large Language Models (\LLM{}s). Existing ``real vs.\ fake'' checkers create two symmetric harms: accepting synthetic scams causes deception loss, while trusting uncalibrated percentage scores leads to unfair accusations against human writers—especially non-native English (\ESL{}) authors—and genuine photos missing metadata.
+Web users routinely confront suspicious text, product reviews, and images created or altered using generative Artificial Intelligence (\AI{}) and Large Language Model (\LLM{}) systems. Existing ``real vs.\ fake'' checkers create two symmetric harms: accepting synthetic scams causes deception loss, while trusting uncalibrated percentage scores leads to unfair accusations against human writers—especially non-native English (\ESL{}) authors—and genuine photos missing metadata.
 
 \textbf{Verity} provides an on-demand desktop browser extension and analysis pipeline that inspects only user-selected webpage text or static images. Rather than issuing binary truth verdicts, Verity presents source-grounded evidence, warns plainly that false flags can occur, enters \TermInconclusive{} when signals conflict or fall out-of-domain, recommends verification steps, and processes submissions ephemerally with zero default persistence.
 
@@ -1172,9 +1172,9 @@ Table~\ref{TblPhaseInPlan} maps MoSCoW priorities across the 2026--2027 SFWRENG 
 \midrule
 \textbf{Phase 4 (Wks 18--19)}\newline Jan 19--Feb 8 & Rev~0 Demo & \textbf{M:} \hyperref[NFR3]{NFR3}--\hyperref[NFR6]{NFR6}, \hyperref[NFR.E.1]{NFR.E.1}, \hyperref[NFR.E.2]{NFR.E.2}. \textbf{S:} \hyperref[FR11]{FR11}, \hyperref[NFR8]{NFR8}. & End-to-end demo passing latency, cleanup, cancel, concurrency, uptime.\\
 \midrule
-\textbf{Phase 5 (Wk 22)}\newline Feb 9--Mar 9 & V\&V Report \& Winter CD & \textbf{M:} \hyperref[NFR2]{NFR2}, \hyperref[NFR.E.4]{NFR.E.4}. \textbf{S:} \hyperref[NFR10]{NFR10}. & Winter Usability ($\ge \MinUsabilityParticipants{}$ users, $\ge \MinUnderstandingRate{}$) and fairness audit.\\
+\textbf{Phase 5 (Wk 22)}\newline Feb 9--Mar 8 & V\&V Report \& Winter CD & \textbf{M:} \hyperref[NFR2]{NFR2}, \hyperref[NFR.E.4]{NFR.E.4}. \textbf{S:} \hyperref[NFR10]{NFR10}. & Winter Usability ($\ge \MinUsabilityParticipants{}$ users, $\ge \MinUnderstandingRate{}$) and fairness audit.\\
 \midrule
-\textbf{Phase 6 (Wks 24--26)}\newline Mar 10--Apr 7 & Final Docs \& EXPO & \textbf{C:} UI polish, \CTwoPA{} details. \textbf{W:} Audio/video, user history. & Final regression, User Guide, Rev~1 freeze, Capstone EXPO.\\
+\textbf{Phase 6 (Wks 24--26)}\newline Mar 9--Apr 7 & Final Docs \& EXPO & \textbf{C:} UI polish, \CTwoPA{} details. \textbf{W:} Audio/video, user history. & Final regression, User Guide, Rev~1 freeze, Capstone EXPO.\\
 \end{tabularx}
 }
 
