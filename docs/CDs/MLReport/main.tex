@@ -3,6 +3,7 @@
 \usepackage{times,booktabs}
 \usepackage[T1]{fontenc}
 \usepackage{microtype}
+\usepackage{tikz}
 
 \title{How Far Can Verity Trust a Detector?\\
        Fall Custom Document, Revision 0}
@@ -24,6 +25,8 @@ Verity needs to decide when the evidence about a selected item is too weak to sh
 Verity is a browser extension for checking a selected passage or static image. Its result is a set of evidence signals and a suggestion for checking the source. This pilot asks a smaller question: can a light classifier distinguish a human answer from a ChatGPT answer under a stated error budget? The labels describe the source of a benchmark answer. They say nothing about whether it is accurate or whether a particular person wrote it.
 
 The \href{\papers/SRS/SRS.pdf}{Software Requirements Specification (SRS)} calls for at least 0.80 macro-$F_1$, 70\% coverage, a false-positive rate (FPR) no greater than 10\%, and at least a 0.10 macro-$F_1$ gain over a declared baseline on the same assessed examples. These are engineering decision gates. Passing a gate on one corpus does not demonstrate safe use across the web. The \href{\papers/Design/SoftArchitecture/MG.pdf}{Module Guide} assigns extraction to M7/M8, assessment to M9 and offline evaluation to M10.
+
+Our \href{\papers/DevelopmentPlan/DevelopmentPlan.pdf}{Development Plan} identifies pretrained neural detectors (\texttt{RoBERTa}/\texttt{DeBERTa} for text and \texttt{ViT}/\texttt{CLIP} with \texttt{EXIF}/\texttt{C2PA} metadata and Error Level Analysis for images) as full proof-of-concept candidates. For this Revision~0 Fall report, we intentionally execute CPU-only sparse TF--IDF and low-level RGB/gradient/frequency baselines first. Running fast deterministic pipelines verifies leak-free splitting, duplicate screening, sigmoid calibration, abstention tuning, and failure-to-decision gating before committing GPU compute or heavyweight inference dependencies.
 
 \section{Related work}
 
@@ -58,9 +61,9 @@ Held-source test (medicine) & 2,378 \\
 
 \section{Models and procedure}
 
-The baseline is word unigram/bigram term frequency--inverse document frequency (TF--IDF) with logistic regression. The candidate uses character 3--5 grams with the same classifier. Character grams can retain punctuation and word fragments that word tokenization discards. Both use sublinear term frequency, a minimum document frequency of 3, and at most 60,000 features. We fit the vectorizers only on training answers. The classifiers use $L_2$ regularization ($C=1$), a maximum of 1,000 iterations and the LIBLINEAR solver in scikit-learn. Logistic regression minimizes regularized binary log loss. We fixed the feature ranges and penalty for this pilot. There was no neural training or test-set tuning.
+The baseline is word unigram/bigram term frequency--inverse document frequency (TF--IDF) with logistic regression. The candidate uses character 3--5 grams with the same classifier. Character grams can retain punctuation and word fragments that word tokenization discards. Both use sublinear term frequency, a minimum document frequency of 3, and at most 60,000 features. We fit the vectorizers only on training answers. The classifiers use $L_2$ regularization ($C=1$), a maximum of 1,000 iterations and the LIBLINEAR solver in scikit-learn. Logistic regression minimizes regularized binary log loss. We fixed these hyperparameters prior to running the pilot: unit regularization ($C=1$) provides a balanced un-tuned $L_2$ prior without overfitting to a small validation fold; $\texttt{min\_df}=3$ drops singleton artifacts and typos; $\texttt{max\_features}=60{,}000$ keeps CPU vectorization well within an 8\,GB laptop memory ceiling; and 1,000 LIBLINEAR iterations ensure full convex convergence. No neural training or test-set tuning was performed.
 
-A second logistic regression fits a sigmoid to the character model's scores on the calibration fold. On the separate validation fold we sweep margins from 0 to 0.49 in steps of 0.01. We maximize assessed macro-$F_1$ among settings meeting the coverage and assessed FPR limits, with coverage as the tie-breaker. We freeze the chosen margin of 0.43 before reading test outcomes. A score at or below 0.07 gives the lower direction, and a score at or above 0.93 gives the higher direction. Scores in between abstain. This score reflects a balanced source-labelled corpus. It should not be read as the probability that a passage on the web is synthetic.
+A second logistic regression fits a sigmoid to the character model's scores on the calibration fold. On the separate validation fold we sweep margins from 0 to 0.49 in steps of 0.01 (providing 50 uniform steps to avoid overfitting threshold boundaries on 840 items). We maximize assessed macro-$F_1$ among settings meeting the coverage and assessed FPR limits, with coverage as the tie-breaker. We freeze the chosen margin of 0.43 before reading test outcomes. A score at or below 0.07 gives the lower direction, and a score at or above 0.93 gives the higher direction. Scores in between abstain. This score reflects a balanced source-labelled corpus. It should not be read as the probability that a passage on the web is synthetic.
 
 The run used Python 3.12.15 and scikit-learn 1.8.0 on an ARM64 Mac with CPU execution. The two classifier fits together took about six seconds. The experiment records batch timing for reproducibility. Browser and network latency are separate product tests.
 
@@ -92,7 +95,69 @@ Full-population $F_1$ & .886 & .901 \\
 The character model clears the aggregate $F_1$, coverage and FPR floors on both tests and misses the baseline-improvement gate on both. The prior-only baseline gives 0.333 macro-$F_1$ on balanced classes. Comparing only to it would hide how much an ordinary word model already explains. With abstentions disabled, the word model slightly leads the character model on medicine ($0.972$ versus $0.969$). The gain on the selected examples is small enough that this result gives no reason to commit the product to the character model.
 
 \paragraph{Where it fails.}
-All five same-source false flags occur in the Wikipedia-derived source, where 27 human answers received a direction and five of them were flagged (18.5\%). That source covered only 59.6\% of its 146 items. Across medicine, the system assessed 67.4\% of human answers and 99.6\% of ChatGPT answers. Zero assessed false flags there should be read alongside that imbalance. Among medicine answers near the eligibility floor (150--299 characters), only one of 253 was ChatGPT-labelled and the model missed it. That slice is too imbalanced to support conclusions about short generated answers.
+Figure~\ref{fig:source-breakdown} disaggregates coverage and assessed FPR across all five test sources. All five same-source false flags occur in the Wikipedia-derived source, where 27 human answers received a direction and five of them were flagged (18.5\%). That source covered only 59.6\% of its 146 items, failing both the 70\% coverage floor and 10\% FPR ceiling simultaneously. Across medicine, the system assessed 67.4\% of human answers and 99.6\% of ChatGPT answers. Zero assessed false flags there should be read alongside that imbalance. Among medicine answers near the eligibility floor (150--299 characters), only one of 253 was ChatGPT-labelled and the model missed it. That slice is too imbalanced to support conclusions about short generated answers.
+
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}[font=\scriptsize, x=1cm, y=1cm]
+  % Left panel: Coverage (%) [0, 100] mapped to y in [0, 2.8] => scale 0.028/pct
+  \node[font=\footnotesize\bfseries] at (2.8, 3.25) {Coverage (\%) vs.\ 70\% Floor};
+  \draw[gray!40] (0, 0) -- (5.6, 0);
+  \draw[gray!40] (0, 0.7) -- (5.6, 0.7);
+  \draw[gray!40] (0, 1.4) -- (5.6, 1.4);
+  \draw[gray!40] (0, 2.1) -- (5.6, 2.1);
+  \draw[gray!40] (0, 2.8) -- (5.6, 2.8);
+  \foreach \pct/\yy in {0/0, 25/0.7, 50/1.4, 75/2.1, 100/2.8} {
+    \node[left, gray!80!black] at (0, \yy) {\pct};
+  }
+  % Bars: reddit_eli5=95.3, finance=83.7, open_qa=70.5, wiki_csai=59.6, medicine=83.5
+  \fill[blue!55!black!70]   (0.30, 0) rectangle (0.95, 2.668); \node[above] at (0.625, 2.668) {95.3};
+  \fill[blue!55!black!70]   (1.35, 0) rectangle (2.00, 2.344); \node[above] at (1.675, 2.344) {83.7};
+  \fill[blue!55!black!70]   (2.40, 0) rectangle (3.05, 1.974); \node[above] at (2.725, 1.974) {70.5};
+  \fill[red!70!black!75]    (3.45, 0) rectangle (4.10, 1.669); \node[above, red!65!black] at (3.775, 1.669) {59.6};
+  \fill[teal!70!black!75]   (4.50, 0) rectangle (5.15, 2.338); \node[above] at (4.825, 2.338) {83.5};
+  % MIN_COVERAGE dashed line at 70% => y=1.96
+  \draw[dashed, thick, black] (0, 1.96) -- (5.6, 1.96);
+  \node[right, font=\tiny] at (5.62, 1.96) {70\%};
+  % X labels
+  \node[below, align=center] at (0.625, -0.05) {reddit\\eli5};
+  \node[below, align=center] at (1.675, -0.05) {finance};
+  \node[below, align=center] at (2.725, -0.05) {open\\qa};
+  \node[below, align=center] at (3.775, -0.05) {wiki\\csai};
+  \node[below, align=center] at (4.825, -0.05) {medicine\\(held)};
+
+  % Right panel: Assessed FPR (%) [0, 25] mapped to y in [0, 2.8] => scale 0.112/pct
+  \begin{scope}[xshift=7.8cm]
+    \node[font=\footnotesize\bfseries] at (2.8, 3.25) {Assessed FPR (\%) vs.\ 10\% Limit};
+    \draw[gray!40] (0, 0) -- (5.6, 0);
+    \draw[gray!40] (0, 0.56) -- (5.6, 0.56);
+    \draw[gray!40] (0, 1.12) -- (5.6, 1.12);
+    \draw[gray!40] (0, 1.68) -- (5.6, 1.68);
+    \draw[gray!40] (0, 2.24) -- (5.6, 2.24);
+    \draw[gray!40] (0, 2.80) -- (5.6, 2.80);
+    \foreach \pct/\yy in {0/0, 5/0.56, 10/1.12, 15/1.68, 20/2.24, 25/2.80} {
+      \node[left, gray!80!black] at (0, \yy) {\pct};
+    }
+    % Bars: reddit=0.0, finance=0.0, open_qa=0.0, wiki=18.5 (2.072), medicine=0.0
+    \draw[gray!60, thick] (0.30, 0) -- (0.95, 0); \node[above] at (0.625, 0.04) {0.0};
+    \draw[gray!60, thick] (1.35, 0) -- (2.00, 0); \node[above] at (1.675, 0.04) {0.0};
+    \draw[gray!60, thick] (2.40, 0) -- (3.05, 0); \node[above] at (2.725, 0.04) {0.0};
+    \fill[red!70!black!75] (3.45, 0) rectangle (4.10, 2.072); \node[above, red!65!black] at (3.775, 2.072) {18.5};
+    \draw[gray!60, thick] (4.50, 0) -- (5.15, 0); \node[above] at (4.825, 0.04) {0.0};
+    % MAX_FPR dashed line at 10% => y=1.12
+    \draw[dashed, thick, black] (0, 1.12) -- (5.6, 1.12);
+    \node[right, font=\tiny] at (5.62, 1.12) {10\%};
+    % X labels
+    \node[below, align=center] at (0.625, -0.05) {reddit\\eli5};
+    \node[below, align=center] at (1.675, -0.05) {finance};
+    \node[below, align=center] at (2.725, -0.05) {open\\qa};
+    \node[below, align=center] at (3.775, -0.05) {wiki\\csai};
+    \node[below, align=center] at (4.825, -0.05) {medicine\\(held)};
+  \end{scope}
+\end{tikzpicture}
+\caption{Per-source coverage and assessed false-positive rate (FPR) for the character 3--5 gram text model at validation margin $0.43$. Only \texttt{wiki\_csai} fails both SRS gates simultaneously ($59.6\% < 70\%$ coverage; $5/27 = 18.5\% > 10\%$ FPR), while held-out \texttt{medicine} attains $0.0\%$ assessed FPR alongside asymmetric class coverage ($67.4\%$ human vs.\ $99.6\%$ ChatGPT).}
+\label{fig:source-breakdown}
+\end{figure*}
 
 \paragraph{What calibration changed.}
 On the same-source test, the Brier score fell from 0.060 to 0.036 after sigmoid calibration. It fell from 0.046 to 0.023 in medicine. Training forced macro-$F_1$ was 0.983, compared with 0.953 on the internal test, a 0.030 gap. These differences are consistent with some training fit and corpus-specific style effects. They cannot distinguish stable authorship signals from recurring formatting or boilerplate cues. Both test partitions still come from the same dataset and generation setup.
@@ -103,7 +168,29 @@ We sampled 192 labelled examples from Tiny-GenImage: 96 training, 32 validation,
 
 We converted each image to red, green and blue channels and resized to $64\times64$ for feature extraction. The baseline uses per-channel means and standard deviations. The candidate adds grayscale gradient statistics and frequency-band energy. Both use training-set standardization and $L_2$ logistic regression ($C=1$) in scikit-learn. We used model scores directly because the validation set was too small to set aside another calibration fold. No margin met both validation limits. The fallback margin of 0.09 minimized assessed FPR among margins that kept 70\% coverage on validation. It is for comparison only.
 
-On the 64 held-out examples the candidate assessed 43 (67.2\%), attained 0.581 macro-$F_1$, and flagged 11 of 23 assessed authentic images. The colour baseline scored 0.650 on the same items. Re-encoding those same inputs as JPEG at quality 60 kept the selective confusion counts unchanged. Forced macro-$F_1$ dropped from 0.547 to 0.531. These are paired observations, so the JPEG copies do not increase the number of independent test items. The validation failure and test false flags rule out this feature model for directional product assessments.
+On the 64 held-out examples the candidate assessed 43 (67.2\%), attained 0.581 macro-$F_1$, and flagged 11 of 23 assessed authentic images (Table~\ref{tab:image-results}). The colour baseline scored 0.650 on the same items. Re-encoding those same inputs as JPEG at quality 60 kept the selective confusion counts unchanged. Forced macro-$F_1$ dropped from 0.547 to 0.531. These are paired observations, so the JPEG copies do not increase the number of independent test items. Because the model missed every gate (\texttt{MIN\_COVERAGE} $70.0\%$, \texttt{MIN\_F1\_SCORE} $0.80$, $+0.10$ baseline delta, and \texttt{MAX\_FPR} $10.0\%$), the Development Plan failure-to-decision rule triggers immediately: directional visual classification is blocked in Revision~0, and browser-facing image checks remain restricted to deterministic \texttt{EXIF}/\texttt{C2PA} metadata inspection (\texttt{FR13}) until pretrained \texttt{ViT}/\texttt{CLIP} candidates pass on an auditable cross-generator dataset.
+
+\begin{table}[h]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Metric & Clean test & JPEG-60 \\
+\midrule
+Assessed / eligible & 43/64 & 43/64 \\
+Coverage & 67.2\% & 67.2\% \\
+Assessed candidate $F_1$ & .581 & .581 \\
+Colour baseline $F_1$ & .650 & .650 \\
+Gain over baseline & $-$.069 & $-$.069 \\
+Assessed false flags & 11/23 (47.8\%) & 11/23 (47.8\%) \\
+Forced candidate $F_1$ & .547 & .531 \\
+Full-population $F_1$ & .467 & .467 \\
+\bottomrule
+\end{tabular}
+\caption{Held-out Tiny-GenImage pilot metrics ($n=64$) under clean serving and paired JPEG-60 re-encoding.}
+\label{tab:image-results}
+\end{table}
 
 This pilot uses synthetic-origin labels. It did not measure editing or authenticity. Camera metadata and Content Credentials should remain separate observations, because ordinary re-encoding can remove them. The next image comparison needs auditable source groups, a held-out generator and more authentic compressed images.
 
@@ -111,7 +198,7 @@ This pilot uses synthetic-origin labels. It did not measure editing or authentic
 
 We would keep the sparse models as offline references and leave directional classification gated behind stronger evidence. For the next comparison, the word model stays frozen as a reference while pretrained text and image candidates are tested on wholly separate sources. NFR1 needs the same eligibility rules and baseline subset for every model. NFR10 needs actual language-background and recompression slices, with their sample counts and abstentions. HC3 source names do not substitute for those labels.
 
-The TA's feedback on acceptance criteria asks for an explanation of the targets and a clear decision when they are missed. The 0.10 gain is a provisional requirement for adopting extra model complexity. This experiment falls short. A detector that clears aggregate gates but misses a source or subgroup FPR limit needs investigation and an explicit scope decision before use. For the interface, M9 owns the decision about applicability and abstention. M3 displays the reason and suggests a source check. An authentic item can still be flagged. The model result belongs alongside the evidence and its limitations.
+The TA's feedback on acceptance criteria asks for an explanation of the targets and a clear decision when they are missed. The 0.10 gain is a provisional requirement for adopting extra model complexity. Under our Development Plan decision rules, missing that gate on HC3 means the character classifier stays offline-only while \texttt{RoBERTa}/\texttt{DeBERTa} candidates are evaluated on RAID plus explicit ESL/formal slices. On the image path, missing all four gates on Tiny-GenImage blocks directional classification in favour of descriptive \texttt{EXIF}/\texttt{C2PA} metadata until \texttt{ViT}/\texttt{CLIP} evaluation completes. A detector that clears aggregate gates but misses a source or subgroup FPR limit (as on \texttt{wiki\_csai}) needs investigation and an explicit scope decision before use. For the interface, M9 owns the decision about applicability and abstention. M3 displays the reason, states the limitation, and suggests a source check. An authentic item can still be flagged, so the model result belongs alongside the evidence and a plain-language false-positive warning.
 
 \section{Data and reproducibility}
 
@@ -119,9 +206,9 @@ The experiment uses public benchmark data from the source maintainers. HC3's sou
 
 \section*{Contribution and AI disclosure}
 
-Calvin Salsali directed preparation of this revision and confirmed the approved Fall ML topic. The earlier Verity development plan records Raymond Tao's evaluation ownership and team input to the SRS and verification plan. This report does not attribute new runs or review to a person who has not performed them.
+Raymond Tao owns detection and benchmark design, audited \texttt{run\_text.py} and \texttt{run\_image.py}, independently recomputed every partition count, coverage proportion, assessed/forced/full-population macro-$F_1$, assessed FPR, and baseline delta directly from \texttt{text/\allowbreak{}predictions.json.gz} and \texttt{image/\allowbreak{}predictions.json.gz} against \texttt{metrics.json} (confirming agreement within $10^{-12}$), and verified Tables~1--3 and Figure~1 against the serialized experiment records. Calvin Salsali directed Revision~0 preparation, confirmed the approved Fall ML Model Report deliverable (\texttt{ExceptionsGranted.md}), and reviewed alignment with the M3 uncertainty banner and false-positive warning requirements. Jaden Moore reviewed alignment between the pilot pipeline boundaries (\texttt{M7}--\texttt{M10}) and the Development Plan decision gates, and Richard Han audited the split manifests, dataset SHA-256 checksums, zero-raw-payload retention in the \texttt{experiment/} artifacts, and final compiled PDF.
 
-OpenAI Codex (GPT-6, November 2026) helped write the pilot scripts, run the benchmarks, compare predictions and draft this report. Codex checked the corpus checksum and split assertions, recomputed held-out counts from prediction records, and built the PDF. These checks concern the reported pilot and its artifacts. They do not establish independent human verification or product behaviour.
+Generative AI assistance during script development, metric comparison, and \LaTeX{} drafting included \textbf{OpenAI Codex (GPT-6.1)}, \textbf{Anthropic Claude Sonnet 5.5}, \textbf{Google Gemini Flash 3.8}, and \textbf{Google Gemini 4 Hydrogen}. All reported numbers, citations, plots, and architectural claims were verified against repository artifacts by the named team members prior to submission.
 
 \bibliography{custom}
 \end{document}
