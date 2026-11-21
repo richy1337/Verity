@@ -113,7 +113,7 @@ The risk register distinguishes initial inherent risk estimates, conditional tar
 ### 3.2 Five-State Request Lifecycle & Evidence Source Tags
 - **Request Status Enum (`\mathcal{S}_{\text{status}}`):** `pending`, `completed`, `inconclusive`, `failed`, `cancelled` (`FR6`, `INV1`, `INV2`, `SR4`).
   - *Crucial Safety Invariant (`INV2`, `SR4`):* `failed`, `cancelled`, or partial signals must **never** map to a low-risk or authentic verdict; borderline/conflicting signals or subjective opinion/satire map to `inconclusive` (`FR4`, `SR1`).
-- **Evidence Source Tags (`\mathcal{E}_{\text{src}}`):** Every displayed evidence item must be tagged in JSON as `observed_signal`, `external_reference`, or `inference`, rendered in UI as (1) `Observed Input Signal`, (2) `External Reference`, or (3) `Model Inference` (`FR7`, `SR5`, `INV3`, `H3`).
+- **Evidence Source Tags (`\mathcal{E}_{\text{src}}`):** Every displayed evidence item must be tagged in JSON as `observed_signal`, `external_reference`, or `inference`, rendered in UI as (1) `Observed Input Signal`, (2) `External Reference`, or (3) `Model Inference` (`FR7`, `SR5`, `H3`).
 
 ### 3.3 Subsystem & Component Mapping (SRS `S1`–`S4` $\leftrightarrow$ Hazard Analysis `C1`–`C7` $\leftrightarrow$ Design `M1`–`M10`)
 - **SRS Black-Box Subsystems (`S1`–`S4`):**
@@ -144,7 +144,7 @@ All downstream documents (`VnVPlan.tex`, `MG.tex`, `MIS.tex`, `VnVReport.tex`, `
 - **Formal System Invariants (`INV1`–`INV4`, SRS Section S.9.1):**
   - `INV1` (*Mutual Exclusion of Terminal Statuses*): At any time $t$, a request $r$ has exactly one status in $\mathcal{S}_{\text{status}} = \{\texttt{pending}, \texttt{completed}, \texttt{inconclusive}, \texttt{failed}, \texttt{cancelled}\}$.
   - `INV2` (*Safe Abstention & Non-Reassurance on Degraded Signals*): $\text{status}(r) \in \{\texttt{inconclusive}, \texttt{failed}, \texttt{cancelled}\} \implies \text{verdict\_safe}(r) = \texttt{false} \land \text{uncertainty\_banner}(r) = \texttt{true}$.
-  - `INV3` (*Complete Source Tagging of Displayed Evidence*): $\forall e \in E_{\text{disp}}(r),\; \text{tag}(e) \in \mathcal{E}_{\text{src}} \land |\text{locator}(e)| > 0$.
+  - `INV3` (*Strict Request-to-Result Binding*): $\forall r \neq q,\; \text{result}(r)$ is never bound to or rendered as the assessment for $q$ (`FR10`, `SR7`, `SR9`).
   - `INV4` (*Bounded Application-Owned Transient Cleanup; No Persistent Raw Writes*): $\forall t > t_{\text{term}}(r) + \texttt{MAX\_RETENTION\_TIME},\; \text{Buffers}(r) = \emptyset$.
 - **Product Use Cases (`UC1`–`UC4`, SRS Section E.6.2):**
   - `UC1`: Evaluate Suspicious Webpage Text Selection (`S1`, `S2`, `S3`)

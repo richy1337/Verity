@@ -11,5 +11,5 @@
 
 - [ ] **Automated Checks / Build:** Passed CI (`pytest`, `ruff`, TypeScript/Vitest, or `pdflatex` / `tectonic` PDF build).
 - [ ] **Documentation Sync (if applicable):** Compiled `.pdf` copied to `pdfs/` (and removed from `docs/`), figure `.pdf`s added to `.pdf-deps.json`, and checked against `docs/Checklists/Writing-Checklist.tex`.
-- [ ] **Safety & Privacy Invariants:** Preserves 5-state lifecycle (`pending`, `completed`, `inconclusive`, `failed`, `cancelled` — `INV1`/`INV2`), source-tagged evidence (`INV3`), and `0.0 s` post-terminal buffer cleanup (`INV4`).
+- [ ] **Safety & Privacy Invariants:** Preserves 5-state lifecycle (`pending`, `completed`, `inconclusive`, `failed`, `cancelled` — `INV1`/`INV2`), strict request-to-result binding (`INV3`), and `1.0 s` bounded transient cleanup with zero persistent raw writes (`INV4`).
 - [ ] **Peer Review:** Reviewed by at least one other Team 23 member prior to merge.
