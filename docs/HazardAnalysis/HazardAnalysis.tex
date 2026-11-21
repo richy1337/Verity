@@ -59,7 +59,6 @@
 \newcommand{\HA}{\hyperlink{ha-acr-ha}{HA}}
 \newcommand{\HTML}{\hyperlink{ha-acr-html}{HTML}}
 \newcommand{\HTTPS}{\hyperlink{ha-acr-https}{HTTPS}}
-\newcommand{\JSON}{\hyperlink{ha-acr-json}{JSON}}
 \newcommand{\LLM}{\hyperlink{ha-acr-llm}{LLM}}
 \newcommand{\ML}{\hyperlink{ha-acr-ml}{ML}}
 \newcommand{\MVThree}{\hyperlink{ha-acr-mv3}{MV3}}
@@ -159,7 +158,6 @@ Table~\ref{TblHAAcronyms} lists each acronym used in this document and links to 
 \hypertarget{ha-acr-ha}{\textbf{HA}} & Hazard Analysis & Section~\ref{sec:intro} (\hyperref[sec:intro]{Introduction})\\
 \hypertarget{ha-acr-html}{\textbf{HTML}} & HyperText Markup Language & Section~\ref{sec:fmea} (\hyperref[sec:fmea]{FMEA})\\
 \hypertarget{ha-acr-https}{\textbf{HTTPS}} & HyperText Transfer Protocol Secure & Section~\ref{sec:boundaries} (\hyperref[sec:boundaries]{System Boundaries})\\
-\hypertarget{ha-acr-json}{\textbf{JSON}} & JavaScript Object Notation & Section~\ref{sec:boundaries} (\hyperref[sec:boundaries]{System Boundaries})\\
 \hypertarget{ha-acr-llm}{\textbf{LLM}} & Large Language Model & Section~\ref{sec:scope} (\hyperref[sec:scope]{Scope and Losses})\\
 \hypertarget{ha-acr-ml}{\textbf{ML}} & Machine Learning & Section~\ref{sec:intro} (\hyperref[sec:intro]{Introduction})\\
 \hypertarget{ha-acr-mv3}{\textbf{MV3}} & Manifest Version 3 (Chrome Extension Architecture) & Section~\ref{sec:scope} (\hyperref[sec:scope]{Scope and Losses})\\
@@ -474,9 +472,9 @@ Table~\ref{TblRiskRegister} assigns proposed verification owners and open releas
 % ======================================================================
 \section{Safety and Security Requirements}\label{sec:safety-reqs}
 
-Derived from Table~\ref{TblFMEA}, the nine normative requirements \hyperref[SR1]{SR1}--\hyperref[SR9]{SR9} match Section~S.4 of the companion \SRS{} \cite{VeritySRS2026} identically. Hazard \hyperref[haz:H10]{H10} is governed directly by \SRS{} evaluation requirements \texttt{FR12}, \texttt{FR14}, \texttt{NFR1}, \texttt{NFR7}, and \texttt{NFR10}.
+Derived from Table~\ref{TblFMEA}, the nine normative Safety and Security Requirements (\SR{}) \hyperref[SR1]{SR1}--\hyperref[SR9]{SR9} match Section~S.4 of the companion \SRS{} \cite{VeritySRS2026} identically. Hazard \hyperref[haz:H10]{H10} is governed directly by \SRS{} evaluation requirements \texttt{FR12}, \texttt{FR14}, \texttt{NFR1}, \texttt{NFR7}, and \texttt{NFR10}.
 
-\subsection{User-Facing and Inference Safety Requirements (\texttt{SR1}--\texttt{SR5}, \texttt{SR7})}
+\subsection{User-Facing and Inference Safety Requirements (\texttt{SR1}--\texttt{SR5})}
 
 \begin{enumerate}[leftmargin=*]
     \item \phantomsection\label{SR1}\textbf{SR1 --- Uncertainty Must Stay Visible}\newline
@@ -494,16 +492,16 @@ Derived from Table~\ref{TblFMEA}, the nine normative requirements \hyperref[SR1]
     \item \phantomsection\label{SR5}\textbf{SR5 --- Grounded Explanations and Prompt-Injection Immunity}\newline
     Every displayed factual assertion about a submitted item shall have a locator to an observed input signal or accessible external source that supports that assertion; model inferences shall be explicitly labelled and shall not be presented as verified facts. Instructions embedded within submitted text or image metadata shall never override this rule.
 
-    \item \phantomsection\label{SR7}\textbf{SR7 --- Strict Request-to-Result Association}\newline
-    Every displayed result shall be bound to exactly one initiating request identifier, and a late or out-of-order response from an earlier or cancelled submission shall never overwrite the result displayed for a newer submission.
-
 \end{enumerate}
 
-\subsection{Sandboxing, Privacy, and Isolation Requirements (\texttt{SR6}, \texttt{SR8}, \texttt{SR9})}
+\subsection{Sandboxing, Privacy, and Isolation Requirements (\texttt{SR6}--\texttt{SR9})}
 
-\begin{enumerate}[leftmargin=*, start=7]
+\begin{enumerate}[leftmargin=*, start=6]
     \item \phantomsection\label{SR6}\textbf{SR6 --- Untrusted Webpage Content Sandboxing}\newline
     The system shall reject unsupported or malformed inputs, shall never execute active content (HTML/JavaScript/SVG scripts) inside selected items, and shall enforce per-request payload size (\MinTextLength{}--\MaxTextLength{}, $\le \MaxImageSize{}$), dimension (\MinImageDim{} to \MaxImageDim{}), and execution time ($\le \MaxResponseTime{}$) bounds.
+
+    \item \phantomsection\label{SR7}\textbf{SR7 --- Strict Request-to-Result Association}\newline
+    Every displayed result shall be bound to exactly one initiating request identifier, and a late or out-of-order response from an earlier or cancelled submission shall never overwrite the result displayed for a newer submission.
 
     \item \phantomsection\label{SR8}\textbf{SR8 --- Controlled Content Access and Ephemeral Cleanup}\newline
     The browser extension shall access webpage content only upon an explicit user-triggered check using least-privilege permissions, shall never collect unselected page content, browsing history, or credentials, shall require prior informed consent before any external provider transfer, shall never persist raw selected content, and shall stop request-owned processing and release application-owned transient copies within \MaxRetentionTime{} after every terminal outcome. External providers shall be disabled unless their documented retention terms are compatible with this policy; consent does not establish remote deletion.
