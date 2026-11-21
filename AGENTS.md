@@ -54,7 +54,7 @@ Verity/
 │   ├── projMngmnt/            # MeetingNotes.tex, POC_Productivity_Rep.tex, Rev0_Productivity_Rep.tex, Final_Productivity_Rep.tex
 │   ├── VnVPlan/               # Verification & Validation Plan (VnVPlan.tex, README.md)
 │   ├── CDs/
-│   │   ├── MLReport/          # CD-Fall: main.tex, acl.sty, acl_natbib.bst, custom.bib, Expectations_ML.md
+│   │   ├── MLReport/          # CD-Fall: main.tex, acl.sty, acl_natbib.bst, custom.bib, Expectations_ML.md, Expectations_AgentBasedML.md
 │   │   │   └── experiment/    # Reproducible CPU pilot scripts & artifacts (README.md, requirements.txt, run_text.py, run_image.py, text/*.json*, image/*.json*)
 │   │   └── UsabilityTesting/  # CD-Winter: Expectations.md (target UsabilityReport.tex — Week 22, Mar 2027)
 │   ├── Design/
@@ -191,9 +191,9 @@ Downstream documents and tests must reference these exact SRS identifiers:
 - **Formal System Invariants (`INV1`–`INV4`, SRS Section E.5 & S.9.1):**
   - `INV1` (*Status Exclusivity*): Every admitted request $r \in \mathcal{R}$ holds exactly one state $\text{status}(r) \in \mathcal{S}_{\text{status}} = \{\texttt{pending}, \texttt{completed}, \texttt{inconclusive}, \texttt{failed}, \texttt{cancelled}\}$; invalid selections rejected at pre-admission (`FR2`) never enter $\mathcal{R}$.
   - `INV2` (*No Silent Reassurance*): $\text{status}(r) \in \{\texttt{pending}, \texttt{inconclusive}, \texttt{failed}, \texttt{cancelled}\} \implies$ never display a low-risk signal summary (`FR4`, `SR4`).
-  - `INV3` (*Strict Request-to-Result Binding*): $\forall r \neq q,\; \text{result}(r)$ is never bound to or rendered as the assessment for $q$ (`FR10`, `SR7`, `SR9`). *(Aligned across `SRS.tex` PR `#84` and `MG.tex`/`MIS.tex` PR `#81`; evidence source tagging $\mathcal{E}_{\text{src}}$ is specified by `FR7`, `SR5`, `H3`, and SRS S.9.1 Well-Formed Result Invariant.)*
+  - `INV3` (*Strict Request Isolation*): Distinct requests $r \neq q$ never expose or overwrite each other's payloads or results (`FR10`, `SR7`, `SR9`). *(Matches `SRS.tex` PR `#84` Section E.5; `MG.tex` PR `#81` summarizes this as "Strict result binding." Evidence source tagging $\mathcal{E}_{\text{src}}$ is specified by `FR7`, `SR5`, `H3`, and SRS S.9.1 Well-Formed Result Invariant.)*
   - `INV4` (*Zero Persistence & Bounded Cleanup*): Raw content never enters persistent storage/logs; request work halts and application-owned transient references release within `MAX_RETENTION_TIME` after terminal decision (`FR9`, `NFR4`, `SR8`).
-- **Product Use Cases (`UC1`–`UC4`, SRS Section S.7):**
+- **Product Use Cases (`UC1`–`UC4`, SRS Section S.8):**
   - `UC1`: Analyse a Supported Webpage Item (`S1`, `S2`, `S3`)
   - `UC2`: Handle Weak, Conflicting, or Out-of-Domain Signals (`S1`, `S2`, `S3`)
   - `UC3`: Reject Invalid Input or Handle Service/Timeout Fault (`S1`, `S2`)
