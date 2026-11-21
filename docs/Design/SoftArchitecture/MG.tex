@@ -89,8 +89,6 @@ Table~\ref{TblAcronyms} defines the acronyms and abbreviations used across this 
 \endhead
 AC & Anticipated Change\\
 C2PA & Coalition for Content Provenance and Authenticity\\
-CI/CD & Continuous Integration and Continuous Deployment\\
-DAG & Directed Acyclic Graph\\
 EXIF & Exchangeable Image File Format\\
 FR & Functional Requirement\\
 FPR & False Positive Rate\\
@@ -454,7 +452,7 @@ This section records the AI tools used to prepare and verify this Module Guide.
 
 \noindent All four team members read the full document and verified module secrets, requirement and hazard rows, anticipated-change mappings, and schedule assignments against the SRS, Hazard Analysis, V\&V Plan, and MG checklist.
 
-\medskip\noindent Automated consistency was verified via \texttt{python3 test/\allowbreak{}documentation/\allowbreak{}verify\_\allowbreak{}specification.py -{}-with-hazard} (8 checks passing) and \texttt{python3 test/\allowbreak{}documentation/\allowbreak{}verify\_\allowbreak{}design.py} (confirming all 10 modules, 52 trace rows, 13 anticipated changes, acyclic 12-edge Uses graph, and 10 distinct owner/reviewer schedule rows), and the compiled PDF was inspected for layout and working references.
+\medskip\noindent Automated consistency was verified via \texttt{verify\_specification.py -{}-with-hazard} under \texttt{test/documentation/} (8 checks passing) and \texttt{verify\_design.py} (confirming all 10 modules, 52 trace rows, 13 anticipated changes, acyclic 12-edge Uses graph, and 10 distinct owner/reviewer schedule rows), and the compiled PDF was inspected for layout and working references.
 
 \newpage{}
 
