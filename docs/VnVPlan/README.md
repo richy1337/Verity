@@ -1,19 +1,24 @@
 # Verification and Validation Plan
 
-`VnVPlan.tex` is the source; the reviewed output is `pdfs/VnVPlan/VnVPlan.pdf`.
-The plan distinguishes available document/input checks from planned product tests.
+`VnVPlan.tex` is the authoritative LaTeX source; the reviewed PDF output lives at `pdfs/VnVPlan/VnVPlan.pdf`.
+The plan separates currently runnable documentation and fixture checks from planned dynamic product and human usability tests.
 
 From the repository root:
 
 ```sh
 python3 test/documentation/verify_specification.py --with-hazard
-python3 -m pip install -r test/fixtures/requirements.txt
-python3 test/fixtures/generate.py --seed 42
-make docs/VnVPlan/VnVPlan.pdf
+python3 test/documentation/verify_design.py
+python3 test/fixtures/generate.py --text-and-png-only --seed 42
+tectonic docs/VnVPlan/VnVPlan.tex
 ```
 
-After a local build, place the compiled document in `pdfs/VnVPlan/` and remove the generated document PDF from `docs/VnVPlan/`. Embedded figure PDFs elsewhere in `docs/` are separate assets and must be preserved.
+For full image-fixture generation (including Pillow-built boundary and decompression-bomb PNG/JPEG/WebP files):
 
-The fixture generator, exact boundary recipes, expected dispositions and limitations are documented in [the fixture README](../../test/fixtures/README.md). The PDF's data-collection appendix defines fixed sample budgets, source grouping, analysis and evidence retention for assets that still need to be frozen before execution. Existing specification checks do not certify product behavior or inspect the plan's constants/traceability.
+```sh
+python3 -m pip install -r test/fixtures/requirements.txt
+python3 test/fixtures/generate.py --seed 42
+```
 
-The follow-up review also requires team confirmation of personal disclosure/reflection attestations and separate evidence for peer-review issues and the V&V presentation. These activities are not inferred from passing document checks.
+After compiling locally, copy `VnVPlan.pdf` to `pdfs/VnVPlan/VnVPlan.pdf` and delete the compiled PDF from `docs/VnVPlan/` so only source files remain inside `docs/`.
+
+See [`test/fixtures/README.md`](../../test/fixtures/README.md) for fixture inventories (including `FX-EVID` subtle-accusation controls and `FX-ABST` genre texts) and Section 6.3 of the plan for dataset licensing, freeze gates, and evidence archiving rules.
