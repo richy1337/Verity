@@ -35,6 +35,8 @@ For the live POC demonstration on \textbf{Wednesday, December 2, 2026 (5:45--6:0
     \item \textbf{Validation, Boundary Fixtures, and Reproducibility (Jaden Moore and Richard Han):} Execute the synthetic boundary and adversarial input generator (\texttt{test/\allowbreak{}fixtures/\allowbreak{}generate.py}) and the automated SRS/HA/design specification checks (\texttt{verify\_\allowbreak{}specification.py} and \texttt{verify\_\allowbreak{}design.py}), plus discuss the POC fallback/scope decision rules for Revision~0.
 \end{enumerate}
 
+\noindent \textbf{Scope Reconciliation with the Development Plan:} Section~9.3 of the initial \href{https://github.com/richy1337/Verity/blob/main/pdfs/DevelopmentPlan/DevelopmentPlan.pdf}{Development Plan} anticipated running a local FastAPI service alongside the CLI benchmark harness during the live POC demonstration. Because the Fall ML pilot (\texttt{experiment/}) surfaced high false-positive rates on unseen Wikipedia text (18.5\%) and failed every image acceptance gate, Team~23 followed our POC failure-to-decision rule and scoped the December~2 demonstration to the workflow/uncertainty walkthrough, offline \texttt{experiment/} ML pilot scripts (acting as the POC CLI harness), synthetic boundary fixtures (\texttt{test/fixtures/generate.py}), and executable SRS/HA/design verification scripts, while staging the full FastAPI runtime and Chromium MV3 browser extension integration in \texttt{src/} for Revision~0 (matching Phase~2/3 staging in the SRS and Module Guide; \texttt{DevelopmentPlan.tex} will be updated accordingly alongside Revision~0).
+
 \section{Team Meeting Attendance}
 
 \begin{table}[H]
@@ -134,13 +136,13 @@ Table counts cover all non-merge student commits on \texttt{main} through commit
 \midrule
 Calvin Salsali & 16 & 7 \\
 Raymond Tao & 21 & 7 \\
-Jaden Moore & 8 & 6 \\
+Jaden Moore & 0 & 6 \\
 Richard Han & 2 & 6 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The repository contains 62 issues total through Issue~\#79: 47 authored by Team~23 members across open and closed states, plus 15 issues authored by Peer Review Teams~12 and~16. Closed assigned counts reflect completed September/October deliverables, peer-review fixes, and backlog triage ahead of the POC demo. Open assigned issues track active TA and peer feedback items across the SRS, Hazard Analysis, V\&V Plan, Design Rev~$-1$, and Fall ML Report.
+The repository contains 62 issues total through Issue~\#79: 39 authored by Team~23 members across open and closed states (Raymond Tao: 21, Calvin Salsali: 16, Richard Han: 2, Jaden Moore: 0), plus 23 issues authored by Peer Review Teams~12 (11) and~16 (12). Closed assigned counts reflect completed September/October deliverables, peer-review fixes, and backlog triage ahead of the POC demo, while Jaden Moore's contributions were tracked through 6 closed assigned issues, 5 pull requests, and 14 non-merge commits (38.9\%) rather than opening tracker issues. Open assigned issues track active TA and peer feedback items across the SRS, Hazard Analysis, V\&V Plan, Design Rev~$-1$, and Fall ML Report.
 
 \section{CICD via GitHub Actions}
 
