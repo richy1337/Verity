@@ -1,15 +1,19 @@
 \documentclass{article}
 
+\usepackage[margin=1in]{geometry}
 \usepackage{float}
 \restylefloat{table}
 
+\usepackage{amsmath}
 \usepackage{booktabs}
+\usepackage{xurl}
+\setlength{\emergencystretch}{2em}
 
 \title{Team Productivity: POC\\\progname}
 
 \author{\authname}
 
-\date{}
+\date{November 21, 2026}
 
 \input{../Comments.text}
 \input{../Common.text}
@@ -18,59 +22,43 @@
 
 \maketitle
 
-This document summarizes the contributions of each team member up to the POC
-Demo.  The time period of interest is the time between the beginning of the term
-and the POC demo.
-
-\wss{Please do not delete sections or modify the table formats.  Standardization
-helps the instructors and TAs to review these documents. You may add sections to
-the report.}
-
-\wss{Remove the instructor guidelines/comments in the final version.}
-
-\wss{Fill in the requested information, like project url, TA name, supervisor name, etc.}
+This document summarizes the contributions of Team 23 (Verity) from the start of the Fall 2026 term up to the Proof of Concept (POC) snapshot on November 21, 2026 (at \texttt{main} commit \texttt{ee9c1d3}).
 
 \section{Demo Plans}
 
-\wss{What is your feasibility risk?}
+Verity's central feasibility risk is whether lightweight, reproducible text and image detectors can separate synthetic or manipulated content from authentic inputs within our error budget ($\text{Macro-}F_1 \ge 0.80$, $\text{FPR} \le 10.0\%$, $\text{Coverage} \ge 70.0\%$, and $\ge +0.10$ over a declared naive baseline) without falsely accusing formal or English as a Second Language (ESL) prose or re-compressed photographs. Our Fall text and image pilots in the \href{https://github.com/richy1337/Verity/blob/main/pdfs/CDs/MLReport/main.pdf}{ML Model Report} already surfaced two concrete failure cases: a character TF--IDF model improved on a word baseline by only $+0.007$ while misflagging 5 of 27 assessed Wikipedia human answers ($18.5\%$), and a simple statistical image pilot missed every acceptance gate.
 
-\wss{What will you be demonstrating}
+For the live POC demonstration on \textbf{Wednesday, December 2, 2026 (5:45--6:00~pm, ITB/201)} with TA Rebecca Di Filippo, we will run live code directly on a team laptop (without slides) covering:
+\begin{enumerate}
+    \item \textbf{Workflow and Uncertainty Framing (Calvin Salsali):} Walk through how Verity distinguishes \texttt{completed}, \texttt{inconclusive}, and \texttt{failed} outcomes and surfaces source-tagged evidence without accusatory language.
+    \item \textbf{Reproducible ML Evaluation Pipeline (Raymond Tao):} Run and inspect the deterministic text/image experiment harness (\texttt{docs/\allowbreak{}CDs/\allowbreak{}MLReport/\allowbreak{}experiment/}) showing calibration, abstention sweeps, baseline comparison, and per-source false-positive breakdowns.
+    \item \textbf{Validation, Boundary Fixtures, and Reproducibility (Jaden Moore and Richard Han):} Execute the synthetic boundary and adversarial input generator (\texttt{test/\allowbreak{}fixtures/\allowbreak{}generate.py}) and the automated SRS/HA/design specification checks (\texttt{verify\_\allowbreak{}specification.py} and \texttt{verify\_\allowbreak{}design.py}), plus discuss the POC fallback/scope decision rules for Revision~0.
+\end{enumerate}
+
+\noindent \textbf{Scope Reconciliation with the Development Plan:} Section~9.3 of the initial \href{https://github.com/richy1337/Verity/blob/main/pdfs/DevelopmentPlan/DevelopmentPlan.pdf}{Development Plan} anticipated running a local FastAPI service alongside the CLI benchmark harness during the live POC demonstration. Because the Fall ML pilot (\texttt{experiment/}) surfaced high false-positive rates on unseen Wikipedia text (18.5\%) and failed every image acceptance gate, Team~23 followed our POC failure-to-decision rule and scoped the December~2 demonstration to the workflow/uncertainty walkthrough, offline \texttt{experiment/} ML pilot scripts (acting as the POC CLI harness), synthetic boundary fixtures (\texttt{test/fixtures/generate.py}), and executable SRS/HA/design verification scripts, while staging the full FastAPI runtime and Chromium MV3 browser extension integration in \texttt{src/} for Revision~0 (matching Phase~2/3 staging in the SRS and Module Guide; \texttt{DevelopmentPlan.tex} will be updated accordingly alongside Revision~0).
 
 \section{Team Meeting Attendance}
 
-\wss{For each team member how many team meetings have they attended over the
-time period of interest.  This number should be determined from the meeting
-issues in the team's repo.  The first entry in the table should be the total
-number of team meetings held by the team.}
-
 \begin{table}[H]
 \centering
 \begin{tabular}{ll}
 \toprule
 \textbf{Student} & \textbf{Meetings}\\
 \midrule
-Total & Num\\
-Name 1 & Num\\
-Name 2 & Num\\
-Name 3 & Num\\
-Name 4 & Num\\
-Name 5 & Num\\
+Total & 3\\
+Calvin Salsali & 3\\
+Raymond Tao & 3\\
+Jaden Moore & 3\\
+Richard Han & 3\\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\wss{If needed, an explanation for the counts can be provided here.}
+This count reflects the three formally documented team sessions recorded in the repository prior to the POC milestone: two meeting issues (\href{https://github.com/richy1337/Verity/issues/37}{\#37} on Sept~28 and \href{https://github.com/richy1337/Verity/issues/38}{\#38} on Oct~18) plus the Oct~5 SRS/Hazard Analysis brainstorming session recorded in \href{https://github.com/richy1337/Verity/blob/main/pdfs/projMngmnt/MeetingNotes.pdf}{MeetingNotes.pdf}. Informal weekly coordination occurred in team chat without separate GitHub issues; going forward, every weekly meeting will be logged as a labelled meeting issue as stated in our Team Charter.
 
 \section{Supervisor/Stakeholder Meeting Attendance}
 
-\wss{For each team member how many supervisor/stakeholder team meetings have
-they attended over the time period of interest.  This number should be determined
-from the supervisor meeting issues in the team's repo.  The first entry in the
-table should be the total number of supervisor and team meetings held by the
-team.  If there is no supervisor, there will usually be meetings with
-stakeholders (potential users) that can serve a similar purpose.}
-
-\noindent \textbf{Supervisor's Name: } [fill in this information]
+\noindent \textbf{Supervisor's Name: } None (no external faculty or industry supervisor)
 
 \begin{table}[H]
 \centering
@@ -78,56 +66,24 @@ stakeholders (potential users) that can serve a similar purpose.}
 \toprule
 \textbf{Student} & \textbf{Meetings}\\
 \midrule
-Total & Num\\
-Name 1 & Num\\
-Name 2 & Num\\
-Name 3 & Num\\
-Name 4 & Num\\
-Name 5 & Num\\
+Total & 0\\
+Calvin Salsali & 0\\
+Raymond Tao & 0\\
+Jaden Moore & 0\\
+Richard Han & 0\\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\wss{If needed, an explanation for the counts can be provided here.}
+Verity does not have an external project supervisor. Requirements and risk assumptions were shaped through TA consultations, peer reviews from Teams~12 and~16, and informal peer discussions rather than formal supervisor meetings; structured user sessions are scheduled for the Winter Usability Study (CD-Winter).
 
 \section{Lecture Attendance}
 
-\wss{For each team member how many lectures have they attended over the time
-period of interest.  This number should be determined from the lecture issues in
-the team's repo. You can find the number of lectures in the time period of
-interest by looking at the
-\href{https://calendar.google.com/calendar/u/0/embed?src=rnboqiaki1k2la7rpu3bn0um58@group.calendar.google.com&ctz=America/Toronto}
-{Google calendar} for the capstone course. The first entry in the
-table should be the total number of lectures held for the class during the period of interest.}
-
-\wss{NOTE: There will be approximately 13 lectures between the start of class
-and the POC demos}
-
-\begin{table}[H]
-\centering
-\begin{tabular}{ll}
-\toprule
-\textbf{Student} & \textbf{Lectures}\\
-\midrule
-Total & Num\\
-Name 1 & Num\\
-Name 2 & Num\\
-Name 3 & Num\\
-Name 4 & Num\\
-Name 5 & Num\\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\wss{If needed, an explanation for the lecture attendance can be provided here.}
+Lecture attendance was not tracked via repository issues during the POC period and is omitted here. Going forward, the team will record lecture attendance using the repository lecture issue template.
 
 \section{TA Document Discussion Attendance}
 
-\wss{For each team member how many of the informal document discussion meetings
-with the TA were attended over the time period of interest. The first row is the
-total number of discussion meetings scheduled by the TA with the team.}
-
-\noindent \textbf{TA's Name: } [fill in this information]
+\noindent \textbf{TA's Name: } Rebecca Di Filippo
 
 \begin{table}[H]
 \centering
@@ -135,117 +91,87 @@ total number of discussion meetings scheduled by the TA with the team.}
 \toprule
 \textbf{Student} & \textbf{Meetings}\\
 \midrule
-Total & Num\\
-Name 1 & Num\\
-Name 2 & Num\\
-Name 3 & Num\\
-Name 4 & Num\\
-Name 5 & Num\\
+Total & 3\\
+Calvin Salsali & 3\\
+Raymond Tao & 3\\
+Jaden Moore & 3\\
+Richard Han & 3\\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\wss{If needed, an explanation for the attendance can be provided here.}
+All four team members attended all three scheduled informal TA document discussions with Rebecca Di Filippo (SRS/Hazard Analysis on Oct~7 tracked in \href{https://github.com/richy1337/Verity/issues/17}{Issue~\#17}, V\&V Plan, and Design Document Rev~$-1$ / CD-Fall).
 
 \section{Commits, Lines Added and Lines Deleted, Pull Requests}
 
-\wss{For each team member how many commits to the main branch have been made
-over the time period of interest.  The total is the total number of commits for
-the entire team since the beginning of the term.  The percentage is the
-percentage of the total commits made by each team member.}
-
-\wss{There are also columns for lines added and lines deleted to give a sense of
-the magnitude of each team member's contributions.  Note that these numbers can
-be somewhat misleading, as a team member who does refactoring may have high
-numbers in both columns, while a team member who implements a large new feature
-may have a high number of lines added, but few lines deleted.  As for all commit
-information, these numbers will be interpreted with care.}
-
-\wss{The pull requests column counts the number of pull requests created by each
-team member.  This is a measure of how many contributions were made in branches,
-which may not be reflected in the commit counts for the main branch.}
-
 \begin{table}[H]
 \centering
-\begin{tabular}{lllllll}
+\begin{tabular}{lrrrrr}
 \toprule
 \textbf{Student} & \textbf{Commits} & \textbf{Percent} & \textbf{Lines Added} &
 \textbf{Lines Deleted} & \textbf{Pull Requests}\\
 \midrule
-Total & Num & 100\% & total added & total deleted & total PRs\\
-Name 1 & Num & \% & num & num & num\\
-Name 2 & Num & \% & num & num & num\\
-Name 3 & Num & \% & num & num & num\\
-Name 4 & Num & \% & num & num & num\\
-Name 5 & Num & \% & num & num & num\\
+Total & 36 & 100.0\% & 20,712 & 4,864 & 17\\
+Raymond Tao & 16 & 44.4\% & 4,344 & 2,463 & 6\\
+Jaden Moore & 14 & 38.9\% & 1,727 & 767 & 5\\
+Richard Han & 4 & 11.1\% & 14,303 & 1,377 & 3\\
+Calvin Salsali & 2 & 5.6\% & 338 & 257 & 3\\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\wss{If needed, an explanation for the counts can be provided here.  For
-instance, if a team member has more commits to unmerged branches, these numbers
-can be provided here.  If multiple people contribute to a commit, git allows for
-multi-author commits.}
+Table counts cover all non-merge student commits on \texttt{main} through commit \texttt{ee9c1d3} (consolidating multiple Git author emails per student and excluding 8 automated \texttt{github-actions[bot]} PDF-sync commits and 21 merge commits). Two GitHub bookkeeping factors explain the line and commit spread:
+\begin{itemize}
+    \item \textbf{Initial Template Import:} Richard Han's line additions include the initial 11,357-line \texttt{capTemplate} repository import; excluding that setup commit, his authored net changes on \texttt{main} are $+2,946 / -1,377$ lines.
+    \item \textbf{Consolidated PRs and Missing Co-Author Trailers:} Calvin Salsali opened three PRs, two merged and one (\href{https://github.com/richy1337/Verity/pull/68}{PR~\#68}, Design Rev~$-1$ and ML Report draft) whose work was reconciled and merged via \href{https://github.com/richy1337/Verity/pull/69}{PR~\#69} and \href{https://github.com/richy1337/Verity/pull/71}{PR~\#71}. Several documents were also co-edited during group sessions without \texttt{Co-authored-by} commit trailers. Team~23 will use explicit \texttt{Co-authored-by} trailers on shared work going forward.
+\end{itemize}
 
 \section{Issue Tracker}
 
-\wss{For each team member how many issues have they authored (including open and
-closed issues (O+C)) and how many have they been assigned (only counting closed
-issues (C only)) over the time period of interest.}
-
 \begin{table}[H]
 \centering
-\begin{tabular}{lll}
+\begin{tabular}{lrr}
 \toprule
 \textbf{Student} & \textbf{Authored (O+C)} & \textbf{Assigned (C only)}\\
 \midrule
-Name 1 & Num & Num \\
-Name 2 & Num & Num \\
-Name 3 & Num & Num \\
-Name 4 & Num & Num \\
-Name 5 & Num & Num \\
+Calvin Salsali & 16 & 7 \\
+Raymond Tao & 21 & 7 \\
+Jaden Moore & 0 & 6 \\
+Richard Han & 2 & 6 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\wss{If needed, an explanation for the counts can be provided here.}
+The repository contains 62 issues total through Issue~\#79: 39 authored by Team~23 members across open and closed states (Raymond Tao: 21, Calvin Salsali: 16, Richard Han: 2, Jaden Moore: 0), plus 23 issues authored by Peer Review Teams~12 (11) and~16 (12). Closed assigned counts reflect completed September/October deliverables, peer-review fixes, and backlog triage ahead of the POC demo, while Jaden Moore's contributions were tracked through 6 closed assigned issues, 5 pull requests, and 14 non-merge commits (38.9\%) rather than opening tracker issues. Open assigned issues track active TA and peer feedback items across the SRS, Hazard Analysis, V\&V Plan, Design Rev~$-1$, and Fall ML Report.
 
 \section{CICD via GitHub Actions}
 
-\wss{Say how CICD technology is used and will be used in your project.}
-
-\wss{Provide links to your CICD yaml files}
+Team 23 runs two active GitHub Actions workflows:
+\begin{itemize}
+    \item \href{https://github.com/richy1337/Verity/blob/main/.github/workflows/latex-pages.yml}{\texttt{.github/\allowbreak{}workflows/\allowbreak{}latex-pages.yml}}: automatically compiles changed \LaTeX{} and Markdown documentation via \texttt{pdflatex} and \texttt{pandoc}, updates \texttt{.pdf-deps.json}, syncs compiled PDFs into \texttt{pdfs/}, and publishes the index to GitHub Pages.
+    \item \href{https://github.com/richy1337/Verity/blob/main/.github/workflows/specification-checks.yml}{\texttt{.github/\allowbreak{}workflows/\allowbreak{}specification-checks.yml}}: runs on every pull request and push to \texttt{main} to execute \texttt{test/\allowbreak{}documentation/\allowbreak{}verify\_\allowbreak{}specification.py -{}-with-hazard} (8 formal SRS/HA guard and metric checks) and \texttt{test/\allowbreak{}documentation/\allowbreak{}verify\_\allowbreak{}design.py} (MG/MIS consistency and lifecycle audit).
+\end{itemize}
+As implementation moves into \texttt{src/} for Revision~0, we will extend CI with \texttt{pytest}, \texttt{ruff}, \texttt{mypy}, \texttt{eslint}, and \texttt{vitest} gates as specified in the V\&V Plan.
 
 \section{Custom Documents (CDs)}
 
-\wss{What is the plan (as documented in TeamComposition.csv) for the team's
-CDs?  Should the CDs be modified now that the team knows more about the
-project?}
+In the course \texttt{TeamComposition.csv} file, Team~23 originally listed \emph{User/Stakeholder/Client interview report} for CD-Fall and \emph{Usability Report} for CD-Winter. After evaluating our core technical risk, the team shifted CD-Fall to the \textbf{Machine Learning Model Report} (\href{https://github.com/richy1337/Verity/blob/main/pdfs/CDs/MLReport/main.pdf}{\texttt{pdfs/CDs/MLReport/main.pdf}}), recorded in \href{https://github.com/richy1337/Verity/blob/main/ExceptionsGranted.md}{\texttt{ExceptionsGranted.md}}. This better serves Verity because detector generalization and false-positive control on real corpora must be established before building out the full browser extension. A corresponding update to \texttt{TeamComposition.csv} in the course repository is pending, while \emph{Usability Report} remains unchanged for CD-Winter.
 
 \section{Team Charter Trigger Items}
 
-\wss{Provide a summary of the quantified triggers identified in the team's
-charter.}
+\noindent \textbf{Trigger Summary:} Under Appendix~C of \href{https://github.com/richy1337/Verity/blob/main/pdfs/DevelopmentPlan/DevelopmentPlan.pdf}{DevelopmentPlan.pdf}, a formal Team Check-In is triggered when: (1) an issue is more than 7~days overdue with no status update, (2) a member misses two scheduled meetings in a 4-week window without prior notice, or (3) a member goes two consecutive weekly cycles with no substantive contribution.
 
-\wss{Provide a list of any violations of the triggers.  If the team wishes, the
-violations can be summarized on aggregate, instead of naming specific team
-members.}
+\medskip\noindent \textbf{Observed Trigger Status:} No member missed scheduled meetings without notice or went inactive for two consecutive weeks. However, on an aggregate process level, the team violated our issue-currency expectation by leaving early September backlog issues (\href{https://github.com/richy1337/Verity/issues/4}{\#4}--\href{https://github.com/richy1337/Verity/issues/11}{\#11}) open well past 7~days after their underlying work landed in the SRS/Design docs, failing to log informal weekly syncs and lecture attendance as GitHub issues, and falling behind on documenting TA V\&V Plan feedback as tracked issues.
 
-\wss{Provide a plan to address the violations.  This could include revising the
-triggers, if they are found to be too weak, strong or ambiguous.}
+\medskip\noindent \textbf{Corrective Plan:} Ahead of the POC demo, we closed stale completed backlog issues with commit/PR references, opened eight single-owner issues (\href{https://github.com/richy1337/Verity/issues/72}{\#72}--\href{https://github.com/richy1337/Verity/issues/79}{\#79}) covering all unaddressed TA V\&V feedback and recent PR defects, and committed to logging weekly meetings, lecture attendance, and \texttt{Co-authored-by} trailers consistently. Current trigger thresholds remain appropriate and do not need loosening.
 
 \section{Additional Productivity Metrics}
 
-\wss{If your team has additional metrics of productivity, please feel free to
-add them to this report.  If not, please explicitly state that there are no additional
-metrics.}
-
-\wss{Additional metrics can include things like code reviews done, pull requests
-created, count of joining meetings late, count of number of times contributions
-had to be corrected, number of internal deadlines missed, test cases written, etc.}
-
-\wss{We are looking for data on these metrics, not just a list of additional
-metrics the team is planning on tracking.  However, if all you have is a plan,
-please share it here.}
+Beyond commits and closed issues, Team~23 tracks three concrete repository quality indicators up to the POC snapshot:
+\begin{itemize}
+    \item \textbf{Pull Request Throughput:} 16 of 17 opened pull requests merged cleanly into \texttt{main}, resolving all Week~04/06 TA feedback issues (\href{https://github.com/richy1337/Verity/issues/17}{\#17}--\href{https://github.com/richy1337/Verity/issues/21}{\#21}) and Team~12/16 peer-review issues (\href{https://github.com/richy1337/Verity/issues/2}{\#2}--\href{https://github.com/richy1337/Verity/issues/3}{\#3}, \href{https://github.com/richy1337/Verity/issues/13}{\#13}--\href{https://github.com/richy1337/Verity/issues/16}{\#16}, \href{https://github.com/richy1337/Verity/issues/29}{\#29}--\href{https://github.com/richy1337/Verity/issues/34}{\#34}).
+    \item \textbf{Automated Specification \& Design Checks:} All 8 checks in \texttt{verify\_\allowbreak{}specification.py -{}-with-hazard} and all 10-module / 52-row / 32-assignment checks in \texttt{verify\_\allowbreak{}design.py} pass on \texttt{main}.
+    \item \textbf{Executed ML Pilot Evaluation Scope:} Reproducible CPU experiments logged 3,212 held-out HC3 text predictions (834 same-source + 2,378 held-domain medicine) and 64 Tiny-GenImage test predictions (clean + JPEG-60) in \texttt{docs/\allowbreak{}CDs/\allowbreak{}MLReport/\allowbreak{}experiment/}.
+\end{itemize}
 
 \end{document}
