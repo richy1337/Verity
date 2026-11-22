@@ -44,7 +44,7 @@
 
 \title{Module Guide for Verity}
 \author{\authname}
-\date{November 18, 2026}
+\date{November 21, 2026}
 
 \maketitle
 
@@ -55,8 +55,9 @@
 \begin{tabularx}{\textwidth}{p{2.3cm}p{3.2cm}X}
 \toprule {\bf Date} & {\bf Developer(s)} & {\bf Change}\\
 \midrule
-2026-11-16 & Richard Han, Calvin Salsali & Prepared Revision $-1$ with the AI assistance disclosed below. The revision establishes the browser, service and offline boundaries, assigns ten module secrets, and traces the design to the SRS and Hazard Analysis.\\
-2026-11-18 & Jaden Moore & Clarified testable contracts and constants, aligned verification references, and completed design navigation.\\
+2026-11-16 & Richard Han, Calvin Salsali & Prepared Revision $-1$ establishing the browser, service and offline boundaries, ten module secrets, and traceability to the SRS and Hazard Analysis.\\
+2026-11-18 & Jaden Moore & Clarified testable contracts and constants, added the module-level implementation schedule, aligned verification references, and completed design navigation.\\
+2026-11-21 & Calvin Salsali, Raymond Tao, Jaden Moore, Richard Han & Added the Abbreviations and Acronyms table, clarified M8's shared image/provenance secret, aligned availability wording with end-to-end probes, and updated the Generative AI disclosure.\\
 \bottomrule
 \end{tabularx}
 
@@ -72,9 +73,40 @@
 
 \pagenumbering{arabic}
 
+\section{Abbreviations and Acronyms}
+
+Table~\ref{TblAcronyms} defines the acronyms and abbreviations used across this Module Guide and the companion \href{\pdfbase/Design/SoftDetailedDes/MIS.pdf}{Module Interface Specification (MIS)}.
+
+\begin{longtable}{@{}lp{0.75\linewidth}@{}}
+\caption{Abbreviations and Acronyms} \label{TblAcronyms}\\
+\toprule
+\textbf{Acronym} & \textbf{Full Expansion}\\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Acronym} & \textbf{Full Expansion}\\
+\midrule
+\endhead
+AC & Anticipated Change\\
+C2PA & Coalition for Content Provenance and Authenticity\\
+EXIF & Exchangeable Image File Format\\
+FR & Functional Requirement\\
+HA & Hazard Analysis\\
+INV & System Invariant\\
+LC / ULC & Likely Change / Unlikely Change\\
+MG & Module Guide\\
+MIS & Module Interface Specification\\
+NFR / NFR.E & Non-Functional Requirement / Environmental NFR\\
+SR & Safety and Security Requirement\\
+SRS & Software Requirements Specification\\
+TA & Teaching Assistant\\
+V\&V & Verification and Validation\\
+\bottomrule
+\end{longtable}
+
 \section{Introduction}
 
-Verity checks text or a static image a user selects on a webpage. It returns the signals it found, how much weight to give them, and a next step the user can take. This guide describes the proposed build for Revision $-1$. The modules below are work assignments. Their contracts are in the \href{\pdfbase/Design/SoftDetailedDes/MIS.pdf}{Module Interface Specification (MIS)}.
+Verity checks text or a static image a user selects on a webpage. It returns the signals it found, how much weight to give them, and a next step the user can take. This guide describes the proposed architecture for Revision $-1$. The modules below are work assignments; their contracts are in the \href{\pdfbase/Design/SoftDetailedDes/MIS.pdf}{Module Interface Specification (MIS)}.
 
 The browser extension handles selection, consent, and display. The team-controlled analysis service validates inputs and runs detectors. For the development and demo setup that service runs on the developer or demo host. Moving it to a team-controlled remote host changes the connection address and deployment, while keeping the same ownership boundary. An optional third-party provider is outside that boundary and stays disabled unless its retention terms are approved and the user consents to a specific transfer. The offline evaluation harness runs as a separate developer process on labelled benchmark data. It is within the project scope and outside the live request path.
 
@@ -82,7 +114,7 @@ The starting point is the course Module Guide template and its decomposition by 
 
 \section{Anticipated and Unlikely Changes} \label{SecChange}
 
-Likely changes identify decisions to hide; the fixed decisions explain the limits of that flexibility.
+Likely changes (LC) identify decisions to hide across anticipated changes (AC); unlikely changes (ULC) explain the limits of that flexibility.
 
 \subsection{Anticipated Changes} \label{SecAchange}
 
@@ -167,7 +199,7 @@ The three groups below are categories for decomposition. Implement the ten leaf 
 
 \textbf{Evidence is a condition of completion.} M9 needs a supported, calibrated decision and at least one grounded observation. M3 still checks the response envelope. A source tag tells the reader where a signal came from. A missing provenance manifest is recorded as missing and carries no claim about who made the image. An inconclusive check and an execution failure show different explanations and neither receives a low-risk badge.
 
-\textbf{Bounded concurrency.} M5 sizes the reference setup to admit at least the SRS concurrent-request target. A capacity refusal is shown as a busy service response before admission. Already admitted work keeps its own deadline and cancellation handling. Availability follows NFT-8 in the V\&V Plan: successful \texttt{GET /healthz} probes divided by all scheduled probes in its declared window. End-to-end valid-check recovery and capacity are separate mandatory outcomes; a healthy endpoint alone does not establish recovery.
+\textbf{Bounded concurrency.} M5 sizes the reference setup to admit at least the SRS concurrent-request target. A capacity refusal is shown as a busy service response before admission. Already admitted work keeps its own deadline and cancellation handling. Availability follows NFT-8 in the V\&V Plan: periodic end-to-end valid checks paired with \texttt{GET /healthz} probes over the evaluation window. Fault recovery and concurrent burst capacity are verified separately; a healthy endpoint alone does not establish availability.
 
 \section{Module Decomposition} \label{SecMD}
 
@@ -235,7 +267,7 @@ These modules hide detector, assessment and offline-evaluation decisions.
 \subsubsection{Image signals and provenance (\modref{8})}
 
 \begin{description}
-\item[Secrets:] Image analysis strategy.
+\item[Secrets:] Image analysis strategy (one-secret exception: visual feature extraction and EXIF/C2PA container parsing read the same decoded/container bytes together to avoid double-decoding untrusted images, while returning separate provenance and visual signal fields).
 \item[Services:] Return visual signals and a separate provenance observation from a supported image (S3, C6). Changes AC2 and AC5.
 \end{description}
 
@@ -391,33 +423,33 @@ Feb 1--12 & Calvin Salsali, Raymond Tao, Jaden Moore, Richard Han & Demonstrate 
 \bottomrule
 \end{longtable}
 
-Jaden Moore owns CI wiring. This follow-up adds a specification-check workflow for the existing eight SRS/HA checks and the MG/MIS consistency audit; the LaTeX workflow already compiles documentation. Product unit tests, static analysis and coverage gates in the V\&V Plan must be added as the modules land. The repository administrator must require successful checks in branch protection; a workflow file alone does not enforce a merge block. The final usability study and complete V\&V report remain later milestones.
+Jaden Moore owns CI wiring. The repository runs a specification-check workflow for the eight SRS/HA checks and the MG/MIS consistency audit alongside the LaTeX documentation build. Product unit tests, static analysis and coverage gates in the V\&V Plan are added as the modules are implemented. Required status checks in branch protection are enforced by repository settings before merge. The final usability study and complete V\&V report remain later milestones.
 
 \clearpage
 
 \section{Generative AI Use Disclosure}
 
-This section records the AI tools used to prepare and review the design and the checks performed on AI-generated content.
+This section records the AI tools used to prepare and verify this Module Guide.
 
 \subsection{AI Tools Used}
 
-\noindent OpenAI Codex (GPT-6), Claude Fable 5.2 and Claude Opus 5.5 were used for drafting and revising this document and for ensuring consistency with the course checklists and the contracts in the team's previous documents.
+\noindent OpenAI Codex (GPT-6.1), Anthropic Claude Sonnet 5.5, Google Gemini Flash 3.8, and Google Gemini 4 Hydrogen were used for drafting, revising, and checking consistency across the module decomposition, traceability tables, and course checklists.
 
 \subsection{How and Where Used}
 
-\noindent Calvin Salsali used OpenAI Codex (GPT-6, November 2026) to draft the module descriptions, uses diagram, trace tables and companion interface contracts from the team's development plan, SRS, Hazard Analysis, V\&V Plan and course checklists.
+\noindent Calvin Salsali used OpenAI Codex (GPT-6.1) to draft initial module descriptions, the Uses diagram, trace tables, and companion interface outlines from the SRS, Hazard Analysis, and V\&V Plan.
 
-\medskip\noindent Richard Han used Claude Fable 5.2 and Claude Opus 5.5 to revise the document, check it against the course checklists, and check its consistency with the team's previous documents.
+\medskip\noindent Richard Han used Anthropic Claude Sonnet 5.5 to check module boundaries against the MG checklist and verify requirement and hazard identifiers against the SRS and Hazard Analysis.
 
-\medskip\noindent Jaden Moore used OpenAI Codex (GPT-6, November 2026) to review the MG and MIS against the milestone rubric and revise the implementation schedule, traceability and interface contracts.
+\medskip\noindent Jaden Moore used OpenAI Codex (GPT-6.1) and Google Gemini Flash 3.8 to review the MG against the rubric, complete the module-level implementation schedule, and refine concurrency and ownership wording.
+
+\medskip\noindent Raymond Tao used Google Gemini 4 Hydrogen to review the M7--M10 signal, policy, and evaluation boundaries against the Fall ML Model Report and update the abbreviations and disclosure sections.
 
 \subsection{Verification of AI-Generated Content}
 
-\noindent The team read through the full document and checked the AI-generated content for correctness and consistency. Module names, secrets, requirement identifiers, hazard identifiers and symbolic constants were compared against the SRS, Hazard Analysis, V\&V Plan and course checklists, and any errors or inconsistencies were corrected by hand.
+\noindent All four team members read the full document and verified module secrets, requirement and hazard rows, anticipated-change mappings, and schedule assignments against the SRS, Hazard Analysis, V\&V Plan, and MG checklist.
 
-\medskip\noindent As an extra check, the AI tools were also asked to review their own generated content against the same sources. Any issues raised in that review were checked by the team before changes were accepted.
-
-\medskip\noindent The follow-up review ran the SRS and Hazard Analysis specification tests, checked MG/MIS traceability and interface consistency, and rebuilt and inspected both PDFs.
+\medskip\noindent Automated consistency was verified via \texttt{verify\_specification.py -{}-with-hazard} under \texttt{test/documentation/} (8 checks passing) and \texttt{verify\_design.py} (confirming all 10 modules, 52 trace rows, 13 anticipated changes, acyclic 12-edge Uses graph, and 10 distinct owner/reviewer schedule rows), and the compiled PDF was inspected for layout and working references.
 
 \newpage{}
 

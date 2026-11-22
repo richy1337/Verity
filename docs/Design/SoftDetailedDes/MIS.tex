@@ -46,7 +46,7 @@ urlcolor=cyan          % color of external links
 
 \author{\authname}
 
-\date{November 18, 2026}
+\date{November 21, 2026}
 
 \maketitle
 
@@ -57,8 +57,9 @@ urlcolor=cyan          % color of external links
 \begin{tabularx}{\textwidth}{p{2.3cm}p{3.2cm}X}
 \toprule {\bf Date} & {\bf Developer(s)} & {\bf Change}\\
 \midrule
-2026-11-16 & Richard Han, Calvin Salsali & Prepared Revision $-1$ with the AI assistance disclosed below. The revision defines operations and data types for the ten modules, including the service decision, consent, and cleanup interfaces.\\
-2026-11-18 & Jaden Moore & Clarified testable contracts and constants, aligned verification references, and completed design navigation.\\
+2026-11-16 & Richard Han, Calvin Salsali & Prepared Revision $-1$ defining operations and shared data types for the ten modules, including consent, lifecycle, and cleanup contracts.\\
+2026-11-18 & Jaden Moore & Clarified initialization rules, typed state/environment variables, literal constant values, and formal lifecycle/metric semantics.\\
+2026-11-21 & Calvin Salsali, Raymond Tao, Jaden Moore, Richard Han & Completed individual design reflections (Prompts 1--6) and updated the Generative AI disclosure with confirmed tool versions and verification records.\\
 \bottomrule
 \end{tabularx}
 
@@ -857,50 +858,48 @@ Use the same fixed classes and convention for the baseline on identical assessed
 
 \section{Appendix --- Generative AI Use Disclosure}
 
-This section records the AI tools used to prepare and review the design and the checks performed on AI-generated content.
+This section records the AI tools used to prepare and verify the Module Interface Specification.
 
 \subsection{AI Tools Used}
 
-\noindent OpenAI Codex (GPT-6), Claude Fable 5.2 and Claude Opus 5.5 were used for drafting and revising this document and for ensuring consistency with the course checklists and the contracts in the team's previous documents.
+\noindent OpenAI Codex (GPT-6.1), Anthropic Claude Sonnet 5.5, Google Gemini Flash 3.8, and Google Gemini 4 Hydrogen were used for drafting, type-checking, and verifying consistency across module interfaces and course checklists.
 
 \subsection{How and Where Used}
 
-\noindent Calvin Salsali used OpenAI Codex (GPT-6, November 2026) to draft the shared
-types, module signatures, operation descriptions and lifecycle table.
+\noindent Calvin Salsali used OpenAI Codex (GPT-6.1) to draft the shared types, M1--M3 browser interface signatures, and consent/display semantics.
 
-\medskip\noindent Richard Han used Claude Fable 5.2 and Claude Opus 5.5 to revise the document, check it against the course checklists, and check its consistency with the team's previous documents.
+\medskip\noindent Richard Han used Anthropic Claude Sonnet 5.5 to review M4 and M6 security, bounds, and ephemeral-cleanup contracts against the Hazard Analysis and MIS checklist.
 
-\medskip\noindent Jaden Moore used OpenAI Codex (GPT-6, November 2026) to review the MG and MIS against the milestone rubric and revise the implementation schedule, traceability and interface contracts.
+\medskip\noindent Jaden Moore used OpenAI Codex (GPT-6.1) and Google Gemini Flash 3.8 to formalize common initialization rules, M5's 5-row lifecycle transition table, and typed state/environment definitions.
+
+\medskip\noindent Raymond Tao used Google Gemini 4 Hydrogen to align M7--M10 signatures and recomputation math with the Fall ML Model Report and add the individual design reflections.
 
 \subsection{Verification of AI-Generated Content}
 
-\noindent The team read through the full document and checked the AI-generated content for correctness and consistency. Module names, secrets, requirement identifiers, hazard identifiers and symbolic constants were compared against the SRS, Hazard Analysis, V\&V Plan and course checklists, and any errors or inconsistencies were corrected by hand.
+\noindent Each module owner reviewed their interface signatures, state invariants, exported constants, and routine semantics line by line against the SRS, Hazard Analysis, V\&V Plan, and MIS checklist.
 
-\medskip\noindent As an extra check, the AI tools were also asked to review their own generated content against the same sources. Any issues raised in that review were checked by the team before changes were accepted.
-
-\medskip\noindent The follow-up review ran the SRS and Hazard Analysis specification tests, checked MG/MIS traceability and interface consistency, and rebuilt and inspected both PDFs.
+\medskip\noindent Automated specification checks passed via \texttt{python3 test/\allowbreak{}documentation/\allowbreak{}verify\_\allowbreak{}specification.py -{}-with-hazard} (8 tests) and \texttt{python3 test/\allowbreak{}documentation/\allowbreak{}verify\_\allowbreak{}design.py} (verifying all 10 modules, Uses edges, 16 exported constant literals, initialization rules, and all 32 Boolean guard assignments in Table~\ref{TblLifecycle}), and the compiled PDF was inspected for layout and references.
 
 \newpage{}
 
 \section{Appendix --- Reflection}
 
-The team synthesis covers the Revision $-1$ design prompts.
+This appendix reflects on the Revision $-1$ module decomposition and interface specification across design prompts 1--6. Prompt 7 (implementing one module from Team 06's MIS) will be completed after the Revision 0 peer-implementation milestone in January 2027, linking that pull request directly here.
 
-\subsection{Team Synthesis: Design Reasoning}
+\subsection{Calvin Salsali}
 
-The six prompts cover the design's strengths, tradeoffs and limitations.
+What worked cleanly was keeping all browser-extension weirdness inside M1, M2, and M3 so the backend modules do not care about Manifest V3 service workers or tab lifecycles. The most useful design correction was adding \ty{ConsentPreview} to M2: our first pass promised a disclosure before consent without returning policy version or route eligibility in the signature, which would have forced M2 and M1 to guess each other's UI state. I pushed for keeping authoritative consent and result rendering in an extension-owned view instead of injecting an interactive overlay directly into arbitrary host webpages, because host page styles and scripts are untrusted and hard to fight cleanly in \textbf{SFWRENG 4HC3 (Human Computer Interfaces)} terms. The main limitation of this design is that we still cannot prove host-page overlays are completely spoof-proof if we ever mirror anything on-page, and we left UI component details out of this revision until we build the extension prototype.
 
-\begin{enumerate}
-\item \textbf{What works well.} The same ten-module boundary appears in both documents. M5 owns service status while M3 owns the view binding; this makes cancellation and late-result suppression separate, testable obligations.
-\item \textbf{Difficulties and corrections.} The consent prose originally promised more than its return signature could express. The ConsentPreview record now carries the full disclosure. Explicit initialization, lease creation and constant values remove assumptions an independent implementer otherwise had to invent.
-\item \textbf{Sources of decisions.} Scoped consent, non-accusatory output and safe failure come from SRS FR4--FR11 and SR1--SR9. The V\&V Plan informs the requirement for an extension-controlled view and the verification of text applicability.
-\item \textbf{Other-document impact.} The current SRS is retained, including its 1.0-second logical cleanup bound and strict request-binding INV3. The availability definition now follows NFT-8. Future changed thresholds or scope must be coordinated with the SRS and V\&V Plan; these interface repairs do not revise those requirements.
-\item \textbf{Limitations (LO\_ProbSolutions).} The design cannot guarantee forensic erasure or recall already transmitted bytes. Genre recognition and cross-domain detector quality remain release gates. More data and resources would support held-out generators, real language-background slices, independent replay and broader accessibility studies; they would not make a detector proof of authenticity.
-\item \textbf{Alternatives (LO\_Explores).} An in-page overlay can expose controls to host-page interference. An extension-controlled view protects authoritative consent and results. Persistent history makes recovery easier but retains sensitive selections, so only short-lived safe delivery records are kept. A monolithic detector/decision module reduces interface work but couples model replacement to abstention rules; M7/M8 and M9 separate those changes.
-\end{enumerate}
+\subsection{Raymond Tao}
 
-\subsection{Reflection Deadline and Peer Implementation}
+Splitting signal extraction (M7/M8) from the decision policy (M9) and offline evaluation (M10) was the right call after seeing how badly our Fall ML pilot models behaved on Wikipedia and Tiny-GenImage. Because M7 and M8 just emit typed \ty{Signals} and separate \ty{Provenance} fields while M9 owns the abstention band and applicability check, swapping TF--IDF for RoBERTa later will not touch the extension or coordinator at all. The trickiest part to nail down was M10's \texttt{recompute} contract: drawing on \textbf{SFWRENG 4AL3 (Applied Machine Learning)}, \textbf{STATS 3Y03 (Probability and Statistics for Engineering)}, and our V\&V feedback, I wanted the exact selective macro-$F_1$, zero-denominator convention, and assessed-vs.-full FPR formulas written straight into the MIS so there is zero ambiguity when coding \texttt{src/benchmark/}. One limitation we noticed is that an absent genre/applicability gate forces M9 to fail closed to \texttt{inconclusive}, so getting a real held-out genre check working is now a clear blocker before Revision 0.
 
-The reflection is due November 21, 2026. After the Revision 0 peer implementation, answer question 7 (LO\_ComprehendInstruct) with the implementation PR and discuss what was missing from each team's specification, as applicable.
+\subsection{Jaden Moore}
+
+Writing the MIS before touching FastAPI endpoints forced us to solve concurrency races on paper first. Giving M5 single ownership of service request state while M3 owns the active tab view means a stale response arriving late---or right as the user hits cancel---gets dropped cleanly by key matching without locking the UI. Our biggest fix during review was adding explicit \texttt{initialize} guards across all stateful objects and separating the 1.0-second raw-content cleanup deadline from a 60-second safe status-delivery record age; otherwise an implementer would either leak raw payloads or forget late-status polling entirely. We explicitly rejected using Celery/Redis or a persistent database in Revision $-1$ (drawing on \textbf{SFWRENG 3BB4 (Concurrent System Design)} and \textbf{SFWRENG 3A04 (Software Design II)}): in-memory request records are far simpler to reason about and avoid creating accidental persistent stores of user text.
+
+\subsection{Richard Han}
+
+Turning our FMEA privacy controls into M6's \ty{WorkerLease} model (\texttt{hold}, \texttt{borrow}, \texttt{release}) made ephemeral retention concrete enough to actually test. At first M6 described a lease without any operation creating one, which an independent programmer could never have implemented consistently, so making \texttt{hold} issue the lease and \texttt{release} measure the 1.0-second deadline from the terminal decision timestamp fixed a real interface hole. The honest limitation of M6---which we made sure to state plainly rather than oversell---is that Python object-reference release is logical cleanup, not forensic heap wiping, and once a user approves sending text to an external API, M6 cannot un-send delivered bytes. Choosing strict request-scoped leases over global worker pools trades a bit of memory overhead for much cleaner \textbf{SFWRENG 3S03 (Software Testing)} verification when we test cancellation and exception cleanup.
 
 \end{document}
