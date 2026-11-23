@@ -267,7 +267,7 @@ These modules hide detector, assessment and offline-evaluation decisions.
 \subsubsection{Image signals and provenance (\modref{8})}
 
 \begin{description}
-\item[Secrets:] Image analysis strategy (one-secret exception: visual feature extraction and EXIF/C2PA container parsing read the same decoded/container bytes together to avoid double-decoding untrusted images, while returning separate provenance and visual signal fields).
+\item[Secrets:] Image analysis strategy (justified exception: visual analysis and EXIF/C2PA parsing share one bounded M4 image payload to avoid double-decoding untrusted bytes while returning separate visual and provenance fields).
 \item[Services:] Return visual signals and a separate provenance observation from a supported image (S3, C6). Changes AC2 and AC5.
 \end{description}
 
@@ -296,7 +296,7 @@ The requirement rows list the implementing module first, followed by modules tha
 \toprule SRS & Modules & Design responsibility \\ \midrule
 \endhead
 FR1 & \modref{2}, \modref{1} & Explicit scoped selection and modality preview \\
-FR2 & \modref{4}, \modref{3} & Pre-admission validation and corrective message \\
+FR2 & \modref{4}, \modref{5}, \modref{3} & Validation rules (M4), pre-admission gating before detectors (M5), and corrective rejection display (M3) \\
 FR3 & \modref{9}, \modref{3}, \modref{7}, \modref{8} & Evidence-backed result with limitations \\
 FR4 & \modref{9}, \modref{3}, \modref{5} & Abstention and visible uncertainty \\
 FR5 & \modref{3}, \modref{9} & Next verification step and non-guarantee \\
