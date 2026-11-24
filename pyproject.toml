@@ -1,0 +1,71 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "verity"
+version = "0.1.0"
+description = "Verity POC analysis service and offline benchmark harness"
+readme = "src/README.md"
+license = "MIT"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
+    "pydantic>=2.7",
+    "pillow>=11.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "httpx>=0.27",
+    "ruff>=0.6",
+    "basedpyright>=1.39",
+]
+
+[project.scripts]
+verity-bench = "benchmark.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["backend*", "benchmark*"]
+
+[tool.setuptools.package-data]
+backend = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["test/unit", "test/integration", "test/poc"]
+pythonpath = ["src", "test", "."]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "test"]
+extend-exclude = ["docs", "test/fixtures", "test/documentation"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["backend", "benchmark", "poc", "conftest", "src"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+
+[tool.basedpyright]
+include = ["src", "test"]
+exclude = [
+    "**/__pycache__",
+    ".venv",
+    "docs",
+    "test/fixtures",
+    "test/documentation",
+]
+extraPaths = ["src", "test"]
+pythonVersion = "3.11"
+typeCheckingMode = "standard"
+reportMissingTypeStubs = false

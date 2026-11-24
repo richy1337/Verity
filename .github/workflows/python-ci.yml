@@ -1,0 +1,41 @@
+name: Python checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  lint-and-test:
+    name: Ruff, basedpyright and pytest
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install uv
+        uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      - name: Verify lockfile and sync environment
+        run: |
+          uv lock --check
+          uv sync --locked
+      - name: Ruff lint
+        run: uv run ruff check src test
+      - name: Ruff format check
+        run: uv run ruff format --check src test
+      - name: Static type check
+        run: uv run basedpyright
+      - name: Unit, integration and PoC tests
+        # Fast checks only: metric formulas, split-hash verification, validation
+        # boundaries, policy and API contract. No model downloads or GPU work.
+        run: uv run pytest
