@@ -16,12 +16,12 @@ dependencies = [
     "pillow>=11.0",
 ]
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
     "pytest>=8",
     "httpx>=0.27",
     "ruff>=0.6",
-    "black>=24",
+    "basedpyright>=1.39",
 ]
 
 [project.scripts]
@@ -31,15 +31,13 @@ verity-bench = "benchmark.cli:main"
 where = ["src"]
 include = ["backend*", "benchmark*"]
 
-[tool.pytest.ini_options]
-testpaths = ["test/unit", "test/integration"]
-pythonpath = ["src", "test"]
-addopts = "-q"
+[tool.setuptools.package-data]
+backend = ["py.typed"]
 
-[tool.black]
-line-length = 100
-target-version = ["py311"]
-extend-exclude = "docs/|test/fixtures/|test/documentation/"
+[tool.pytest.ini_options]
+testpaths = ["test/unit", "test/integration", "test/poc"]
+pythonpath = ["src", "test", "."]
+addopts = "-q"
 
 [tool.ruff]
 line-length = 100
@@ -51,4 +49,23 @@ extend-exclude = ["docs", "test/fixtures", "test/documentation"]
 select = ["E", "F", "W", "I", "B", "UP"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["backend", "benchmark", "conftest"]
+known-first-party = ["backend", "benchmark", "poc", "conftest", "src"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+
+[tool.basedpyright]
+include = ["src", "test"]
+exclude = [
+    "**/__pycache__",
+    ".venv",
+    "docs",
+    "test/fixtures",
+    "test/documentation",
+]
+extraPaths = ["src", "test"]
+pythonVersion = "3.11"
+typeCheckingMode = "standard"
+reportMissingTypeStubs = false
