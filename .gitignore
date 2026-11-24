@@ -283,3 +283,9 @@ TSWLatexianTemp*
 ## Python bytecode from the build scripts
 __pycache__/
 *.pyc
+
+## Python tooling
+.venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/

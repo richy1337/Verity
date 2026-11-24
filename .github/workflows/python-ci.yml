@@ -1,0 +1,32 @@
+name: Python checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint-and-test:
+    name: Ruff, Black and pytest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - name: Install package and dev tools
+        run: python -m pip install -e ".[dev]"
+      - name: Ruff lint
+        run: ruff check src test
+      - name: Black format check
+        run: black --check src test
+      - name: Unit and integration tests
+        # Fast checks only: metric formulas, split-hash verification, validation
+        # boundaries, policy and API contract. No model downloads or GPU work.
+        run: pytest
