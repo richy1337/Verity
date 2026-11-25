@@ -18,6 +18,7 @@ from conftest import make_image
         ("a" * MAX_TEXT_LENGTH, None),
         ("a" * (MAX_TEXT_LENGTH + 1), "text_too_long"),
         ("\U0001f600" * MIN_TEXT_LENGTH, None),  # counts code points, not bytes
+        ("a" * (MIN_TEXT_LENGTH - 1) + "\ud800", "invalid_utf8"),  # lone surrogate
     ],
 )
 def test_text_bounds(text, code):

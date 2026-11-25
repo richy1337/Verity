@@ -44,7 +44,7 @@ class ImageInfo:
 
 
 def validate_text(text: str) -> Rejection | None:
-    """Return a Rejection if the text is empty, too short or too long; otherwise None.
+    """Reject empty text, out-of-bounds text, or text that cannot be encoded as UTF-8.
 
     Why: very short text gives unreliable signals (H2) and very long text costs too much (H7).
     """
@@ -57,6 +57,10 @@ def validate_text(text: str) -> Rejection | None:
         return Rejection("text_too_short", f"Select at least {MIN_TEXT_LENGTH} characters.")
     if n > MAX_TEXT_LENGTH:
         return Rejection("text_too_long", f"Select at most {MAX_TEXT_LENGTH:,} characters.")
+    try:
+        text.encode("utf-8")
+    except UnicodeEncodeError:
+        return Rejection("invalid_utf8", "Select text that can be encoded as UTF-8.")
     return None
 
 
