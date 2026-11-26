@@ -1,0 +1,40 @@
+[
+  {
+    "title": "Text assessment",
+    "response": {
+      "status": "completed",
+      "summary_label": "The example detector flagged a writing-pattern signal.",
+      "false_positive_warning": "Authentic writing can also trigger this signal.",
+      "uncertainty": "This pattern provides limited evidence about authorship.",
+      "signals": [
+        {
+          "source": "observed_signal",
+          "locator": "Repair café passage, sentences 1–5",
+          "summary": "The five sentences range from 11 to 17 words."
+        }
+      ],
+      "limitations": ["This example considers one writing feature."],
+      "verification_steps": ["Check the draft history or contact the original author."]
+    }
+  },
+  {
+    "title": "Image with missing provenance",
+    "response": {
+      "status": "inconclusive",
+      "uncertainty": "Provenance is unknown from the submitted copy.",
+      "signals": [
+        {
+          "source": "observed_signal",
+          "locator": "Blue Marble JPEG metadata",
+          "summary": "Embedded provenance metadata is absent or stripped."
+        }
+      ],
+      "limitations": ["A provenance check covers the file's metadata. Visual analysis is a separate check."],
+      "verification_steps": ["Compare the image with NASA's Apollo 17 archive record."]
+    }
+  },
+  {
+    "title": "Analysis unavailable",
+    "response": {"status": "failed"}
+  }
+]
