@@ -36,7 +36,7 @@ jobs:
           # must never let the later rsync --delete wipe committed PDFs.
           mkdir -p build-pdf
           if [ -d pdfs ]; then
-            rsync -av --ignore-existing pdfs/ build-pdf/
+            rsync -av pdfs/ build-pdf/
           fi
       - name: Get changed LaTeX files
         id: latex-files

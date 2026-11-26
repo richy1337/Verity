@@ -44,7 +44,7 @@
 
 \title{Module Guide for Verity}
 \author{\authname}
-\date{November 21, 2026}
+\date{November 22, 2026}
 
 \maketitle
 
@@ -58,6 +58,7 @@
 2026-11-16 & Richard Han, Calvin Salsali & Prepared Revision $-1$ establishing the browser, service and offline boundaries, ten module secrets, and traceability to the SRS and Hazard Analysis.\\
 2026-11-18 & Jaden Moore & Clarified testable contracts and constants, added the module-level implementation schedule, aligned verification references, and completed design navigation.\\
 2026-11-21 & Calvin Salsali, Raymond Tao, Jaden Moore, Richard Han & Added the Abbreviations and Acronyms table, clarified M8's shared image/provenance secret, aligned availability wording with end-to-end probes, and updated the Generative AI disclosure.\\
+2026-11-22 & Calvin Salsali, Raymond Tao, Jaden Moore, Richard Han & Addressed Team 16 peer review: added M5 to the FR2 trace, tightened the M8 shared-secret justification, and labelled modules M1--M10 in the hierarchy table.\\
 \bottomrule
 \end{tabularx}
 
@@ -165,25 +166,25 @@ The three groups below are categories for decomposition. Implement the ten leaf 
 
 \begin{table}[h!]
 \centering
-\begin{tabular}{p{0.3\textwidth} p{0.6\textwidth}}
+\begin{tabular}{p{0.34\textwidth} p{0.56\textwidth}}
 \toprule
 \textbf{Level 1} & \textbf{Level 2}\\
 \midrule
 
-{Hardware-Hiding Module} & Browser and host bridge \\
+Hardware-Hiding & M1: Browser and host bridge \\
 \midrule
 
-\multirow{5}{0.3\textwidth}{Behaviour-Hiding Module} & Selection and consent\\
-& Result card\\
-& Input validation\\
-& Request coordinator\\
-& Temporary content\\
+Behaviour-Hiding & M2: Selection and consent\\
+& M3: Result card\\
+& M4: Input validation\\
+& M5: Request coordinator\\
+& M6: Temporary content\\
 \midrule
 
-\multirow{4}{0.3\textwidth}{Software-Decision-Hiding Module} & Text signals\\
-& Image signals and provenance\\
-& Assessment policy\\
-& Offline evaluation\\
+Software-Decision-Hiding & M7: Text signals\\
+& M8: Image signals and provenance\\
+& M9: Assessment policy\\
+& M10: Offline evaluation\\
 \bottomrule
 
 \end{tabular}
@@ -267,7 +268,7 @@ These modules hide detector, assessment and offline-evaluation decisions.
 \subsubsection{Image signals and provenance (\modref{8})}
 
 \begin{description}
-\item[Secrets:] Image analysis strategy (one-secret exception: visual feature extraction and EXIF/C2PA container parsing read the same decoded/container bytes together to avoid double-decoding untrusted images, while returning separate provenance and visual signal fields).
+\item[Secrets:] Image analysis strategy (justified exception: visual analysis and EXIF/C2PA parsing share one bounded M4 image payload to avoid double-decoding untrusted bytes while returning separate visual and provenance fields).
 \item[Services:] Return visual signals and a separate provenance observation from a supported image (S3, C6). Changes AC2 and AC5.
 \end{description}
 
@@ -296,7 +297,7 @@ The requirement rows list the implementing module first, followed by modules tha
 \toprule SRS & Modules & Design responsibility \\ \midrule
 \endhead
 FR1 & \modref{2}, \modref{1} & Explicit scoped selection and modality preview \\
-FR2 & \modref{4}, \modref{3} & Pre-admission validation and corrective message \\
+FR2 & \modref{4}, \modref{5}, \modref{3} & Validation rules (M4), pre-admission gating before detectors (M5), and corrective rejection display (M3) \\
 FR3 & \modref{9}, \modref{3}, \modref{7}, \modref{8} & Evidence-backed result with limitations \\
 FR4 & \modref{9}, \modref{3}, \modref{5} & Abstention and visible uncertainty \\
 FR5 & \modref{3}, \modref{9} & Next verification step and non-guarantee \\

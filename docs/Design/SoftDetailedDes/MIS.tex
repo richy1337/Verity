@@ -46,7 +46,7 @@ urlcolor=cyan          % color of external links
 
 \author{\authname}
 
-\date{November 21, 2026}
+\date{November 22, 2026}
 
 \maketitle
 
@@ -60,6 +60,7 @@ urlcolor=cyan          % color of external links
 2026-11-16 & Richard Han, Calvin Salsali & Prepared Revision $-1$ defining operations and shared data types for the ten modules, including consent, lifecycle, and cleanup contracts.\\
 2026-11-18 & Jaden Moore & Clarified initialization rules, typed state/environment variables, literal constant values, and formal lifecycle/metric semantics.\\
 2026-11-21 & Calvin Salsali, Raymond Tao, Jaden Moore, Richard Han & Completed individual design reflections (Prompts 1--6) and updated the Generative AI disclosure with confirmed tool versions and verification records.\\
+2026-11-22 & Calvin Salsali, Raymond Tao, Jaden Moore, Richard Han & Addressed Team 16 peer review: M5 deadline timer, M6/M5 cleanup-violation follow-up, M10 baseline data in the saved run, and module-hierarchy labels.\\
 \bottomrule
 \end{tabularx}
 
@@ -95,7 +96,7 @@ A returned reason is safe to show or log and contains no raw selection. All oper
 \endhead
 \ty{BrowserDocument}, \ty{RenderSurface} & Browser-owned document and extension-owned display surface. \\
 \ty{InputEvent}, \ty{Channel} & User input event and authenticated transport channel. \\
-\ty{Clock}, \ty{FileSet}, \ty{Directory}, \ty{Storage} & Monotonic time source, versioned files, output directory and persistent storage. \\
+\ty{Clock}, \ty{Timer}, \ty{FileSet}, \ty{Directory}, \ty{Storage} & Monotonic time source, host one-shot timer scheduler, versioned files, output directory and persistent storage. \\
 \ty{Session}, \ty{RequestId} & Opaque authenticated session context and a fresh UUIDv4 request identifier (Universally Unique Identifier, version 4). A request identifier alone grants no access. \\
 \key & Pair of initiating session identity and request identifier. Services check the session against trusted transport context. \\
 \ty{Boolean} & True or false. $\mathbb{N}_0$ denotes nonnegative integers. \\
@@ -104,10 +105,10 @@ A returned reason is safe to show or log and contains no raw selection. All oper
 \ty{Modality} & Text or image. \\
 \ty{Approve}, \ty{Decline} & Alternatives of an explicit user decision. \\
 \ty{WorkEvent} & Tagged worker result, timeout, dependency error or accepted cancellation, with check key and a trusted work capability. Client-supplied events never receive that capability. \\
-\ty{RequestRecord} & Status, authenticated owner, admission instant, deadline, approved route and opaque work handle; latest safe \ty{Update}; and optional terminal instant and delivery-expiry instant. \\
+\ty{RequestRecord} & Status, authenticated owner, admission instant, deadline, armed deadline-timer handle, approved route and opaque work handle; latest safe \ty{Update}; and optional terminal instant and delivery-expiry instant. \\
 \ty{WorkerLease} & Opaque authorization for one worker and check. \\
 \ty{LocalInstant} & Timestamp on the cleanup owner's monotonic clock. \\
-\ty{CleanupReceipt} & Key, local completion time and cleanup outcome. \\
+\ty{CleanupReceipt} & Key, local completion time and cleanup outcome: within the retention bound, or flagged as a late cleanup violation. \\
 \ty{MetricReport} & Per-class and per-slice counts and metrics, with eligibility and coverage denominators. \\
 \ty{Gesture}, \ty{View} & Explicit browser invocation for one selection, and a trusted extension view scoped to its tab and session. \\
 \ty{RawItem} & One text or static image selection with modality, declared media attributes and optional user-entered context. Modality is text or image. \\
@@ -124,10 +125,10 @@ A returned reason is safe to show or log and contains no raw selection. All oper
 \ty{Assessment} & Optional direction (higher or lower synthetic/manipulation signal), evidence, visible uncertainty, limits and a next check. \\
 \ty{Update} & Check key, status, and optional assessment or reason. The status determines the variant: pending has no assessment; completed requires an assessment with direction and supported evidence; inconclusive requires limits and guidance; failed/cancelled require a reason and have no direction. Inconclusive updates can have supported observations and have no direction. \\
 \ty{Decision} & Completed with an assessment, or inconclusive with limitations and guidance. Includes no job or session state. \\
-\ty{Config} & Module-specific immutable configuration. Host settings include trusted endpoint and supported origins; coordinator settings include capacity and worker configuration; buffer settings include cleanup policy; offline settings include output directory, seed and model profiles. Detector/decision settings contain versioned task and modality; frozen model, applicability-gate and calibration profile identifiers; score direction; abstention margin; supported domain; and required signal set. Runtime and offline settings are separate instances. An absent genre profile cannot assert supported applicability. \\
+\ty{Config} & Module-specific immutable configuration. Host settings include trusted endpoint and supported origins; coordinator settings include capacity and worker configuration; buffer settings include cleanup policy; offline settings include output directory, seed, model profiles, and the comparison baseline's identifier, version and frozen configuration, all declared before evaluation. Detector/decision settings contain versioned task and modality; frozen model, applicability-gate and calibration profile identifiers; score direction; abstention margin; supported domain; and required signal set. Runtime and offline settings are separate instances. An absent genre profile cannot assert supported applicability. \\
 \ty{LeaseRecord} & Authorized worker capability, transient item references and open/closed marker for one check. \\
 \ty{ViewRecord} & Active key, local status, cancellation marker and safe display model. \\
-\ty{Manifest}, \ty{Run} & Labelled corpus revision, item identity and split metadata. Run adds frozen settings, outcomes, audit and metric report. \\
+\ty{Manifest}, \ty{Run} & Labelled corpus revision, item identity and split metadata. Run adds frozen settings, the baseline version and configuration, one candidate outcome and one baseline prediction per eligible item ID, the audit and the metric report. \\
 \bottomrule
 \end{longtable}
 
@@ -178,25 +179,25 @@ The hierarchy assigns one specification to each leaf module in the MG.
 
 \begin{table}[ht]
 \centering
-\begin{tabular}{p{0.3\textwidth} p{0.6\textwidth}}
+\begin{tabular}{p{0.34\textwidth} p{0.56\textwidth}}
 \toprule
 \textbf{Level 1} & \textbf{Level 2}\\
 \midrule
 
-{Hardware-Hiding} & Browser and host bridge \\
+Hardware-Hiding & M1: Browser and host bridge \\
 \midrule
 
-\multirow{5}{0.3\textwidth}{Behaviour-Hiding} & Selection and consent\\
-& Result card\\
-& Input validation\\
-& Request coordinator\\
-& Temporary content\\
+Behaviour-Hiding & M2: Selection and consent\\
+& M3: Result card\\
+& M4: Input validation\\
+& M5: Request coordinator\\
+& M6: Temporary content\\
 \midrule
 
-\multirow{4}{0.3\textwidth}{Software-Decision-Hiding} & Text signals\\
-& Image signals and provenance\\
-& Assessment policy\\
-& Offline evaluation\\
+Software-Decision-Hiding & M7: Text signals\\
+& M8: Image signals and provenance\\
+& M9: Assessment policy\\
+& M10: Offline evaluation\\
 \bottomrule
 
 \end{tabular}
@@ -502,18 +503,19 @@ The state and environment below are private; callers rely on the operation effec
 
 \subsubsection{State Variables}
 
-Let $R:\key\rightharpoonup\ty{RequestRecord}$ be a partial map. Each record contains the RequestRecord fields from Table~\ref{TblTypes}, including its latest safe update and optional terminal/expiry times. The update is pending at admission and is replaced atomically with each status decision. Only the terminal/expiry times are absent until the first terminal decision; the expiry instant is then fixed to terminal time plus the delivery-record age. Initially $R=\varnothing$. For every $k\in\operatorname{dom}(R)$, the record owner equals the session component of $k$. Let $P$ count pending records and $K$ be the configured admission capacity; $0\le P\le K$ and $K\ge\Const{MAX\_\allowbreak{}CONCURRENT\_\allowbreak{}REQS}$. A terminal record never changes status.
+Let $R:\key\rightharpoonup\ty{RequestRecord}$ be a partial map. Each record contains the RequestRecord fields from Table~\ref{TblTypes}, including its latest safe update and optional terminal/expiry times. The update is pending at admission and is replaced atomically with each status decision. Only the terminal/expiry times are absent until the first terminal decision; the expiry instant is then fixed to terminal time plus the delivery-record age. Initially $R=\varnothing$. For every $k\in\operatorname{dom}(R)$, the record owner equals the session component of $k$. Let $P$ count pending records and $K$ be the configured admission capacity; $0\le P\le K$ and $K\ge\Const{MAX\_\allowbreak{}CONCURRENT\_\allowbreak{}REQS}$. A terminal record never changes status. Each pending record holds one armed deadline timer; the first terminal decision disarms it and frees the pending slot ($P'=P-1$) unless the unresolved cleanup rule in \texttt{advance} withholds the worker slot.
 
 \subsubsection{Environment Variables}
 
 \begin{itemize}
 \item $\mathit{clock}:\ty{Clock}$: the service host's monotonic clock. Read by \texttt{admit} to set the deadline and by \texttt{advance} to decide whether the deadline is reached. Never modified.
+\item $\mathit{timer}:\ty{Timer}$: the service host's one-shot timer scheduler. \texttt{admit} arms one timer per request for its deadline and the first terminal decision disarms it. When the deadline passes, the timer delivers a trusted timeout \ty{WorkEvent} to \texttt{advance}, even if the detector stalls or the client never calls \texttt{status}.
 \end{itemize}
 
 \subsubsection{Access Routine Semantics}
 
 \noindent \texttt{admit}():
-Check the owner, key freshness, current consent and capacity, then validate through M4. Discard rejected work before entry into the state map. Consume each provider consent once and bind it to the validated item and provider policy. For success, register transient ownership in M6, enter pending, set the deadline to admission time plus \Const{MAX\_\allowbreak{}RESPONSE\_\allowbreak{}TIME}, and dispatch to the correct detector. Deploy enough capacity for the SRS concurrency target. Refuse excess pre-admission work with a busy reason. Never substitute a provider for the approved route.
+Check the owner, key freshness, current consent and capacity, then validate through M4. Discard rejected work before entry into the state map. Consume each provider consent once and bind it to the validated item and provider policy. For success, register transient ownership in M6, enter pending, set the deadline to admission time plus \Const{MAX\_\allowbreak{}RESPONSE\_\allowbreak{}TIME}, arm the one-shot deadline timer for that instant bound to the key and its work capability, and dispatch to the correct detector. Deploy enough capacity for the SRS concurrency target. Refuse excess pre-admission work with a busy reason. Never substitute a provider for the approved route.
 
 \medskip\noindent \texttt{advance}():
 Only the check's trusted worker, cancellation handler or timer can deliver a work event. While pending, let $c$ mean accepted cancellation, $d$ mean deadline reached, $e$ mean unrecoverable dependency error, and $a$ mean required work has finished or been declared unavailable. Let $v$ be a total Boolean that is false until $a$ and true exactly when M9 supplies a supported completed assessment. An available result from M9 is either completed or inconclusive. Evaluate the following in order as one atomic decision.
@@ -532,7 +534,7 @@ $\neg c \land \neg d \land \neg e \land a \land v$ & completed \\
 \end{tabularx}
 \end{table}
 
-The five rows are disjoint and total over all 32 assignments of $(c,d,e,a,v)$; UT-C4 in the V\&V Plan specifies exhaustive verification of them. Partial unavailable work without an unrecoverable error sets $a$ when resolved and $v=\mathrm{false}$, producing inconclusive. Once terminal, the status is fixed. On the first terminal decision, stop request-owned work and invoke M6 cleanup. Retain only the safe response needed for delivery. Unrecognized work events and late updates cannot mutate the state. A foreign key exposes no state.
+The five rows are disjoint and total over all 32 assignments of $(c,d,e,a,v)$; UT-C4 in the V\&V Plan specifies exhaustive verification of them. Partial unavailable work without an unrecoverable error sets $a$ when resolved and $v=\mathrm{false}$, producing inconclusive. Once terminal, the status is fixed. On the first terminal decision, disarm the deadline timer, stop request-owned work and call M6 \texttt{release} with the terminal instant. Retain only the safe response needed for delivery. If \texttt{release} reports a cleanup violation, M5 records a safe alert (key, elapsed time and the violation code only) and leaves the terminal status unchanged. While M6 reports a worker still unresolved, M5 withholds that capacity slot, refuses excess admissions with a busy reason, reports degraded health, and retries \texttt{release} until it returns a receipt confirming worker exit. Unrecognized work events and late updates cannot mutate the state. A foreign key exposes no state.
 
 \medskip\noindent \texttt{cancel}():
 Check the authenticated owner. For pending work, submit an accepted cancellation event to the same decision as \texttt{advance}. A terminal request remains terminal. Duplicate cancellation is safe.
@@ -583,7 +585,7 @@ The state and environment below are private; callers rely on the operation effec
 
 \subsubsection{State Variables}
 
-$B:\key\rightharpoonup\ty{LeaseRecord}$, initially empty. A live lease reads only its own key. Closed records contain no item references; late workers cannot recreate a closed key. Closed-key rejection persists through the safe delivery-record lifetime without retaining content.
+$B:\key\rightharpoonup\ty{LeaseRecord}$, initially empty. A live lease reads only its own key. Closed records contain no item references; late workers cannot recreate a closed key. Closed-key rejection persists through the safe delivery-record lifetime without retaining content. $U\subseteq\operatorname{dom}(B)$, initially empty, holds keys whose request-owned work has not exited; their records stay closed with no item references.
 
 \subsubsection{Environment Variables}
 
@@ -601,7 +603,7 @@ Register one validated item for a fresh key and return its unforgeable worker le
 Require a live lease authorized only for the same key. Expose data only for the lease duration and track references owned by that work. A missing, foreign or revoked lease returns the same reason.
 
 \medskip\noindent \texttt{release}():
-Revoke leases, stop request-owned work and drop application-owned service references, including queued copies, by \Const{MAX\_\allowbreak{}RETENTION\_\allowbreak{}TIME} after the local terminal decision. The argument $t$ is the recorded local terminal-decision instant; measure the bound from $t$, never from the later cleanup-call time. Set $B'(k)$ to a closed record with no item references. Return a receipt only after cleanup. Repeating release leaves the key closed. The receipt covers application-owned references and worker exit. Report a cleanup violation if the bound is missed. The operation cannot recall content that has already reached an approved external recipient.
+Revoke leases, stop request-owned work and drop application-owned service references, including queued copies, by \Const{MAX\_\allowbreak{}RETENTION\_\allowbreak{}TIME} after the local terminal decision. The argument $t$ is the recorded local terminal-decision instant; measure the bound from $t$, never from the later cleanup-call time. Set $B'(k)$ to a closed record with no item references. Return a receipt only after cleanup. Repeating release leaves the key closed. The receipt covers application-owned references and worker exit. If work exits within the bound, return a receipt. If it exits late, return a receipt flagged as a cleanup violation. If it has not exited by the bound, add the key to $U$ and return the cleanup-violation reason. A repeated \texttt{release} retries forced termination and removes the key from $U$ once the worker exits. The operation cannot recall content that has already reached an approved external recipient.
 
 %% ------------------------------------------------------------------ M7
 \clearpage
@@ -831,10 +833,10 @@ $r:\operatorname{Optional}(\ty{Run})$, initially absent; $p_{10}:\ty{Config}$, f
 \subsubsection{Access Routine Semantics}
 
 \noindent \texttt{evaluate}():
-Validate the licensed corpus revision, labels and input eligibility. Assign related sources and duplicate groups to one split. Freeze exact/near-duplicate checks, seed, split identities, subgroup tags, model versions and validation thresholds before held-out evaluation. Apply live modality/assessment contracts and record exactly one outcome per eligible item, including abstentions and errors. Set $r'$ to this run, write its artifact in the configured output directory, and return $out:=r'$. Never access live selections.
+Validate the licensed corpus revision, labels and input eligibility. Assign related sources and duplicate groups to one split. Freeze exact/near-duplicate checks, seed, split identities, subgroup tags, model versions and validation thresholds before held-out evaluation. Apply live modality/assessment contracts and run the frozen comparison baseline on the same eligible items. Record exactly one candidate outcome and one baseline prediction per eligible item, including abstentions and errors. Set $r'$ to this run, write its artifact in the configured output directory, and return $out:=r'$. Never access live selections.
 
 \medskip\noindent \texttt{recompute}():
-For binary ground-truth label $y_i$ and directional prediction $\hat o_i$, let $I$ be all eligible held-out IDs, $A$ the IDs with completed directional assessments, $N_0=|\{i\in I:y_i=0\}|$, $A_0=|\{i\in A:y_i=0\}|$, and $\mathrm{FP}=|\{i\in A:y_i=0\land\hat o_i=1\}|$. Compute assessed-only macro-average $F_1$ and the baseline delta on the same assessed IDs. Compute coverage over all eligible items and false-positive rates with explicit denominators, following SRS NFR1: $\mathrm{Coverage}=|A|/|I|$, $\mathrm{FPR}_{\mathrm{assessed}}=\mathrm{FP}/A_0$ and $\mathrm{FPR}_{\mathrm{full}}=\mathrm{FP}/N_0$. Pass only if assessed macro-average $F_1\ge\Const{MIN\_\allowbreak{}F1\_\allowbreak{}SCORE}$, baseline improvement $\ge\Const{MIN\_\allowbreak{}BASELINE\_\allowbreak{}DELTA}$ on the same $A$, coverage $\ge\Const{MIN\_\allowbreak{}COVERAGE}$ and both FPRs $\le\Const{MAX\_\allowbreak{}FPR}$. An empty required two-class test population or undefined assessed-negative FPR cannot pass. Authentic-only fairness slices report FPR and coverage and mark two-class $F_1$ not applicable. Separately report full-population diagnostics, abstention/error counts, slice and per-class coverage, and the observed environment. Recompute only from input $r$, without changing its outcomes, and write and return $out:=\ty{MetricReport}$. Signal an invalid manifest or missing outcomes instead of reporting an acceptance pass.
+For binary ground-truth label $y_i$ and directional prediction $\hat o_i$, let $I$ be all eligible held-out IDs, $A$ the IDs with completed directional assessments, $N_0=|\{i\in I:y_i=0\}|$, $A_0=|\{i\in A:y_i=0\}|$, and $\mathrm{FP}=|\{i\in A:y_i=0\land\hat o_i=1\}|$. Require the baseline version and configuration and one baseline prediction for every assessed ID; a missing, duplicate or mismatched baseline entry returns missing outcomes and never an acceptance pass. A baseline outcome that is inconclusive or failed counts as a false negative for its true class, as in SRS S.9.2. Compute assessed-only macro-average $F_1$ and the baseline delta on the same assessed IDs. Compute coverage over all eligible items and false-positive rates with explicit denominators, following SRS NFR1: $\mathrm{Coverage}=|A|/|I|$, $\mathrm{FPR}_{\mathrm{assessed}}=\mathrm{FP}/A_0$ and $\mathrm{FPR}_{\mathrm{full}}=\mathrm{FP}/N_0$. Pass only if assessed macro-average $F_1\ge\Const{MIN\_\allowbreak{}F1\_\allowbreak{}SCORE}$, baseline improvement $\ge\Const{MIN\_\allowbreak{}BASELINE\_\allowbreak{}DELTA}$ on the same $A$, coverage $\ge\Const{MIN\_\allowbreak{}COVERAGE}$ and both FPRs $\le\Const{MAX\_\allowbreak{}FPR}$. An empty required two-class test population or undefined assessed-negative FPR cannot pass. Authentic-only fairness slices report FPR and coverage and mark two-class $F_1$ not applicable. Separately report full-population diagnostics, abstention/error counts, slice and per-class coverage, and the observed environment. Recompute only from input $r$, without changing its outcomes, and write and return $out:=\ty{MetricReport}$. Signal an invalid manifest or missing outcomes instead of reporting an acceptance pass.
 
 For each fixed class $c\in\{0,1\}$, count $\mathrm{TP}_c$, $\mathrm{FP}_c$ and $\mathrm{FN}_c$ over $A$. Define
 \[
