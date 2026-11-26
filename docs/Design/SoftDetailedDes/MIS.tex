@@ -46,7 +46,7 @@ urlcolor=cyan          % color of external links
 
 \author{\authname}
 
-\date{November 22, 2026}
+\date{November 24, 2026}
 
 \maketitle
 
@@ -61,6 +61,7 @@ urlcolor=cyan          % color of external links
 2026-11-18 & Jaden Moore & Clarified initialization rules, typed state/environment variables, literal constant values, and formal lifecycle/metric semantics.\\
 2026-11-21 & Calvin Salsali, Raymond Tao, Jaden Moore, Richard Han & Completed individual design reflections (Prompts 1--6) and updated the Generative AI disclosure with confirmed tool versions and verification records.\\
 2026-11-22 & Calvin Salsali, Raymond Tao, Jaden Moore, Richard Han & Addressed Team 16 peer review: M5 deadline timer, M6/M5 cleanup-violation follow-up, M10 baseline data in the saved run, and module-hierarchy labels.\\
+2026-11-24 & Richard Han & Made M5 capacity count withheld cleanup slots ($P+|W|\le K$), added the M5 operational log and cleanup-retry timer, removed the undefined health report, and stated the three M6 \texttt{release} outcomes.\\
 \bottomrule
 \end{tabularx}
 
@@ -104,7 +105,7 @@ A returned reason is safe to show or log and contains no raw selection. All oper
 \ty{Unit} & Successful operation with no data returned. \\
 \ty{Modality} & Text or image. \\
 \ty{Approve}, \ty{Decline} & Alternatives of an explicit user decision. \\
-\ty{WorkEvent} & Tagged worker result, timeout, dependency error or accepted cancellation, with check key and a trusted work capability. Client-supplied events never receive that capability. \\
+\ty{WorkEvent} & Tagged worker result, timeout, dependency error, accepted cancellation or cleanup retry, with check key and a trusted work capability. Client-supplied events never receive that capability. \\
 \ty{RequestRecord} & Status, authenticated owner, admission instant, deadline, armed deadline-timer handle, approved route and opaque work handle; latest safe \ty{Update}; and optional terminal instant and delivery-expiry instant. \\
 \ty{WorkerLease} & Opaque authorization for one worker and check. \\
 \ty{LocalInstant} & Timestamp on the cleanup owner's monotonic clock. \\
@@ -503,19 +504,20 @@ The state and environment below are private; callers rely on the operation effec
 
 \subsubsection{State Variables}
 
-Let $R:\key\rightharpoonup\ty{RequestRecord}$ be a partial map. Each record contains the RequestRecord fields from Table~\ref{TblTypes}, including its latest safe update and optional terminal/expiry times. The update is pending at admission and is replaced atomically with each status decision. Only the terminal/expiry times are absent until the first terminal decision; the expiry instant is then fixed to terminal time plus the delivery-record age. Initially $R=\varnothing$. For every $k\in\operatorname{dom}(R)$, the record owner equals the session component of $k$. Let $P$ count pending records and $K$ be the configured admission capacity; $0\le P\le K$ and $K\ge\Const{MAX\_\allowbreak{}CONCURRENT\_\allowbreak{}REQS}$. A terminal record never changes status. Each pending record holds one armed deadline timer; the first terminal decision disarms it and frees the pending slot ($P'=P-1$) unless the unresolved cleanup rule in \texttt{advance} withholds the worker slot.
+Let $R:\key\rightharpoonup\ty{RequestRecord}$ be a partial map. Each record contains the RequestRecord fields from Table~\ref{TblTypes}, including its latest safe update and optional terminal/expiry times. The update is pending at admission and is replaced atomically with each status decision. Only the terminal/expiry times are absent until the first terminal decision; the expiry instant is then fixed to terminal time plus the delivery-record age. Initially $R=\varnothing$. For every $k\in\operatorname{dom}(R)$, the record owner equals the session component of $k$. Let $P$ count pending records, let $W$ be the set of terminal keys whose worker M6 reports as not yet exited (initially $W=\varnothing$), and let $K$ be the configured admission capacity; $0\le P+|W|\le K$ and $K\ge\Const{MAX\_\allowbreak{}CONCURRENT\_\allowbreak{}REQS}$. A terminal record never changes status. Each pending record holds one armed deadline timer; the first terminal decision disarms it and the record leaves pending ($P'=P-1$). Each key in $W$ holds one armed cleanup-retry timer and keeps its worker slot occupied until M6 confirms worker exit, even after its delivery record expires.
 
 \subsubsection{Environment Variables}
 
 \begin{itemize}
 \item $\mathit{clock}:\ty{Clock}$: the service host's monotonic clock. Read by \texttt{admit} to set the deadline and by \texttt{advance} to decide whether the deadline is reached. Never modified.
-\item $\mathit{timer}:\ty{Timer}$: the service host's one-shot timer scheduler. \texttt{admit} arms one timer per request for its deadline and the first terminal decision disarms it. When the deadline passes, the timer delivers a trusted timeout \ty{WorkEvent} to \texttt{advance}, even if the detector stalls or the client never calls \texttt{status}.
+\item $\mathit{timer}:\ty{Timer}$: the service host's one-shot timer scheduler. \texttt{admit} arms one timer per request for its deadline and the first terminal decision disarms it. When the deadline passes, the timer delivers a trusted timeout \ty{WorkEvent} to \texttt{advance}, even if the detector stalls or the client never calls \texttt{status}. For each key in $W$, \texttt{advance} arms one cleanup-retry timer that delivers a trusted cleanup-retry \ty{WorkEvent} after \Const{MAX\_\allowbreak{}RETENTION\_\allowbreak{}TIME}.
+\item $\mathit{log}:\ty{Storage}$: the service host's operational log. \texttt{advance} appends at most one safe cleanup alert per key, containing only the key, the elapsed time since the terminal instant and the cleanup-violation reason. It never receives raw payload, excerpts or assessments.
 \end{itemize}
 
 \subsubsection{Access Routine Semantics}
 
 \noindent \texttt{admit}():
-Check the owner, key freshness, current consent and capacity, then validate through M4. Discard rejected work before entry into the state map. Consume each provider consent once and bind it to the validated item and provider policy. For success, register transient ownership in M6, enter pending, set the deadline to admission time plus \Const{MAX\_\allowbreak{}RESPONSE\_\allowbreak{}TIME}, arm the one-shot deadline timer for that instant bound to the key and its work capability, and dispatch to the correct detector. Deploy enough capacity for the SRS concurrency target. Refuse excess pre-admission work with a busy reason. Never substitute a provider for the approved route.
+Check the owner, key freshness, current consent and capacity ($P+|W|<K$), then validate through M4. Discard rejected work before entry into the state map. Consume each provider consent once and bind it to the validated item and provider policy. For success, register transient ownership in M6, enter pending, set the deadline to admission time plus \Const{MAX\_\allowbreak{}RESPONSE\_\allowbreak{}TIME}, arm the one-shot deadline timer for that instant bound to the key and its work capability, and dispatch to the correct detector. Deploy enough capacity for the SRS concurrency target. Refuse excess pre-admission work with a busy reason. Never substitute a provider for the approved route.
 
 \medskip\noindent \texttt{advance}():
 Only the check's trusted worker, cancellation handler or timer can deliver a work event. While pending, let $c$ mean accepted cancellation, $d$ mean deadline reached, $e$ mean unrecoverable dependency error, and $a$ mean required work has finished or been declared unavailable. Let $v$ be a total Boolean that is false until $a$ and true exactly when M9 supplies a supported completed assessment. An available result from M9 is either completed or inconclusive. Evaluate the following in order as one atomic decision.
@@ -534,7 +536,7 @@ $\neg c \land \neg d \land \neg e \land a \land v$ & completed \\
 \end{tabularx}
 \end{table}
 
-The five rows are disjoint and total over all 32 assignments of $(c,d,e,a,v)$; UT-C4 in the V\&V Plan specifies exhaustive verification of them. Partial unavailable work without an unrecoverable error sets $a$ when resolved and $v=\mathrm{false}$, producing inconclusive. Once terminal, the status is fixed. On the first terminal decision, disarm the deadline timer, stop request-owned work and call M6 \texttt{release} with the terminal instant. Retain only the safe response needed for delivery. If \texttt{release} reports a cleanup violation, M5 records a safe alert (key, elapsed time and the violation code only) and leaves the terminal status unchanged. While M6 reports a worker still unresolved, M5 withholds that capacity slot, refuses excess admissions with a busy reason, reports degraded health, and retries \texttt{release} until it returns a receipt confirming worker exit. Unrecognized work events and late updates cannot mutate the state. A foreign key exposes no state.
+The five rows are disjoint and total over all 32 assignments of $(c,d,e,a,v)$; UT-C4 in the V\&V Plan specifies exhaustive verification of them. Partial unavailable work without an unrecoverable error sets $a$ when resolved and $v=\mathrm{false}$, producing inconclusive. Once terminal, the status is fixed. On the first terminal decision, disarm the deadline timer, stop request-owned work and call M6 \texttt{release} with the terminal instant. Retain only the safe response needed for delivery. On the first cleanup-violation outcome for a key (the cleanup-violation reason, or a receipt flagged as a late violation), M5 appends a safe alert to $\mathit{log}$ and leaves the terminal status unchanged. On the cleanup-violation reason the worker has not exited: M5 adds the key to $W$ ($W'=W\cup\{k\}$) and arms its cleanup-retry timer, so \texttt{admit} refuses work that would exceed $K$ with a busy reason. On each cleanup-retry event for a key in $W$, M5 calls \texttt{release} again with the same terminal instant; a receipt removes the key and frees its slot ($W'=W\setminus\{k\}$), while the cleanup-violation reason re-arms the timer. A cleanup-retry event changes only $W$, the timer and $\mathit{log}$, never a status or delivery record. Unrecognized work events and late updates cannot mutate the state. A foreign key exposes no state.
 
 \medskip\noindent \texttt{cancel}():
 Check the authenticated owner. For pending work, submit an accepted cancellation event to the same decision as \texttt{advance}. A terminal request remains terminal. Duplicate cancellation is safe.
@@ -603,7 +605,7 @@ Register one validated item for a fresh key and return its unforgeable worker le
 Require a live lease authorized only for the same key. Expose data only for the lease duration and track references owned by that work. A missing, foreign or revoked lease returns the same reason.
 
 \medskip\noindent \texttt{release}():
-Revoke leases, stop request-owned work and drop application-owned service references, including queued copies, by \Const{MAX\_\allowbreak{}RETENTION\_\allowbreak{}TIME} after the local terminal decision. The argument $t$ is the recorded local terminal-decision instant; measure the bound from $t$, never from the later cleanup-call time. Set $B'(k)$ to a closed record with no item references. Return a receipt only after cleanup. Repeating release leaves the key closed. The receipt covers application-owned references and worker exit. If work exits within the bound, return a receipt. If it exits late, return a receipt flagged as a cleanup violation. If it has not exited by the bound, add the key to $U$ and return the cleanup-violation reason. A repeated \texttt{release} retries forced termination and removes the key from $U$ once the worker exits. The operation cannot recall content that has already reached an approved external recipient.
+Revoke leases, stop request-owned work and drop application-owned service references, including queued copies, by \Const{MAX\_\allowbreak{}RETENTION\_\allowbreak{}TIME} after the local terminal decision. The argument $t$ is the recorded local terminal-decision instant; measure the bound from $t$, never from the later cleanup-call time. Set $B'(k)$ to a closed record with no item references. Return exactly one of three outcomes, each covering application-owned references and worker exit: (1) a receipt within the bound if the worker exits by \Const{MAX\_\allowbreak{}RETENTION\_\allowbreak{}TIME}; (2) the cleanup-violation reason, with $U'=U\cup\{k\}$, if the worker has not exited by the bound; or (3) on a repeated call for a key in $U$, which retries forced termination, a receipt flagged as a late cleanup violation once the worker exits, with $U'=U\setminus\{k\}$. A repeated call while the worker still runs returns the cleanup-violation reason again. A late exit can therefore be reported only by a repeated call. Repeating release for a closed key not in $U$ leaves the key closed and returns a receipt. The operation cannot recall content that has already reached an approved external recipient.
 
 %% ------------------------------------------------------------------ M7
 \clearpage
