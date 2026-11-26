@@ -9,18 +9,26 @@ Run locally: ``uv run uvicorn backend.main:app --port 8000``
 import asyncio
 import base64
 import binascii
+import json
 import re
 import statistics
+import sys
+from asyncio import create_subprocess_exec
+from contextlib import suppress
 from typing import Literal
 from uuid import UUID
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
-from starlette.concurrency import run_in_threadpool
+from pydantic import BaseModel, TypeAdapter
 
-from backend.constants import LIMIT_NO_GUARANTEE, MAX_IMAGE_SIZE, MAX_RESPONSE_TIME
+from backend.constants import (
+    LIMIT_NO_GUARANTEE,
+    MAX_CONCURRENT_REQS,
+    MAX_IMAGE_SIZE,
+    MAX_RESPONSE_TIME,
+)
 from backend.validation import Rejection, validate_image, validate_text
 
 VERIFY_STEP = "Check the original source or ask its author before relying on this content."
@@ -66,6 +74,9 @@ class AnalyzeResponse(BaseModel):
     verification_steps: list[str] = [VERIFY_STEP]
 
 
+_CHECK_RESULT = TypeAdapter(list[Signal] | Rejection)
+_WORKER_SLOTS = asyncio.Semaphore(MAX_CONCURRENT_REQS)
+
 app = FastAPI(title="Verity analysis service")
 
 
@@ -94,9 +105,8 @@ async def analyze(req: AnalyzeRequest):
 
     Why: this is the single entry point the extension and demo walkthrough call (UC1, UC3).
     """
-    # Run the check in a worker thread with a hard deadline, so a slow check can't hang.
     try:
-        result = await asyncio.wait_for(run_in_threadpool(_check, req), MAX_RESPONSE_TIME)
+        result = await _check_in_worker(req)
     except TimeoutError:
         return _failed(req.req_id, "The check took too long. No assessment was made.")
     except Exception:
@@ -115,10 +125,37 @@ async def analyze(req: AnalyzeRequest):
     )
 
 
+async def _check_in_worker(req: AnalyzeRequest) -> list[Signal] | Rejection:
+    """Run one check in a process that can be stopped at the response deadline."""
+    async with asyncio.timeout(MAX_RESPONSE_TIME), _WORKER_SLOTS:
+        # The payload travels over a private pipe, separate from the command line and logs.
+        request = json.dumps(req.model_dump(mode="json")).encode("ascii")
+        worker = await create_subprocess_exec(
+            sys.executable,
+            "-m",
+            "backend.main",
+            stdin=asyncio.subprocess.PIPE,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.DEVNULL,
+        )
+        try:
+            output, _ = await worker.communicate(request)
+        finally:
+            if worker.returncode is None:
+                # A cancelled wait leaves the worker running. Stop it before returning a result.
+                with suppress(ProcessLookupError):
+                    worker.kill()
+                await worker.wait()
+
+    if worker.returncode != 0:
+        raise RuntimeError("The analysis worker exited unexpectedly.")
+    return _CHECK_RESULT.validate_json(output)
+
+
 def _check(req: AnalyzeRequest) -> list[Signal] | Rejection:
     """Validate the payload and, if it passes, collect its observed signals.
 
-    Why: keeps validation and signal extraction together in one function the timeout can wrap.
+    Why: a single worker owns validation and signal extraction for this selection.
     """
     if req.modality == "text":
         return validate_text(req.payload) or _text_signals(req.payload)
@@ -196,3 +233,10 @@ def _failed(req_id: UUID, message: str) -> AnalyzeResponse:
         summary_label="The check could not be completed",
         uncertainty=message,
     )
+
+
+if __name__ == "__main__":
+    # A worker handles one selection, then exits and releases its input.
+    # Keep JSON escapes intact so the validator can reject text that cannot be encoded as UTF-8.
+    request = AnalyzeRequest.model_validate(json.load(sys.stdin.buffer))
+    sys.stdout.buffer.write(_CHECK_RESULT.dump_json(_check(request)))

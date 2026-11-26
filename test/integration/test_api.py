@@ -1,11 +1,13 @@
 """Local FastAPI service: status, uncertainty and evidence signals; invalid input rejected."""
 
 import base64
+import sys
 import uuid
 
 import pytest
 from fastapi.testclient import TestClient
 
+from backend import main
 from backend.main import MAX_IMAGE_B64_LENGTH, app
 from conftest import SAMPLE_TEXT, make_image
 
@@ -75,3 +77,30 @@ def test_malformed_request_does_not_echo_input():
         "/api/v1/analyze", json={"req_id": "x", "modality": "text", "payload": "SECRET"}
     )
     assert r.status_code == 422 and "SECRET" not in r.text
+
+
+def test_timeout_stops_worker_before_returning_failed(monkeypatch):
+    """A stalled check releases its worker before the API reports a terminal result."""
+    start_process = main.create_subprocess_exec
+    workers = []
+
+    async def start_stalled_worker(*_command, **options):
+        worker = await start_process(
+            sys.executable,
+            "-c",
+            "import sys, time; sys.stdin.buffer.read(); time.sleep(5)",
+            **options,
+        )
+        workers.append(worker)
+        return worker
+
+    monkeypatch.setattr(main, "create_subprocess_exec", start_stalled_worker)
+    monkeypatch.setattr(main, "MAX_RESPONSE_TIME", 0.5)
+
+    with client:
+        response = post("text", SAMPLE_TEXT)
+        assert response.status_code == 200
+        assert response.json()["status"] == "failed"
+        assert "too long" in response.json()["uncertainty"]
+        assert len(workers) == 1
+        assert workers[0].returncode is not None
